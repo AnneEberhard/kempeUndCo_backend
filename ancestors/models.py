@@ -73,17 +73,17 @@ class Person(models.Model):
     fam_stat_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Familienstand 4')
 
     # Object files and titles
-    obje_file_1 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bilddatei 1')
+    obje_file_1 = models.FileField(upload_to='images/', null=True, blank=True, verbose_name='Bilddatei 1')
     obje_titl_1 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bildtitel 1')
-    obje_file_2 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bilddatei 2')
+    obje_file_2 = models.FileField(upload_to='images/', null=True, blank=True, verbose_name='Bilddatei 2')
     obje_titl_2 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bildtitel 2')
-    obje_file_3 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bilddatei 3')
+    obje_file_3 = models.FileField(upload_to='images/', null=True, blank=True, verbose_name='Bilddatei 3')
     obje_titl_3 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bildtitel 3')
-    obje_file_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bilddatei 4')
+    obje_file_4 = models.FileField(upload_to='images/', null=True, blank=True, verbose_name='Bilddatei 4')
     obje_titl_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bildtitel 4')
-    obje_file_5 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bilddatei 5')
+    obje_file_5 = models.FileField(upload_to='images/', null=True, blank=True, verbose_name='Bilddatei 5')
     obje_titl_5 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bildtitel 5')
-    obje_file_6 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bilddatei 6')
+    obje_file_6 = models.FileField(upload_to='images/', null=True, blank=True, verbose_name='Bilddatei 6')
     obje_titl_6 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bildtitel 6')
 
     def __str__(self):
