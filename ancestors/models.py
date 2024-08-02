@@ -86,5 +86,19 @@ class Person(models.Model):
     obje_file_6 = models.FileField(upload_to='images/', null=True, blank=True, verbose_name='Bilddatei 6')
     obje_titl_6 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Bildtitel 6')
 
+    CONFIDENTIALITY_CHOICES = [
+        ('no', 'Nein'),
+        ('restricted', 'Eingeschränkt'),
+        ('yes', 'Ja'),
+    ]
+
+    confidential = models.CharField(
+        max_length=10,
+        choices=CONFIDENTIALITY_CHOICES,
+        default='no',
+        verbose_name='Vertraulichkeit'
+    )
+
+
     def __str__(self):
         return self.name
