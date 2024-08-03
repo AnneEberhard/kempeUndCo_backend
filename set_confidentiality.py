@@ -22,27 +22,6 @@ def is_recent_birth_date(birth_date):
     current_year = datetime.now().year
     return current_year - birth_year < 120
 
-def transfer_invalid_dates_to_notes():
-    persons = Person.objects.all()
-    for person in persons:
-        birth_date = person.birt_date
-        death_date = person.deat_date
-        notes_changed = False
-        
-        if birth_date and not is_valid_date(birth_date):
-            person.note += f" Geburtsdatum: {birth_date}\n"
-            person.birt_date = ''
-            notes_changed = True
-            
-        if death_date and not is_valid_date(death_date):
-            person.note += f" Todesdatum: {death_date}\n"
-            person.deat_date = ''
-            notes_changed = True
-            
-        if notes_changed:
-            person.save()
-            print(f"Transferred invalid dates for {person.givn} {person.surn}")
-
 def set_confidentiality():
     persons = Person.objects.all()
     for person in persons:
@@ -55,5 +34,4 @@ def set_confidentiality():
             print(f"Confidentiality for {person.givn} {person.surn} set to restricted")
 
 if __name__ == "__main__":
-    transfer_invalid_dates_to_notes()
     set_confidentiality()
