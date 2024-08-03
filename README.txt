@@ -25,6 +25,10 @@ To upload media files based on Ahnenblatt Datei:
     (Person-2024-08-03_1_updated_paths has non-conform dates in notes, extra field: confidential)
     saved data set: Person-2024-08-03_2_addded_conf_upated_path (extra field: confidential)
 
-
+Added family_tree
+1. updated model with field family_tree 1 and 2 and choices -> migrate
+2. run update_family_trees.py to fill all data sets with 'kempe' as family 1 for starters
+    saved data set: Person-2024-08-03_4_stammbaum_kempe_all
+    (includes new fields: confidential, birth_date_formatted, death_date_formatted, family_tree_1, family_tree_2)
 
 

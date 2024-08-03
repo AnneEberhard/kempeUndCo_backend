@@ -28,7 +28,7 @@ class PersonResource(resources.ModelResource):
                   'fam_marr_4', 'fam_stat_4', 'fam_marr_4', 'obje_file_1', 
                   'obje_titl_1', 'obje_file_2', 'obje_titl_2', 'obje_file_3', 
                   'obje_titl_3', 'obje_file_4', 'obje_titl_4', 'obje_file_5', 
-                  'obje_titl_5', 'obje_file_6', 'obje_titl_6', 'confidential')
+                  'obje_titl_5', 'obje_file_6', 'obje_titl_6', 'confidential', 'family_tree_1', 'family_tree_2')
 
 
 class PersonAdmin(ImportExportModelAdmin):

@@ -101,6 +101,15 @@ class Person(models.Model):
         verbose_name='Vertraulichkeit'
     )
 
+    FAMILY_TREE_CHOICES = [
+        ('kempe', 'Stammbaum Kempe'),
+        ('huenten', 'Stammbaum Hünten'),
+        # Weitere Familienbäume hinzufügen, wenn nötig
+    ]
+
+    family_tree_1 = models.CharField(max_length=255, choices=FAMILY_TREE_CHOICES, blank=True, null=True, verbose_name='Stammbaum 1')
+    family_tree_2 = models.CharField(max_length=255, choices=FAMILY_TREE_CHOICES, blank=True, null=True, verbose_name='Stammbaum 2')
 
     def __str__(self):
         return self.name
+
