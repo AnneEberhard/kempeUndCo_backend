@@ -1,3 +1,4 @@
+from datetime import datetime
 from import_export import resources
 from import_export.fields import Field
 from import_export.widgets import DateWidget
@@ -34,6 +35,40 @@ class PersonAdmin(ImportExportModelAdmin):
     resource_class = PersonResource
     list_display = ('id', 'name', 'refn', 'note', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
     search_fields = ('refn', 'uid', 'name')  # Felder, die durchsuchbar sind
+    #readonly_fields = ('birth_date_formatted', 'death_date_formatted')
 
+    def save_model(self, request, obj, form, change):
+        # Wenn das Modell neu erstellt wird oder bearbeitet wird
+        if not change:
+            # Wenn es sich um eine neue Instanz handelt, aber der Name bereits gesetzt ist
+            if obj.birt_date:
+                try:
+                    birth_date = datetime.strptime(obj.birt_date, '%d.%m.%Y').date()
+                    obj.birth_date_formatted = birth_date
+                except ValueError:
+                    obj.birth_date_formatted = None
+            if obj.deat_date:
+                try:
+                    death_date = datetime.strptime(obj.deat_date, '%d.%m.%Y').date()
+                    obj.death_date_formatted = death_date
+                except ValueError:
+                    obj.death_date_formatted = None
+        else:
+            # Wenn das Modell bearbeitet wird
+            if obj.birt_date and not obj.birth_date_formatted:
+                try:
+                    birth_date = datetime.strptime(obj.birt_date, '%d.%m.%Y').date()
+                    obj.birth_date_formatted = birth_date
+                except ValueError:
+                    obj.birth_date_formatted = None
+            if obj.deat_date and not obj.death_date_formatted:
+                try:
+                    death_date = datetime.strptime(obj.deat_date, '%d.%m.%Y').date()
+                    obj.death_date_formatted = death_date
+                except ValueError:
+                    obj.death_date_formatted = None
+
+        super().save_model(request, obj, form, change)
+    
 
 admin.site.register(Person, PersonAdmin)

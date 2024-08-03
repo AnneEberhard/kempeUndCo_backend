@@ -15,6 +15,7 @@ Dates:
 5. run migrate_dates.py
     saved data set: Person-2024-08-03_3_added_formatted_date (includes also updated paths)
     data set includes three new fields: confidential and 2 formatted date fields
+6. admin.py changed so that formatted date fills automatically
 
 To upload media files based on Ahnenblatt Datei:
  1. upload files in media/images folder (händisch)
