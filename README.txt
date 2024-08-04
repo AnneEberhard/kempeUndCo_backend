@@ -41,8 +41,35 @@ Related data
 saved data sets: Person-2024-08-04, RelatedData-2024-08-04
 OPEN: shall change of new dataset also induce change data in old??
 OPEN: Family Status in Ahnenblatt - was ist was?
+CAVE: RelatedData renamed Relation for usability reasons
+saved data set (includes created and modiefied fields):
+    Person-2024-08-04 _2_relation_and_creation
+    Relation-2024-08-04 _2_relation_and_creation
 
 ADMIN View
 1. moved exported fields to resources.py
 2. excluded view of not used fields in person (or double with now related data, such as father)
+3. changed admin.py view von exclude to fieldsets
+
+Created by and last modified
+1. added to person model:
+    creation_date, last_modified_date, created_by, last_modified_by
+2. modified admin.py by switching logic for formatted dates to models.py
+3. run python script_update_created_by.py to fill all existing fields with user
+saved data set: Person-2024-08-04_3_created_by_filled
+
+
+
+
+
+    exclude = ('fath_name', 'fath_refn', 'moth_name', 'moth_refn',
+                'uid', 'marr_spou_name_1', 'marr_spou_refn_1', 'fam_husb_1',
+                'fam_wife_1', 'marr_date_1', 'marr_plac_1', 'fam_chil_1',
+                'fam_marr_1', 'fam_stat_1',
+                'marr_spou_name_2', 'marr_spou_refn_2', 'fam_husb_2', 'fam_wife_2', 'marr_date_2',
+                'marr_plac_2', 'fam_chil_2', 'fam_marr_2', 'fam_stat_2',
+                'marr_spou_name_3', 'marr_spou_refn_3', 'fam_husb_3', 'fam_wife_3', 'marr_date_3',
+                'marr_plac_3', 'fam_chil_3', 'fam_marr_3', 'fam_stat_3',
+                'marr_spou_name_4', 'marr_spou_refn_4', 'fam_husb_4', 'fam_wife_4', 'marr_date_4',
+                'marr_plac_4', 'fam_chil_4', 'fam_marr_4', 'fam_stat_4', 'chan_date', 'chan_date_time' )
 

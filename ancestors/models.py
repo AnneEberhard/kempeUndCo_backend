@@ -1,4 +1,7 @@
+from django.conf import settings
 from django.db import models
+from datetime import datetime
+from django.utils import timezone
 
 class Person(models.Model):
     refn = models.CharField(max_length=255, verbose_name='#REFN')
@@ -27,7 +30,7 @@ class Person(models.Model):
     buri_plac = models.CharField(max_length=255, null=True, blank=True, verbose_name='Beerdigungsort')
     name_rufname = models.CharField(max_length=255, null=True, blank=True, verbose_name='Rufname')
     name_npfx = models.CharField(max_length=255, null=True, blank=True, verbose_name='Namenspräfix')
-    sour = models.TextField(null=True, blank=True, verbose_name='Quelle')
+    sour = models.TextField(null=True, blank=True, verbose_name='Quellen')
     name_nick = models.CharField(max_length=255, null=True, blank=True, verbose_name='Spitzname')
     name_marnm = models.CharField(max_length=255, null=True, blank=True, verbose_name='Ehename')
     chr_addr = models.CharField(max_length=255, null=True, blank=True, verbose_name='Taufe Adresse')
@@ -110,10 +113,43 @@ class Person(models.Model):
     family_tree_1 = models.CharField(max_length=255, choices=FAMILY_TREE_CHOICES, blank=True, null=True, verbose_name='Stammbaum 1')
     family_tree_2 = models.CharField(max_length=255, choices=FAMILY_TREE_CHOICES, blank=True, null=True, verbose_name='Stammbaum 2')
 
+    creation_date = models.DateTimeField(default=timezone.now, verbose_name='Erstellungsdatum')
+    last_modified_date = models.DateTimeField(default=timezone.now, verbose_name='Letzte Änderung')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_persons', verbose_name='Ersteller')
+    last_modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='modified_persons', verbose_name='Letzte Änderung durch')
+
+    def save(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+
+        if not self.pk:  # Neues Objekt
+            self.creation_date = timezone.now()
+            if user:
+                self.created_by = user
+        else:  # Bestehendes Objekt
+            self.last_modified_date = timezone.now()
+            if user:
+                self.last_modified_by = user
+
+        # Geburts- und Todesdaten formatieren
+        if self.birt_date:
+            try:
+                birth_date = datetime.strptime(self.birt_date, '%d.%m.%Y').date()
+                self.birth_date_formatted = birth_date
+            except ValueError:
+                self.birth_date_formatted = None
+        if self.deat_date:
+            try:
+                death_date = datetime.strptime(self.deat_date, '%d.%m.%Y').date()
+                self.death_date_formatted = death_date
+            except ValueError:
+                self.death_date_formatted = None
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
-class RelatedData(models.Model):
+class Relation(models.Model):
 
     FAMILY_STATUS_CHOICES = [
         ('married', 'verheiratet'),
@@ -121,7 +157,6 @@ class RelatedData(models.Model):
         ('widowed', 'verwitwet'),
         ('divorced', 'geschieden'),
     ]
-
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='related_data')
     fath_refn = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='father_of', null=True, blank=True, verbose_name='Vater')

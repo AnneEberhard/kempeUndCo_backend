@@ -1,5 +1,5 @@
 from import_export import resources
-from .models import Person, RelatedData
+from .models import Person, Relation
 
 class PersonResource(resources.ModelResource):
     class Meta:
@@ -24,12 +24,13 @@ class PersonResource(resources.ModelResource):
                   'obje_titl_1', 'obje_file_2', 'obje_titl_2', 'obje_file_3', 
                   'obje_titl_3', 'obje_file_4', 'obje_titl_4', 'obje_file_5', 
                   'obje_titl_5', 'obje_file_6', 'obje_titl_6', 'confidential', 
-                  'family_tree_1', 'family_tree_2')
+                  'family_tree_1', 'family_tree_2', 'creation_date', 'last_modified_date', 
+                  'created_by', 'last_modified_by')
 
 
-class RelatedDataResource(resources.ModelResource):
+class RelationResource(resources.ModelResource):
     class Meta:
-        model = RelatedData
+        model = Relation
         import_id_fields = ('person',)  # Verwenden Sie 'person' als Import-ID
         fields = ('person', 'fath_refn', 'moth_refn', 'marr_spou_refn_1', 
                   'marr_date_1', 'marr_plac_1', 'children_1', 'fam_stat_1', 
