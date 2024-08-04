@@ -58,10 +58,13 @@ Created by and last modified
 3. run python script_update_created_by.py to fill all existing fields with user
 saved data set: Person-2024-08-04_3_created_by_filled
 
+Add new person: refn
+1. will now be added automatically qhen saved and is read only field
 
 
 
 
+Backup:
     exclude = ('fath_name', 'fath_refn', 'moth_name', 'moth_refn',
                 'uid', 'marr_spou_name_1', 'marr_spou_refn_1', 'fam_husb_1',
                 'fam_wife_1', 'marr_date_1', 'marr_plac_1', 'fam_chil_1',

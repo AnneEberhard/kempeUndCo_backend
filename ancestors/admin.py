@@ -6,9 +6,10 @@ from django.contrib import admin
 
 class PersonAdmin(ImportExportModelAdmin):
     resource_class = PersonResource
-    list_display = ('id', 'name', 'refn', 'note', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
-    search_fields = ('refn', 'name')  # Felder, die durchsuchbar sind
-    readonly_fields = ('creation_date', 'last_modified_date', 'created_by', 'last_modified_by')
+    list_display = ('id', 'name', 'refn', 'note','family_tree_1','family_tree_2', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
+    list_filter = ('family_tree_1','family_tree_2')
+    search_fields = ('name',)  # Felder, die durchsuchbar sind
+    readonly_fields = ('refn', 'creation_date', 'last_modified_date', 'created_by', 'last_modified_by')
 
     fieldsets = (
         (None, {
@@ -20,8 +21,8 @@ class PersonAdmin(ImportExportModelAdmin):
         ('Taufe und Beerdigung', {
             'fields': ('chr_date', 'chr_plac', 'chr_addr', 'reli', 'buri_date', 'buri_plac')
         }),
-        ('Name und Quellen', {
-            'fields': ('name_rufname', 'name_npfx', 'sour', 'name_nick', 'name_marnm')
+        ('Name und Notizen', {
+            'fields': ('name_rufname', 'name_npfx', 'note', 'sour', 'name_nick', 'name_marnm')
         }),
         ('Bilddateien', {
             'fields': ('obje_file_1', 'obje_titl_1', 'obje_file_2', 'obje_titl_2', 'obje_file_3', 'obje_titl_3', 

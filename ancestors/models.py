@@ -4,7 +4,7 @@ from datetime import datetime
 from django.utils import timezone
 
 class Person(models.Model):
-    refn = models.CharField(max_length=255, verbose_name='#REFN')
+    refn = models.CharField(max_length=255, unique=True, verbose_name='#REFN')
     name = models.CharField(max_length=255, verbose_name='Name')
     fath_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Name des Vaters')
     fath_refn = models.CharField(max_length=255, null=True, blank=True, verbose_name='#REFN des Vaters')
@@ -118,10 +118,32 @@ class Person(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_persons', verbose_name='Ersteller')
     last_modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='modified_persons', verbose_name='Letzte Änderung durch')
 
+    def _generate_unique_refn(self):
+        """
+        Generate a unique refn value that does not conflict with existing ones.
+        """
+        existing_refs = Person.objects.values_list('refn', flat=True)
+        max_num = 0
+        for ref in existing_refs:
+            try:
+                num = int(ref.strip('@I@'))
+                if num > max_num:
+                    max_num = num
+            except ValueError:
+                continue
+
+        new_num = max_num + 1
+        return f'@I{new_num}@'
+
     def save(self, *args, **kwargs):
+        """
+        saving person including metadata and automatic birth/death date generation
+        """
         user = kwargs.pop('user', None)
 
         if not self.pk:  # Neues Objekt
+            if not self.refn:
+                self.refn = self._generate_unique_refn()
             self.creation_date = timezone.now()
             if user:
                 self.created_by = user
