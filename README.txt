@@ -40,3 +40,7 @@ Related data
 6. new created fields in related data now excluded in person admin
 OPEN: shall change of new dataset also induce change data in old??
 OPEN: Family Status in Ahnenblatt - was ist was?
+
+ADMIN View
+1. moved exported fields to resources.py
+2. excluded view of not used fields in person (or double with now related data, such as father)
