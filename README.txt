@@ -31,4 +31,12 @@ Added family_tree
     saved data set: Person-2024-08-03_4_stammbaum_kempe_all
     (includes new fields: confidential, birth_date_formatted, death_date_formatted, family_tree_1, family_tree_2)
 
-
+Related data
+1. new class to use foreignkey relations
+2. started with motther, father and spouses
+3. run python migrate_person_to_related_data.py to migrate info from person dataset to relatedData data set
+4. added four manytomany fields for children aus 4 potential marriages
+5. run python migrate_children_to_related_data.py
+6. new created fields in related data now excluded in person admin
+OPEN: shall change of new dataset also induce change data in old??
+OPEN: Family Status in Ahnenblatt - was ist was?

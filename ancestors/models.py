@@ -113,3 +113,36 @@ class Person(models.Model):
     def __str__(self):
         return self.name
 
+class RelatedData(models.Model):
+
+    FAMILY_STATUS_CHOICES = [
+        ('married', 'verheiratet'),
+        ('not_married', 'nicht verheiratet'),
+        ('widowed', 'verwitwet'),
+        ('divorced', 'geschieden'),
+    ]
+
+
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='related_data')
+    fath_refn = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='father_of', null=True, blank=True, verbose_name='Vater')
+    moth_refn = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='mother_of', null=True, blank=True, verbose_name='Mutter')
+    marr_spou_refn_1 = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='spouse1_of', null=True, blank=True, verbose_name='Ehepartner 1')
+    marr_date_1 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsdatum 1')
+    marr_plac_1 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsort 1')
+    children_1 = models.ManyToManyField(Person, related_name='children_of_spouse1', blank=True, verbose_name='Kinder aus Ehe 1')
+    fam_stat_1 = models.CharField(max_length=255, choices=FAMILY_STATUS_CHOICES, null=True, blank=True, verbose_name='Familienstand 1')
+    marr_spou_refn_2 = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='spouse2_of', null=True, blank=True, verbose_name='Ehepartner 2')
+    children_2 = models.ManyToManyField(Person, related_name='children_of_spouse2', blank=True, verbose_name='Kinder aus Ehe 2')
+    marr_date_2 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsdatum 2')
+    marr_plac_2 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsort 2')
+    fam_stat_2 = models.CharField(max_length=255, choices=FAMILY_STATUS_CHOICES, null=True, blank=True, verbose_name='Familienstand 2')
+    marr_spou_refn_3 = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='spouse3_of', null=True, blank=True, verbose_name='Ehepartner 3')
+    children_3 = models.ManyToManyField(Person, related_name='children_of_spouse3', blank=True, verbose_name='Kinder aus Ehe 3')
+    marr_date_3 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsdatum 3')
+    marr_plac_3 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsort 3')
+    marr_spou_refn_4 = models.ForeignKey(Person, on_delete=models.SET_NULL, related_name='spouse4_of', null=True, blank=True, verbose_name='Ehepartner 4')
+    fam_stat_3 = models.CharField(max_length=255, choices=FAMILY_STATUS_CHOICES, null=True, blank=True, verbose_name='Familienstand 3')
+    children_4 = models.ManyToManyField(Person, related_name='children_of_spouse4', blank=True, verbose_name='Kinder aus Ehe 4')
+    marr_date_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsdatum 4')
+    marr_plac_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsort 4')
+    fam_stat_4 = models.CharField(max_length=255, choices=FAMILY_STATUS_CHOICES, null=True, blank=True, verbose_name='Familienstand 4')
