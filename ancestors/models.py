@@ -4,8 +4,15 @@ from datetime import datetime
 from django.utils import timezone
 
 class Person(models.Model):
+
+    SEX_CHOICES = [
+        ('F', 'weiblich'),
+        ('M', 'männlich'),
+        ('D', 'divers'),
+    ]
+
     refn = models.CharField(max_length=255, unique=True, verbose_name='#REFN')
-    name = models.CharField(max_length=255, verbose_name='Name')
+    name = models.CharField(max_length=255, verbose_name='Name', editable=False)
     fath_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Name des Vaters')
     fath_refn = models.CharField(max_length=255, null=True, blank=True, verbose_name='#REFN des Vaters')
     moth_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Name der Mutter')
@@ -13,7 +20,7 @@ class Person(models.Model):
     uid = models.CharField(max_length=255, null=True, blank=True, verbose_name='UID')
     surn = models.CharField(max_length=255, null=True, blank=True, verbose_name='Nachname')
     givn = models.CharField(max_length=255, null=True, blank=True, verbose_name='Vorname')
-    sex = models.CharField(max_length=10, null=True, blank=True, verbose_name='Geschlecht')
+    sex = models.CharField(max_length=10, choices=SEX_CHOICES, null=True, blank=True, verbose_name='Geschlecht')
     occu = models.CharField(max_length=255, null=True, blank=True, verbose_name='Beruf')
     chan_date = models.CharField(max_length=255, null=True, blank=True, verbose_name='Änderungsdatum')
     chan_date_time = models.CharField(max_length=255, null=True, blank=True, verbose_name='Änderungsdatum und -uhrzeit')
@@ -151,6 +158,24 @@ class Person(models.Model):
             self.last_modified_date = timezone.now()
             if user:
                 self.last_modified_by = user
+ 
+        # Automatisch den Name-Feld setzen
+        if self.name_npfx:
+            name_parts = [self.name_npfx]
+        else:
+            name_parts = []
+
+        if self.givn:
+            name_parts.append(self.givn)
+        
+        if self.name_nick:
+            name_parts.append(f"'{self.name_nick}'")
+        
+        if self.surn:
+            name_parts.append(self.surn)
+
+        # Join the parts with a space
+        self.name = " ".join(name_parts) if name_parts else "Unbekannt"
 
         # Geburts- und Todesdaten formatieren
         if self.birt_date:

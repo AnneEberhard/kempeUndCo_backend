@@ -6,14 +6,14 @@ from django.db.models import Q
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kempeUndCo_backend.settings')
 django.setup()
 
-from ancestors.models import Person, RelatedData
+from ancestors.models import Person, Relation
 
 def migrate_children_to_related_data():
     persons = Person.objects.all()
     updated_count = 0
 
     for person in persons:
-        related_data, created = RelatedData.objects.get_or_create(person=person)
+        related_data, created = Relation.objects.get_or_create(person=person)
         updated = False
 
         # Kinder aus Ehe 1

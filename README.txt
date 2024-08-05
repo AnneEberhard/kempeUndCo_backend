@@ -58,10 +58,16 @@ Created by and last modified
 3. run python script_update_created_by.py to fill all existing fields with user
 saved data set: Person-2024-08-04_3_created_by_filled
 
-Add new person: refn
-1. will now be added automatically qhen saved and is read only field
+Add new person: 
+1. refn will now be added automatically qhen saved and is readonly field
+2. limited sex to choices F, M, D
+3. name is now readonly and will be generated from prefix, given name, nick_name and surname (if existing)
 
-
+Clean up realtion: duplicates in some cases for spouses and children lists
+1. run python script_cleanup_duplicate_spouses.py
+saved data set: Relation-2024-08-05_1_spouses_cleaned_up
+2. run python script_cleanup_duplicate_children.py
+saved data set: Relation-2024-08-05_2_children_cleaned_up
 
 
 Backup:

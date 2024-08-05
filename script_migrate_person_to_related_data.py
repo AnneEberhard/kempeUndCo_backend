@@ -5,14 +5,14 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kempeUndCo_backend.settings')
 django.setup()
 
-from ancestors.models import Person, RelatedData
+from ancestors.models import Person, Relation
 
 def migrate_person_to_related_data():
     persons = Person.objects.all()
     created_count = 0
 
     for person in persons:
-        related_data, created = RelatedData.objects.get_or_create(person=person)
+        related_data, created = Relation.objects.get_or_create(person=person)
         updated = False
 
         if person.fath_refn and isinstance(person.fath_refn, str):
