@@ -46,7 +46,7 @@ class PersonAdmin(ImportExportModelAdmin):
                 'marr_plac_3', 'fam_chil_3', 'fam_marr_3', 'fam_stat_3',
                 'marr_spou_name_4', 'marr_spou_refn_4', 'fam_husb_4', 'fam_wife_4', 'marr_date_4',
                 'marr_plac_4', 'fam_chil_4', 'fam_marr_4', 'fam_stat_4',),
-            'classes': ('collapse',),
+            'classes': ('collapse',)
         })
     )
 

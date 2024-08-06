@@ -63,7 +63,7 @@ Add new person:
 2. limited sex to choices F, M, D
 3. name is now readonly and will be generated from prefix, given name, nick_name and surname (if existing)
 
-Clean up realtion: duplicates in some cases for spouses and children lists
+Clean up relation: duplicates in some cases for spouses and children lists
 1. run python script_cleanup_duplicate_spouses.py
 saved data set: Relation-2024-08-05_1_spouses_cleaned_up
 2. run python script_cleanup_duplicate_children.py
@@ -82,3 +82,5 @@ Backup:
                 'marr_spou_name_4', 'marr_spou_refn_4', 'fam_husb_4', 'fam_wife_4', 'marr_date_4',
                 'marr_plac_4', 'fam_chil_4', 'fam_marr_4', 'fam_stat_4', 'chan_date', 'chan_date_time' )
 
+Created discussions
+db_backup.sqlite3 created
