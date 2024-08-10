@@ -9,8 +9,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from accounts.views import LoginView
+from rest_framework_simplejwt.views import TokenRefreshView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', LoginView.as_view(), name='login'),
+    path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/discussions/', include('discussions.urls')),
     path('api/ancestors/', include('ancestors.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
