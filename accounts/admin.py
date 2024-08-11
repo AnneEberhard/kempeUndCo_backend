@@ -7,7 +7,7 @@ class CustomUserAdmin(UserAdmin):
     model = CustomUser
     list_display = ('id', 'username', 'email')
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('GUARANTOR','FAMILY',)}),
+        (None, {'fields': ('guarantor', 'guarantor_email','family',)}),
     )
 
 

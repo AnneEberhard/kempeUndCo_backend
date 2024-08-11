@@ -24,3 +24,25 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         }
         return data
 
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'username', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'family']
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            password=validated_data['password'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            guarantor=validated_data['guarantor'],
+            guarantor_email=validated_data.get('guarantor_email'),
+            family=validated_data['family']
+        )
+        return user
