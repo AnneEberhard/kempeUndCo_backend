@@ -30,8 +30,9 @@ class CustomUser(AbstractUser):
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    GUARANTOR = models.CharField(max_length=50, blank=True)
-    FAMILY = models.CharField(max_length=50, blank=True)
+    guarantor = models.BooleanField(default=False)
+    guarantor_email = models.EmailField(blank=True, null=True)
+    family = models.CharField(max_length=50, blank=True)
 
     objects = CustomUserManager()
 
