@@ -84,3 +84,7 @@ Backup:
 
 Created discussions
 db_backup.sqlite3 created
+
+WITH REGARD TO ACCOUNTS/USERS
+username ist mandatory due to DRF admin basis, but will be automatically generated if the user is created in the frontend.
+if the user is created in the backend, choose a username that is not yet existent
