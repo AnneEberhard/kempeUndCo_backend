@@ -32,17 +32,29 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'username', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'family']
+        fields = ['email', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'family']
+
+    def generate_random_username(self, email):
+        import random
+        import string
+        base_username = email.split('@')[0]
+        random_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+        return base_username + random_string
 
     def create(self, validated_data):
+        # Check if username is provided, if not, generate one
+        if not validated_data.get('username'):
+            username = self.generate_random_username(validated_data['email'])
+            validated_data['username'] = username
+
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
-            username=validated_data['username'],
             password=validated_data['password'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
             guarantor=validated_data['guarantor'],
             guarantor_email=validated_data.get('guarantor_email'),
-            family=validated_data['family']
+            family=validated_data['family'],
+            username=validated_data['username']
         )
         return user
