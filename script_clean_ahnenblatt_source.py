@@ -85,6 +85,7 @@ header_mapping = {
     "OBJE.TITL.6": "obje_titl_6",
 }
 
+
 def clean_csv(input_file, output_file):
     with open(input_file, mode='r', encoding='utf-16') as infile, open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
         reader = csv.DictReader(infile, delimiter='\t')
@@ -92,18 +93,19 @@ def clean_csv(input_file, output_file):
         if not all(header in header_mapping for header in reader.fieldnames):
             print("Some headers are not mapped correctly.")
             return
-        
+
         # Neue Header basierend auf dem Mapping
         new_fieldnames = [header_mapping[header] for header in reader.fieldnames]
-        
+
         writer = csv.DictWriter(outfile, fieldnames=new_fieldnames, delimiter=',')
         writer.writeheader()
-        
+
         for row in reader:
             new_row = {header_mapping[key]: value for key, value in row.items()}
             writer.writerow(new_row)
-    
+
     print(f"CSV file cleaned and saved as {output_file}")
+
 
 # Beispielaufruf des Skripts
 input_file = 'Stammfolge Kempe 2264.csv'  # Pfad zur Originaldatei

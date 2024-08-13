@@ -7,6 +7,7 @@ django.setup()
 
 from ancestors.models import Person
 
+
 def update_family_trees():
     # Setzt family_tree_1 auf 'kempe' für alle Datensätze
     persons = Person.objects.all()
@@ -17,6 +18,7 @@ def update_family_trees():
             person.save()
             updated_count += 1
     print(f"Updated {updated_count} records to family_tree_1='kempe'.")
+
 
 if __name__ == "__main__":
     update_family_trees()
