@@ -8,6 +8,7 @@ django.setup()
 
 from ancestors.models import Person, Relation
 
+
 def cleanup_duplicate_children():
     relations = Relation.objects.all()
     updated_count = 0
@@ -52,6 +53,7 @@ def cleanup_duplicate_children():
             updated_count += 1
 
     print(f"Updated {updated_count} Relation records with unique children data.")
+
 
 if __name__ == "__main__":
     cleanup_duplicate_children()

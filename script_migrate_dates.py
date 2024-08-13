@@ -8,6 +8,7 @@ django.setup()
 
 from ancestors.models import Person
 
+
 def migrate_dates():
     for person in Person.objects.all():
         if person.birt_date:
@@ -23,5 +24,6 @@ def migrate_dates():
             except ValueError:
                 print(f"Invalid death date format for person {person.id}: {person.deat_date}")
         person.save()
+
 
 migrate_dates()

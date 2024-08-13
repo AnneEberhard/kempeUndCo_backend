@@ -3,6 +3,7 @@ from django.db import models
 from datetime import datetime
 from django.utils import timezone
 
+
 class Person(models.Model):
 
     SEX_CHOICES = [
@@ -158,7 +159,7 @@ class Person(models.Model):
             self.last_modified_date = timezone.now()
             if user:
                 self.last_modified_by = user
- 
+
         # Automatisch den Name-Feld setzen
         if self.name_npfx:
             name_parts = [self.name_npfx]
@@ -167,10 +168,10 @@ class Person(models.Model):
 
         if self.givn:
             name_parts.append(self.givn)
-        
+
         if self.name_nick:
             name_parts.append(f"'{self.name_nick}'")
-        
+
         if self.surn:
             name_parts.append(self.surn)
 
@@ -195,6 +196,7 @@ class Person(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Relation(models.Model):
 

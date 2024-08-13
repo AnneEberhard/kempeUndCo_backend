@@ -7,6 +7,7 @@ django.setup()
 
 from ancestors.models import Person, Relation
 
+
 def migrate_person_to_related_data():
     persons = Person.objects.all()
     created_count = 0
@@ -20,7 +21,7 @@ def migrate_person_to_related_data():
             if father:
                 related_data.fath_refn = father
                 updated = True
-        
+
         if person.moth_refn and isinstance(person.moth_refn, str):
             mother = Person.objects.filter(refn=person.moth_refn).first()
             if mother:
@@ -56,6 +57,7 @@ def migrate_person_to_related_data():
             created_count += 1
 
     print(f"Created and updated {created_count} RelatedData records.")
+
 
 if __name__ == "__main__":
     migrate_person_to_related_data()

@@ -7,6 +7,7 @@ django.setup()
 
 from ancestors.models import Relation
 
+
 def cleanup_duplicate_spouses():
     # Hole alle Relation-Objekte
     relations = Relation.objects.all()
@@ -15,7 +16,7 @@ def cleanup_duplicate_spouses():
 
     for relation in relations:
         updated = False
-        
+
         # Überprüfen und Bereinigen der Ehepartner-Referenzen
         if relation.marr_spou_refn_2 == relation.marr_spou_refn_1:
             relation.marr_spou_refn_2 = None
@@ -26,7 +27,7 @@ def cleanup_duplicate_spouses():
         if relation.marr_spou_refn_4 == relation.marr_spou_refn_1:
             relation.marr_spou_refn_4 = None
             updated = True
-        
+
         # Speichern der Änderungen, wenn Änderungen vorgenommen wurden
         if updated:
             relation.save()
@@ -34,6 +35,7 @@ def cleanup_duplicate_spouses():
             print(f'Updated relation for person: {relation.person.refn}')
 
     print(f'Updated {updated_count} Relation records.')
+
 
 if __name__ == "__main__":
     cleanup_duplicate_spouses()

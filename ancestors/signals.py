@@ -6,6 +6,7 @@ from django.db.models.signals import post_save, post_delete, pre_save
 from .tasks import rename_image
 from .models import Person
 
+
 @receiver(post_save, sender=Person)
 def rename_files_on_save(sender, instance, created, **kwargs):
     if not hasattr(instance, '_performing_post_save'):
@@ -29,7 +30,7 @@ def rename_files_on_save(sender, instance, created, **kwargs):
                 # Datei umbenennen
                 if os.path.exists(old_path) and old_path != new_full_path:
                     os.rename(old_path, new_full_path)
-                    
+
                     # Pfad im Datenbankfeld aktualisieren
                     file_field.name = new_path
 

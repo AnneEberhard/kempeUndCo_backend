@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
 from .models import CustomUser
-from .serializers import PasswordResetRequestSerializer, RegisterSerializer,CustomTokenObtainPairSerializer, SetNewPasswordSerializer
+from .serializers import PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
 
 
 class LoginView(TokenObtainPairView):
@@ -82,7 +82,7 @@ class RegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response({'success': 'Please check the respective email.'}, status=status.HTTP_201_CREATED)
-    
+
 
 class ActivationView(APIView):
     def get(self, request, uidb64, token):
@@ -173,4 +173,3 @@ class PasswordResetConfirmView(APIView):
             return Response({'success': 'Das Passwort wurde erfolgreich zurückgesetzt.'}, status=status.HTTP_200_OK)
         except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
             return Response({'error': 'Ungültiger Link.'}, status=status.HTTP_400_BAD_REQUEST)
-

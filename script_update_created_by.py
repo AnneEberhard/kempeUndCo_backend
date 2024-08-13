@@ -7,7 +7,7 @@ django.setup()
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model 
+from django.contrib.auth import get_user_model
 from ancestors.models import Person
 
 
@@ -23,6 +23,7 @@ def update_created_by(username):
     updated_count = Person.objects.filter(created_by__isnull=True).update(created_by=user)
 
     print(f'Erfolgreich {updated_count} Datensätze aktualisiert.')
+
 
 if __name__ == "__main__":
     # Hier den Benutzernamen des Erstellers angeben

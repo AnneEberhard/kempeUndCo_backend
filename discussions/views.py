@@ -6,6 +6,7 @@ from ancestors.models import Person
 from .models import Discussion
 from .serializers import DiscussionSerializer
 
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def get_or_create_discussion(request, refn):
@@ -13,8 +14,8 @@ def get_or_create_discussion(request, refn):
         person = Person.objects.get(refn=refn)
     except Person.DoesNotExist:
         return Response({'error': 'Person not found'}, status=404)
-    
+
     discussion, created = Discussion.objects.get_or_create(person=person)
     serializer = DiscussionSerializer(discussion)
-    
+
     return Response(serializer.data, status=201 if created else 200)

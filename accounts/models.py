@@ -33,7 +33,7 @@ class CustomUser(AbstractUser):
         # Weitere Familienbäume hinzufügen, wenn nötig
     ]
     email = models.EmailField(unique=True)
-    
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
     guarantor = models.BooleanField(default=False)

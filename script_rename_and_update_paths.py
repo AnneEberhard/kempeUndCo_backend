@@ -9,6 +9,7 @@ django.setup()
 
 from ancestors.models import Person
 
+
 def rename_and_update_paths():
     for person in Person.objects.all():
         for i in range(1, 7):
@@ -23,15 +24,16 @@ def rename_and_update_paths():
 
                 # Pfad innerhalb des MEDIA_ROOT anpassen
                 new_full_path = os.path.join(settings.MEDIA_ROOT, new_path)
-                
+
                 # Datei umbenennen
                 if os.path.exists(old_path):
                     os.rename(old_path, new_full_path)
-                    
+
                     # Pfad im Datenbankfeld aktualisieren
                     file_field.name = new_path
                     person.save()
                     print(f"Renamed {old_path} to {new_full_path}")
+
 
 if __name__ == "__main__":
     rename_and_update_paths()
