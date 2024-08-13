@@ -1,10 +1,12 @@
+from django.shortcuts import redirect
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status, serializers
 from rest_framework.response import Response
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
-from django.utils.http import urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.template.loader import render_to_string
@@ -65,7 +67,7 @@ class RegistrationView(generics.CreateAPIView):
             user = serializer.save()
 
             # Senden einer Text-E-Mail mit weiteren Anweisungen
-            subject = 'Welcome to Our Service'
+            subject = 'Herzlich Willkommen'
             html_message = render_to_string('no_guarantor_email.html')
             plain_message = strip_tags(html_message)
             from_email = settings.NO_REPLY_EMAIL
@@ -80,3 +82,52 @@ class RegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response({'success': 'Please check the respective email.'}, status=status.HTTP_201_CREATED)
+    
+
+class ActivationView(APIView):
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+
+            # Senden einer Aktivierungsbestätigungs-E-Mail an den Benutzer
+            subject = 'Konto wurde aktiviert'
+            html_message = render_to_string('activation_email.html', {'user': user})
+            plain_message = strip_tags(html_message)
+            from_email = settings.NO_REPLY_EMAIL
+            to_email = [user.email]
+
+            email = EmailMultiAlternatives(subject, plain_message, from_email, to=to_email, reply_to=[settings.REPLY_TO_EMAIL])
+            email.attach_alternative(html_message, "text/html")
+            email.send()
+
+            # Falls der Benutzer einen Bürgen hat, senden wir eine E-Mail an den Bürgen
+            if user.guarantor:
+                guarantor_email = user.guarantor_email
+                try:
+                    guarantor_user = CustomUser.objects.get(email=guarantor_email)
+
+                    subject = 'Ein neuer Benutzer wurde aktiviert'
+                    html_message = render_to_string('guarantor_activation_email.html', {'user': user})
+                    plain_message = strip_tags(html_message)
+                    from_email = settings.NO_REPLY_EMAIL
+                    to_email = [guarantor_user.email]
+
+                    email = EmailMultiAlternatives(subject, plain_message, from_email, to=to_email, reply_to=[settings.REPLY_TO_EMAIL])
+                    email.attach_alternative(html_message, "text/html")
+                    email.send()
+                except CustomUser.DoesNotExist:
+                    pass
+
+            # Redirect to the frontend activation success page
+            return redirect(f"{settings.FRONTEND_URL}/activation-success")
+        else:
+            # Redirect to the frontend activation failure page
+            return redirect(f"{settings.FRONTEND_URL}/activation-failure")
+

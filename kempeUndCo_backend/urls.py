@@ -9,7 +9,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from accounts.views import LoginView, RegistrationView
+from accounts.views import ActivationView, LoginView, RegistrationView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -17,6 +17,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', RegistrationView.as_view(), name='register'),
+     path('activate/<uidb64>/<token>/', ActivationView.as_view(), name='activate'),
     path('api/discussions/', include('discussions.urls')),
     path('api/ancestors/', include('ancestors.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
