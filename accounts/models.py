@@ -26,13 +26,21 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractUser):
+
+    FAMILY_CHOICES = [
+        ('kempe', 'Stammbaum Kempe'),
+        ('huenten', 'Stammbaum Hünten'),
+        # Weitere Familienbäume hinzufügen, wenn nötig
+    ]
     email = models.EmailField(unique=True)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
     guarantor = models.BooleanField(default=False)
     guarantor_email = models.EmailField(blank=True, null=True)
-    family = models.CharField(max_length=50, blank=True)
+    family_1 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, verbose_name='Stammbaum 1')
+    family_2 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, verbose_name='Stammbaum 2')
+    notes = models.TextField(null=True, blank=True, verbose_name='Notizen')
 
     objects = CustomUserManager()
 
