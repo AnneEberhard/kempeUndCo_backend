@@ -88,3 +88,5 @@ db_backup.sqlite3 created
 WITH REGARD TO ACCOUNTS/USERS
 username ist mandatory due to DRF admin basis, but will be automatically generated if the user is created in the frontend.
 if the user is created in the backend, choose a username that is not yet existent
+all interaction with frontend users is in the frontend (activation infos, reset passwort etc.)
+added two family possibilities for user to be assigned to - regard the frontend later on

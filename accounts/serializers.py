@@ -58,3 +58,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username']
         )
         return user
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, min_length=8, max_length=128)
