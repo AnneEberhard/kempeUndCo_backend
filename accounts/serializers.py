@@ -22,7 +22,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         """
         Validate user credentials.
 
-        Authenticate the user using email and password, and ensure the account is active. 
+        Authenticate the user using email and password, and ensure the account is active.
         Return JWT tokens and user details if valid.
 
         Parameters:
@@ -66,7 +66,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     - last_name: string
     - guarantor: string (optional)
     - guarantor_email: string (optional)
-    - family: string (optional)
+    - family_1: string (optional)
+    - family_2: string (optional)
     """
     password = serializers.CharField(write_only=True)
     first_name = serializers.CharField()
@@ -74,7 +75,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'family']
+        fields = ['email', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'family_1', 'family_2']
 
     def generate_random_username(self, email):
         """
@@ -117,7 +118,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name'],
             guarantor=validated_data['guarantor'],
             guarantor_email=validated_data.get('guarantor_email'),
-            family=validated_data['family'],
+            family_1=validated_data['family'],
+            family_2='',
             username=validated_data['username']
         )
         return user

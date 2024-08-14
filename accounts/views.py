@@ -39,7 +39,7 @@ class RegistrationView(generics.CreateAPIView):
     post:
     Register a new user.
 
-    Create a new user account. If a guarantor is provided, an activation email will be sent to the guarantor. 
+    Create a new user account. If a guarantor is provided, an activation email will be sent to the guarantor.
     Otherwise, a welcome email will be sent to the new user.
 
     Request Body:
@@ -58,8 +58,8 @@ class RegistrationView(generics.CreateAPIView):
         """
         Handle user creation and email notifications.
 
-        Create a new user. If a guarantor is specified, send an activation email to the guarantor. 
-        If the guarantor does not exist, notify the new user. 
+        Create a new user. If a guarantor is specified, send an activation email to the guarantor.
+        If the guarantor does not exist, notify the new user.
         If no guarantor is specified, send a welcome email to the new user.
 
         Parameters:
@@ -145,7 +145,7 @@ class ActivationView(APIView):
     get:
     Activate a user account.
 
-    Activate a user account using the provided UID and token. 
+    Activate a user account using the provided UID and token.
     Sends confirmation emails to the user and guarantor (if applicable).
 
     Parameters:
