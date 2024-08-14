@@ -5,6 +5,51 @@ from django.utils import timezone
 
 
 class Person(models.Model):
+    """
+    A model representing a person, based on the source file from Ahnenblatt.
+
+    Attributes that are represented in the admin panel:
+    - refn (CharField): Unique reference number for the person.
+    - name (CharField): Full name of the person, automatically generated and not editable.
+    - uid (CharField): Unique identifier.
+    - surn (CharField): Surname of the person.
+    - givn (CharField): Given name of the person.
+    - sex (CharField): Sex of the person, with choices of 'weiblich', 'männlich', or 'divers'.
+    - occu (CharField): Occupation of the person.
+    - chan_date (CharField): Date of last change.
+    - chan_date_time (CharField): Date and time of last change.
+    - birt_date (CharField): Birth date of the person.
+    - birth_date_formatted (DateField): Automatically formatted birth date.
+    - birt_plac (CharField): Birth place of the person.
+    - deat_date (CharField): Death date of the person.
+    - death_date_formatted (DateField): Automatically formatted death date.
+    - deat_plac (CharField): Death place of the person.
+    - note (TextField): Additional notes about the person.
+    - chr_date (CharField): Christening date of the person.
+    - chr_plac (CharField): Christening place of the person.
+    - buri_date (CharField): Burial date of the person.
+    - buri_plac (CharField): Burial place of the person.
+    - name_rufname (CharField): Rufname (nickname or common name used).
+    - name_npfx (CharField): Name prefix.
+    - sour (TextField): Sources of information about the person.
+    - name_nick (CharField): Nickname.
+    - name_marnm (CharField): Married name.
+    - chr_addr (CharField): Christening address.
+    - reli (CharField): Religion.
+    - 6 obje_file_X and obje_title_X fields that are for uploading up to 6 pictures
+
+    Attributes that are still included here but are handled via the model relation 
+    (s. below, created via scripts, s README for process):
+    - all references to parents, children, spouses and marriages
+
+    Attributes that were newly created via scripts only for this database:
+    - family_tree_1 (CharField): The first family tree to which the person belongs, with choices from predefined options.
+    - family_tree_2 (CharField): The second family tree to which the person belongs, with choices from predefined options.
+    - creation_date (DateTimeField): The date and time when the person record was created.
+    - last_modified_date (DateTimeField): The date and time when the person record was last modified.
+    - created_by (ForeignKey): The user who created the person record.
+    - last_modified_by (ForeignKey): The user who last modified the person record.
+    """
 
     SEX_CHOICES = [
         ('F', 'weiblich'),
@@ -129,6 +174,12 @@ class Person(models.Model):
     def _generate_unique_refn(self):
         """
         Generate a unique refn value that does not conflict with existing ones.
+
+        Iterates through existing refn values to find the maximum numerical suffix,
+        increments it, and returns a new unique refn value.
+
+        Returns:
+        - string: A new unique refn value in the format '@I<new_number>@'
         """
         existing_refs = Person.objects.values_list('refn', flat=True)
         max_num = 0
@@ -145,7 +196,13 @@ class Person(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        saving person including metadata and automatic birth/death date generation
+        Save the Person instance including metadata and automatic birth/death date generation.
+
+        Automatically generates a unique refn for new instances, sets creation and modification dates,
+        and formats the name and birth/death dates.
+
+        Parameters:
+        - user: The user who is creating or modifying the instance (optional)
         """
         user = kwargs.pop('user', None)
 
@@ -195,10 +252,44 @@ class Person(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
+        """
+        Return the string representation of the Person instance.
+
+        Returns:
+        - string: The name of the person
+        """
         return self.name
 
 
 class Relation(models.Model):
+    """
+    A model representing the relationships and family status of a person.
+
+    Attributes:
+    - person (ForeignKey): The person for whom the relationships are being recorded.
+    - fath_refn (ForeignKey): Reference to the person's father.
+    - moth_refn (ForeignKey): Reference to the person's mother.
+    - marr_spou_refn_1 (ForeignKey): Reference to the person's first spouse.
+    - marr_date_1 (CharField): The marriage date for the first spouse.
+    - marr_plac_1 (CharField): The marriage place for the first spouse.
+    - children_1 (ManyToManyField): The children from the first marriage.
+    - fam_stat_1 (CharField): The family status for the first marriage.
+    - marr_spou_refn_2 (ForeignKey): Reference to the person's second spouse.
+    - children_2 (ManyToManyField): The children from the second marriage.
+    - marr_date_2 (CharField): The marriage date for the second spouse.
+    - marr_plac_2 (CharField): The marriage place for the second spouse.
+    - fam_stat_2 (CharField): The family status for the second marriage.
+    - marr_spou_refn_3 (ForeignKey): Reference to the person's third spouse.
+    - children_3 (ManyToManyField): The children from the third marriage.
+    - marr_date_3 (CharField): The marriage date for the third spouse.
+    - marr_plac_3 (CharField): The marriage place for the third spouse.
+    - marr_spou_refn_4 (ForeignKey): Reference to the person's fourth spouse.
+    - fam_stat_3 (CharField): The family status for the third marriage.
+    - children_4 (ManyToManyField): The children from the fourth marriage.
+    - marr_date_4 (CharField): The marriage date for the fourth spouse.
+    - marr_plac_4 (CharField): The marriage place for the fourth spouse.
+    - fam_stat_4 (CharField): The family status for the fourth marriage.
+    """
 
     FAMILY_STATUS_CHOICES = [
         ('married', 'verheiratet'),
