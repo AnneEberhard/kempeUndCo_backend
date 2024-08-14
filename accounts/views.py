@@ -17,13 +17,57 @@ from .serializers import PasswordResetRequestSerializer, RegisterSerializer, Cus
 
 
 class LoginView(TokenObtainPairView):
+    """
+    post:
+    Obtain a new pair of access and refresh tokens.
+
+    Request a pair of JWT tokens (access and refresh) by providing valid user credentials.
+
+    Request Body:
+    - username: string
+    - password: string
+
+    Responses:
+    - 200: Token pair generated successfully
+    - 400: Invalid credentials provided
+    """
     serializer_class = CustomTokenObtainPairSerializer
 
 
 class RegistrationView(generics.CreateAPIView):
+    """
+    post:
+    Register a new user.
+
+    Create a new user account. If a guarantor is provided, an activation email will be sent to the guarantor. 
+    Otherwise, a welcome email will be sent to the new user.
+
+    Request Body:
+    - email: string
+    - password: string
+    - guarantor: string (optional)
+    - guarantor_email: string (optional)
+
+    Responses:
+    - 201: User registered successfully
+    - 400: Guarantor does not exist or other validation errors
+    """
     serializer_class = RegisterSerializer
 
     def perform_create(self, serializer):
+        """
+        Handle user creation and email notifications.
+
+        Create a new user. If a guarantor is specified, send an activation email to the guarantor. 
+        If the guarantor does not exist, notify the new user. 
+        If no guarantor is specified, send a welcome email to the new user.
+
+        Parameters:
+        - serializer: RegisterSerializer instance
+
+        Raises:
+        - serializers.ValidationError: If the guarantor does not exist
+        """
         user_data = serializer.validated_data
 
         if user_data.get('guarantor'):
@@ -78,6 +122,18 @@ class RegistrationView(generics.CreateAPIView):
             email.send()
 
     def post(self, request, *args, **kwargs):
+        """
+        Handle the POST request for user registration.
+
+        Validate the provided data, create the user, and send the respective email notification.
+
+        Parameters:
+        - request: The HTTP request object
+
+        Responses:
+        - 201: User registered successfully with email notification sent
+        - 400: Validation error or other request issues
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -85,7 +141,35 @@ class RegistrationView(generics.CreateAPIView):
 
 
 class ActivationView(APIView):
+    """
+    get:
+    Activate a user account.
+
+    Activate a user account using the provided UID and token. 
+    Sends confirmation emails to the user and guarantor (if applicable).
+
+    Parameters:
+    - uidb64: Base64 encoded user ID
+    - token: Token for user activation
+
+    Responses:
+    - 302: Redirects to the frontend activation success or failure page
+    """
     def get(self, request, uidb64, token):
+        """
+        Handle the GET request for account activation.
+
+        Validate the UID and token, activate the user account, and send confirmation emails.
+
+        Parameters:
+        - request: The HTTP request object
+        - uidb64: Base64 encoded user ID
+        - token: Token for user activation
+
+        Responses:
+        - Redirects to the frontend activation success page if successful
+        - Redirects to the frontend activation failure page if unsuccessful
+        """
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
             user = CustomUser.objects.get(pk=uid)
@@ -133,6 +217,19 @@ class ActivationView(APIView):
 
 
 class PasswordResetRequestView(APIView):
+    """
+    post:
+    Request a password reset.
+
+    Send a password reset link to the user's email address if the email is associated with an account.
+
+    Request Body:
+    - email: string
+
+    Responses:
+    - 200: Password reset link sent successfully
+    - 400: User with the provided email does not exist
+    """
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -159,7 +256,38 @@ class PasswordResetRequestView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
+    """
+    post:
+    Confirm a password reset.
+
+    Reset the user's password using the provided UID and token, and set a new password.
+
+    Request Body:
+    - password: string
+
+    Parameters:
+    - uidb64: Base64 encoded user ID
+    - token: Token for password reset
+
+    Responses:
+    - 200: Password reset successfully
+    - 400: Invalid token, expired token, or other errors
+    """
     def post(self, request, uidb64, token):
+        """
+        Handle the POST request for password reset confirmation.
+
+        Validate the UID and token, set the new password for the user, and save it.
+
+        Parameters:
+        - request: The HTTP request object
+        - uidb64: Base64 encoded user ID
+        - token: Token for password reset
+
+        Responses:
+        - 200: Password reset successfully
+        - 400: Invalid token, expired token, or other errors
+        """
         serializer = SetNewPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:

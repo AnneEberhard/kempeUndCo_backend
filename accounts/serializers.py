@@ -5,7 +5,35 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Custom serializer for obtaining JWT tokens using email and password.
+
+    Validates user credentials and returns a pair of access and refresh tokens along with user details.
+
+    Fields:
+    - email: string
+    - password: string
+
+    Responses:
+    - tokens: JWT access and refresh tokens
+    - user: User details (id, email, username, is_active)
+    """
     def validate(self, attrs):
+        """
+        Validate user credentials.
+
+        Authenticate the user using email and password, and ensure the account is active. 
+        Return JWT tokens and user details if valid.
+
+        Parameters:
+        - attrs: Dictionary containing 'email' and 'password'
+
+        Returns:
+        - Dictionary containing JWT tokens and user details
+
+        Raises:
+        - serializers.ValidationError: If authentication fails or account is inactive
+        """
         authenticate_kwargs = {
             'email': attrs['email'],
             'password': attrs['password'],
@@ -26,6 +54,20 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration.
+
+    Handles the creation of a new user account with the necessary details.
+
+    Fields:
+    - email: string
+    - password: string
+    - first_name: string
+    - last_name: string
+    - guarantor: string (optional)
+    - guarantor_email: string (optional)
+    - family: string (optional)
+    """
     password = serializers.CharField(write_only=True)
     first_name = serializers.CharField()
     last_name = serializers.CharField()
@@ -35,6 +77,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['email', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'family']
 
     def generate_random_username(self, email):
+        """
+        Generate a random username based on the email.
+
+        Create a base username from the email prefix and append a random string.
+
+        Parameters:
+        - email: User's email address
+
+        Returns:
+        - string: Generated username
+        """
         import random
         import string
         base_username = email.split('@')[0]
@@ -42,7 +95,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         return base_username + random_string
 
     def create(self, validated_data):
-        # Check if username is provided, if not, generate one
+        """
+        Create a new user with the validated data.
+
+        Check if a username is provided, otherwise generate one. Create the user with the provided details.
+
+        Parameters:
+        - validated_data: Dictionary containing validated user data
+
+        Returns:
+        - CustomUser: The created user instance
+        """
         if not validated_data.get('username'):
             username = self.generate_random_username(validated_data['email'])
             validated_data['username'] = username
@@ -61,8 +124,24 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
+    """
+    Serializer for password reset request.
+
+    Handles validation of the user's email for password reset.
+
+    Fields:
+    - email: string
+    """
     email = serializers.EmailField()
 
 
 class SetNewPasswordSerializer(serializers.Serializer):
+    """
+    Serializer for setting a new password.
+
+    Handles validation and setting of the new password.
+
+    Fields:
+    - password: string (write-only, min length 8, max length 128)
+    """
     password = serializers.CharField(write_only=True, min_length=8, max_length=128)
