@@ -38,7 +38,7 @@ class Person(models.Model):
     - reli (CharField): Religion.
     - 6 obje_file_X and obje_title_X fields that are for uploading up to 6 pictures
 
-    Attributes that are still included here but are handled via the model relation 
+    Attributes that are still included here but are handled via the model relation
     (s. below, created via scripts, s README for process):
     - all references to parents, children, spouses and marriages
 

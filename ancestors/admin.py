@@ -57,7 +57,7 @@ class PersonAdmin(ImportExportModelAdmin):
 class RelationAdmin(ImportExportModelAdmin):
     resource_class = RelationResource
     list_display = ('person', 'fath_refn', 'moth_refn',
-                    'marr_spou_refn_1', 'display_children_1'
+                    'marr_spou_refn_1', 'display_children_1',
                     'marr_spou_refn_2', 'display_children_2',
                     'marr_spou_refn_3', 'display_children_3',
                     'marr_spou_refn_4', 'display_children_4')

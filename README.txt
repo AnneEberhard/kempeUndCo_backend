@@ -90,3 +90,5 @@ username ist mandatory due to DRF admin basis, but will be automatically generat
 if the user is created in the backend, choose a username that is not yet existent
 all interaction with frontend users is in the frontend (activation infos, reset passwort etc.)
 added two family possibilities for user to be assigned to - regard the frontend later on
+    Currently: default kempe for family 1 und empty field for family 2
+    change later on!!
