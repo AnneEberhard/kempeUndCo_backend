@@ -57,4 +57,4 @@ class PersonListSerializer(serializers.ModelSerializer):
 class RelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Relation
-        fields = '__all__'  # oder liste spezifische Felder auf, z.B. ['id', 'person', 'fath_refn', ...]
+        fields = '__all__'
