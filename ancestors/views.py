@@ -1,11 +1,11 @@
 from rest_framework import generics
 from .models import Person, Relation
-from .serializers import PersonSerializer, RelationSerializer
+from .serializers import PersonListSerializer, PersonSerializer, RelationSerializer
 
 
 class PersonListCreateView(generics.ListCreateAPIView):
     queryset = Person.objects.all()
-    serializer_class = PersonSerializer
+    serializer_class = PersonListSerializer
 
 
 class PersonDetailView(generics.RetrieveUpdateDestroyAPIView):
