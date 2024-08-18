@@ -7,8 +7,16 @@ from .models import Discussion
 from .serializers import DiscussionSerializer
 
 
+@api_view(['GET'])
+#@permission_classes([IsAuthenticated])
+def get_all_discussions(request):
+    discussions = Discussion.objects.all()
+    serializer = DiscussionSerializer(discussions, many=True)
+    return Response(serializer.data)
+
+
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def get_or_create_discussion(request, refn):
     try:
         person = Person.objects.get(refn=refn)

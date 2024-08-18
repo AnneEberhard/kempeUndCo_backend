@@ -1,6 +1,14 @@
 # discussions/serializers.py
 from rest_framework import serializers
+
+from ancestors.models import Person
 from .models import Discussion, DiscussionEntry
+
+
+class PersonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Person
+        fields = ['id', 'name']
 
 
 class DiscussionEntrySerializer(serializers.ModelSerializer):
@@ -12,6 +20,7 @@ class DiscussionEntrySerializer(serializers.ModelSerializer):
 
 
 class DiscussionSerializer(serializers.ModelSerializer):
+    person = PersonSerializer()
     entries = DiscussionEntrySerializer(many=True, read_only=True)
 
     class Meta:
