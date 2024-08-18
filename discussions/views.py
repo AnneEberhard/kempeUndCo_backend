@@ -8,7 +8,7 @@ from .serializers import DiscussionSerializer
 
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_all_discussions(request):
     discussions = Discussion.objects.all()
     serializer = DiscussionSerializer(discussions, many=True)
@@ -16,10 +16,10 @@ def get_all_discussions(request):
 
 
 @api_view(['GET', 'POST'])
-#@permission_classes([IsAuthenticated])
-def get_or_create_discussion(request, refn):
+@permission_classes([IsAuthenticated])
+def get_or_create_discussion(request, id):
     try:
-        person = Person.objects.get(refn=refn)
+        person = Person.objects.get(id=id)
     except Person.DoesNotExist:
         return Response({'error': 'Person not found'}, status=404)
 
