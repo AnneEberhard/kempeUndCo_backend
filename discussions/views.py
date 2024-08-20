@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from ancestors.models import Person
-from .models import Discussion
+from .models import Discussion, DiscussionEntry
 from .serializers import DiscussionEntrySerializer, DiscussionSerializer
 
 
@@ -48,3 +48,41 @@ class CreateDiscussionEntryView(APIView):
             serializer.save(author=request.user, discussion=discussion)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DiscussionEntryDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        try:
+            return DiscussionEntry.objects.get(pk=pk)
+        except DiscussionEntry.DoesNotExist:
+            return None
+
+    def get(self, request, pk, *args, **kwargs):
+        entry = self.get_object(pk)
+        if entry:
+            serializer = DiscussionEntrySerializer(entry)
+            return Response(serializer.data)
+        return Response({'error': 'Discussion entry not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, pk, *args, **kwargs):
+        entry = self.get_object(pk)
+        if entry:
+            if entry.author != request.user:
+                return Response({'error': 'You are not the author of this entry'}, status=status.HTTP_403_FORBIDDEN)
+            serializer = DiscussionEntrySerializer(entry, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Discussion entry not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, pk, *args, **kwargs):
+        entry = self.get_object(pk)
+        if entry:
+            if entry.author != request.user:
+                return Response({'error': 'You are not the author of this entry'}, status=status.HTTP_403_FORBIDDEN)
+            entry.delete()
+            return Response({'message': 'Discussion entry deleted'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'error': 'Discussion entry not found'}, status=status.HTTP_404_NOT_FOUND)
