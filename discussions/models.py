@@ -12,6 +12,7 @@ class Discussion(models.Model):
 class DiscussionEntry(models.Model):
     discussion = models.ForeignKey(Discussion, on_delete=models.CASCADE, related_name='entries')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    title= models.CharField(max_length=255, blank=True, null=True, verbose_name='Titel')
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
