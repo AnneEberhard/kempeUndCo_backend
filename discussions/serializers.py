@@ -16,7 +16,7 @@ class DiscussionEntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DiscussionEntry
-        fields = ['id', 'author', 'content', 'created_at', 'updated_at']
+        fields = ['id', 'author', 'title', 'content', 'created_at', 'updated_at']
 
 
 class DiscussionSerializer(serializers.ModelSerializer):
