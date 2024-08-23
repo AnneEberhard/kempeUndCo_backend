@@ -6,9 +6,9 @@ from django.contrib import admin
 
 class PersonAdmin(ImportExportModelAdmin):
     resource_class = PersonResource
-    list_display = ('id', 'name', 'refn', 'note', 'family_tree_1', 'family_tree_2', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
+    list_display = ('id', 'name', 'note', 'family_tree_1', 'family_tree_2', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
     list_filter = ('family_tree_1', 'family_tree_2')
-    search_fields = ('name', 'refn')  # Felder, die durchsuchbar sind
+    search_fields = ('name', 'id')  # Felder, die durchsuchbar sind
     readonly_fields = ('name', 'refn', 'creation_date', 'last_modified_date', 'created_by', 'last_modified_by')
 
     fieldsets = (
@@ -50,6 +50,9 @@ class PersonAdmin(ImportExportModelAdmin):
         })
     )
 
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
     def save_model(self, request, obj, form, change):
         obj.save(user=request.user)
 
@@ -80,6 +83,9 @@ class RelationAdmin(ImportExportModelAdmin):
     def display_children_4(self, obj):
         return ", ".join([child.name for child in obj.children_4.all()])
     display_children_4.short_description = 'Kinder aus Ehe 4'
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
 
 
 admin.site.register(Person, PersonAdmin)
