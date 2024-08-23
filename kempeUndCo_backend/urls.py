@@ -22,4 +22,5 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('api/discussions/', include('discussions.urls')),
     path('api/ancestors/', include('ancestors.urls')),
+    path('api/infos/', include('infos.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
