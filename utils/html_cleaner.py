@@ -1,4 +1,8 @@
 import bleach
+from bleach.css_sanitizer import CSSSanitizer
+
+
+css_sanitizer = CSSSanitizer()
 
 ALLOWED_TAGS = [
     'a', 'b', 'blockquote', 'br', 'em', 'i', 'li', 'ol', 'p', 'strong', 'ul', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -13,4 +17,10 @@ ALLOWED_ATTRIBUTES = {
 
 def clean_html(content):
     """Cleans the HTML content using bleach and returns cleaned content before saving."""
-    return bleach.clean(content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+    return bleach.clean(
+        content, 
+        tags=ALLOWED_TAGS, 
+        attributes=ALLOWED_ATTRIBUTES, 
+        strip=True, 
+        css_sanitizer=css_sanitizer
+    )
