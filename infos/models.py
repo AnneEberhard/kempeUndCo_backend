@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.conf import settings
 from utils.html_cleaner import clean_html
@@ -18,6 +19,16 @@ class Info(models.Model):
 
     def save(self, *args, **kwargs):
         self.content = clean_html(self.content)
+
+        if self.pk:  # Only if instance already exists
+            old_info = Info.objects.get(pk=self.pk)
+            for i in range(1, 5):
+                old_image = getattr(old_info, f'image_{i}')
+                new_image = getattr(self, f'image_{i}')
+                if old_image and old_image != new_image:
+                    if os.path.isfile(old_image.path):
+                        os.remove(old_image.path)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
