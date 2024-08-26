@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/discussions/', include('discussions.urls')),
     path('api/ancestors/', include('ancestors.urls')),
     path('api/infos/', include('infos.urls')),
+    path('api/recipes/', include('recipes.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import InfoCreateView, InfoDetailView, InfoListView, delete_image
+from .views import InfoCreateView, InfoDetailView, InfoListView
 
 urlpatterns = [
     path('create/', InfoCreateView.as_view(), name='create_Info'),  
