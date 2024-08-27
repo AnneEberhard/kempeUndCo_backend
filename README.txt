@@ -1,3 +1,11 @@
+Create Groups:
+    run: python manage.py create_groups
+        file can be found: kempeUndCo_backend/accounts/management/commands/create_groups.py
+    then run (for existing users): python manage.py assign_users_to_groups
+        file can be found: kempeUndCo_backend/accounts/management/commands/assign_users_to_groups.py
+
+
+
 Vor import von Ahnenblatt CSV: 
     run python script_check_encoding_csv.py to check the UTF encoding (is usually UTF-16)
     run python script_clean_ahnenblatt_source.py to clean the headers of sonderzeichen and change to UTF-8
