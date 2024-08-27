@@ -27,7 +27,7 @@ class RecipeListView(generics.ListAPIView):
 class RecipeDetailView(APIView):
     def get(self, request, pk, *args, **kwargs):
         recipe = get_object_or_404(Recipe, pk=pk)
-        serializer = RecipeSerializer(recipe)
+        serializer = RecipeSerializer(recipe, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk, *args, **kwargs):
@@ -42,7 +42,7 @@ class RecipeDetailView(APIView):
                         os.remove(image_field.path)
                     setattr(recipe, field, None)
 
-        serializer = RecipeSerializer(recipe, data=request.data, partial=True)
+        serializer = RecipeSerializer(recipe, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

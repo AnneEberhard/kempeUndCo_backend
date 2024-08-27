@@ -27,7 +27,7 @@ class InfoListView(generics.ListAPIView):
 class InfoDetailView(APIView):
     def get(self, request, pk, *args, **kwargs):
         info = get_object_or_404(Info, pk=pk)
-        serializer = InfoSerializer(info)
+        serializer = InfoSerializer(info, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk, *args, **kwargs):
@@ -42,7 +42,7 @@ class InfoDetailView(APIView):
                         os.remove(image_field.path)
                     setattr(info, field, None)
 
-        serializer = InfoSerializer(info, data=request.data, partial=True)
+        serializer = InfoSerializer(info, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
