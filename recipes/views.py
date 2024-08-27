@@ -12,7 +12,7 @@ from recipes.serializers import RecipeSerializer
 
 class RecipeCreateView(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = RecipeSerializer(data=request.data)
+        serializer = RecipeSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save(author=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
