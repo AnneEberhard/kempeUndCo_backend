@@ -2,7 +2,7 @@ from rest_framework import generics
 from .models import Person, Relation
 from .serializers import PersonListSerializer, PersonSerializer, RelationSerializer
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import permission_classes
 
 
 @permission_classes([IsAuthenticated])

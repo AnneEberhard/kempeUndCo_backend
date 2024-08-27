@@ -1,7 +1,8 @@
 import json
 import os
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.views import APIView
@@ -10,6 +11,7 @@ from infos.models import Info
 from infos.serializers import InfoSerializer
 
 
+@permission_classes([IsAuthenticated])
 class InfoCreateView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = InfoSerializer(data=request.data, context={'request': request})
@@ -19,11 +21,13 @@ class InfoCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@permission_classes([IsAuthenticated])
 class InfoListView(generics.ListAPIView):
     queryset = Info.objects.all()
     serializer_class = InfoSerializer
 
 
+@permission_classes([IsAuthenticated])
 class InfoDetailView(APIView):
     def get(self, request, pk, *args, **kwargs):
         info = get_object_or_404(Info, pk=pk)

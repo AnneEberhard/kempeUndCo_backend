@@ -118,6 +118,7 @@ class PersonSerializer(serializers.ModelSerializer):
             }
         return representation
 
+
 class PersonListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Person

@@ -30,6 +30,7 @@ def get_or_create_discussion(request, id):
     return Response(serializer.data, status=201 if created else 200)
 
 
+@permission_classes([IsAuthenticated])
 class CreateDiscussionEntryView(APIView):
 
     def post(self, request, *args, **kwargs):
@@ -50,6 +51,7 @@ class CreateDiscussionEntryView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@permission_classes([IsAuthenticated])
 class DiscussionEntryDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
