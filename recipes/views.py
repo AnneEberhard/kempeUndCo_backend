@@ -1,10 +1,12 @@
 import json
 import os
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from recipes.models import Recipe
 from recipes.serializers import RecipeSerializer
@@ -12,7 +14,16 @@ from recipes.serializers import RecipeSerializer
 
 class RecipeCreateView(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = RecipeSerializer(data=request.data, context={'request': request})
+        user = request.user
+        print(user.family_1)
+        family_1 = user.family_1
+        family_2 = user.family_2
+
+        data = request.data.copy()
+        data['family_1'] = family_1
+        data['family_2'] = family_2
+
+        serializer = RecipeSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save(author=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -20,11 +31,36 @@ class RecipeCreateView(APIView):
 
 
 class RecipeListView(generics.ListAPIView):
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_allowed_family_trees(self):
+        """Holt die erlaubten Stammbaum-Namen für den aktuellen Benutzer."""
+        user = self.request.user
+        allowed_trees = set()
+
+        # Sammle alle Stammbäume, die der Benutzer sehen darf
+        for group in user.groups.all():
+            if group.name.startswith("Stammbaum "):
+                tree_name = group.name.replace("Stammbaum ", "").lower()
+                allowed_trees.add(tree_name)
+        
+        return allowed_trees
+
+    def get_queryset(self):
+        """Filtert die Rezepte basierend auf den erlaubten Stammbaum-Namen des Benutzers."""
+        allowed_family_trees = self.get_allowed_family_trees()
+        if not allowed_family_trees:
+            return Recipe.objects.none()  # Keine Rezepte zurückgeben, wenn keine erlaubten Stammbäume vorhanden sind
+
+        return Recipe.objects.filter(
+            Q(family_1__in=allowed_family_trees) |
+            Q(family_2__in=allowed_family_trees)
+        ).distinct()
 
 
 class RecipeDetailView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk, *args, **kwargs):
         recipe = get_object_or_404(Recipe, pk=pk)
         serializer = RecipeSerializer(recipe, context={'request': request})

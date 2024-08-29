@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from datetime import datetime
 from django.utils import timezone
+from kempeUndCo_backend.constants import FAMILY_CHOICES
 
 
 class Person(models.Model):
@@ -157,14 +158,8 @@ class Person(models.Model):
         verbose_name='Vertraulichkeit'
     )
 
-    FAMILY_TREE_CHOICES = [
-        ('kempe', 'Stammbaum Kempe'),
-        ('huenten', 'Stammbaum Hünten'),
-        # Weitere Familienbäume hinzufügen, wenn nötig
-    ]
-
-    family_tree_1 = models.CharField(max_length=255, choices=FAMILY_TREE_CHOICES, blank=True, null=True, verbose_name='Stammbaum 1')
-    family_tree_2 = models.CharField(max_length=255, choices=FAMILY_TREE_CHOICES, blank=True, null=True, verbose_name='Stammbaum 2')
+    family_tree_1 = models.CharField(max_length=255, choices=FAMILY_CHOICES, blank=True, null=True, verbose_name='Stammbaum 1')
+    family_tree_2 = models.CharField(max_length=255, choices=FAMILY_CHOICES, blank=True, null=True, verbose_name='Stammbaum 2')
 
     creation_date = models.DateTimeField(default=timezone.now, verbose_name='Erstellungsdatum')
     last_modified_date = models.DateTimeField(default=timezone.now, verbose_name='Letzte Änderung')

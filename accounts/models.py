@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.auth.models import BaseUserManager
 
+from kempeUndCo_backend.constants import FAMILY_CHOICES
+
 
 class CustomUserManager(BaseUserManager):
     """
@@ -69,11 +71,7 @@ class CustomUser(AbstractUser):
     - family_2: string, optional, choices for second family tree
     - notes: text, optional
     """
-    FAMILY_CHOICES = [
-        ('kempe', 'Stammbaum Kempe'),
-        ('huenten', 'Stammbaum Hünten'),
-        # Weitere Familienbäume hinzufügen, wenn nötig
-    ]
+
     email = models.EmailField(unique=True)
 
     USERNAME_FIELD = 'email'

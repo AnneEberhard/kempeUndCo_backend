@@ -4,9 +4,10 @@ Create Groups:
     then run (for existing users): python manage.py assign_users_to_groups
         file can be found: kempeUndCo_backend/accounts/management/commands/assign_users_to_groups.py
 
+If adding new family choices:
+    from kempeUndCo_backend.constants import FAMILY_CHOICES
 
-
-Vor import von Ahnenblatt CSV: 
+Pre import Ahnenblatt CSV: 
     run python script_check_encoding_csv.py to check the UTF encoding (is usually UTF-16)
     run python script_clean_ahnenblatt_source.py to clean the headers of sonderzeichen and change to UTF-8
     then run import via django admin panel
@@ -67,7 +68,7 @@ Created by and last modified
 saved data set: Person-2024-08-04_3_created_by_filled
 
 Add new person: 
-1. refn will now be added automatically qhen saved and is readonly field
+1. refn will now be added automatically when saved and is readonly field
 2. limited sex to choices F, M, D
 3. name is now readonly and will be generated from prefix, given name, nick_name and surname (if existing)
 
