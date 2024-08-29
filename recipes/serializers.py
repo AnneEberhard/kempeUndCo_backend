@@ -13,7 +13,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'content', 'author_email', 'created_at', 'updated_at',
             'image_1', 'image_2', 'image_3', 'image_4',
-            'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url'
+            'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url', 'family_1', 'family_2'
         ]
         read_only_fields = ['author', 'created_at', 'updated_at']
 
