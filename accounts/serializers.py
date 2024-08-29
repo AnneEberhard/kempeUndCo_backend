@@ -68,16 +68,18 @@ class RegisterSerializer(serializers.ModelSerializer):
     - last_name: string
     - guarantor: string (optional)
     - guarantor_email: string (optional)
-    - family_1: string (optional)
-    - family_2: string (optional)
+    - selected_families: list (optional) - A list of selected families (not a model field)
     """
     password = serializers.CharField(write_only=True)
     first_name = serializers.CharField()
     last_name = serializers.CharField()
+    selected_families = serializers.ListField(
+        child=serializers.CharField(), required=False, write_only=True
+    )
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'family_1', 'family_2']
+        fields = ['email', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'selected_families']
 
     def generate_random_username(self, email):
         """
@@ -113,6 +115,12 @@ class RegisterSerializer(serializers.ModelSerializer):
             username = self.generate_random_username(validated_data['email'])
             validated_data['username'] = username
 
+        # Verarbeite die ausgewählten Familien
+        selected_families = validated_data.get('selected_families', [])
+        print(f"Selected Families: {selected_families}")
+        family_1 = selected_families[0] if len(selected_families) > 0 else None
+        family_2 = selected_families[1] if len(selected_families) > 1 else None
+
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
@@ -120,8 +128,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name'],
             guarantor=validated_data['guarantor'],
             guarantor_email=validated_data.get('guarantor_email'),
-            family_1=validated_data['family'],
-            family_2='',
+            family_1=family_1,
+            family_2=family_2,
             username=validated_data['username']
         )
         return user

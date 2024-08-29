@@ -75,6 +75,23 @@ class RegistrationView(generics.CreateAPIView):
             try:
                 guarantor_user = CustomUser.objects.get(email=guarantor_email)
 
+                # Erlaubte Familien des Bürgen ermitteln
+                allowed_families = {guarantor_user.family_1, guarantor_user.family_2}
+                print(allowed_families)
+
+                # Benutzer wählt mehrere Familien aus
+                selected_families = user_data.get('selected_families', [])
+                print(selected_families)
+                valid_families = [fam for fam in selected_families if fam in allowed_families]
+                print(valid_families)
+                if not valid_families:
+                    raise serializers.ValidationError("Der Bürge ist für die ausgewählten Familien nicht berechtigt.")
+
+                # Anpassen der Benutzer-Familienfelder basierend auf validierten Familien
+                user_data['family_1'] = valid_families[0] if len(valid_families) > 0 else None
+                user_data['family_2'] = valid_families[1] if len(valid_families) > 1 else None
+
+
                 # Benutzer erstellen
                 user = serializer.save()
 
@@ -134,8 +151,10 @@ class RegistrationView(generics.CreateAPIView):
         - 201: User registered successfully with email notification sent
         - 400: Validation error or other request issues
         """
+        print("Raw request data:", request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        print("Validated data:", serializer.validated_data)
         self.perform_create(serializer)
         return Response({'success': 'Please check the respective email.'}, status=status.HTTP_201_CREATED)
 

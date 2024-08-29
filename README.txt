@@ -78,6 +78,8 @@ saved data set: Relation-2024-08-05_1_spouses_cleaned_up
 2. run python script_cleanup_duplicate_children.py
 saved data set: Relation-2024-08-05_2_children_cleaned_up
 
+BEWARE: family_tree_ was changed to family_
+    saved data set: Person-2024-08-29_family
 
 Backup:
     exclude = ('fath_name', 'fath_refn', 'moth_name', 'moth_refn',

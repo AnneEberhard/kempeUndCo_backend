@@ -3,3 +3,6 @@ FAMILY_CHOICES = [
     ('huenten', 'Stammbaum Hünten'),
     # Weitere Familienbäume hinzufügen, wenn nötig
 ]
+
+# for create groups
+FAMILIES = {'kempe', 'huenten'}

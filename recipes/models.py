@@ -18,7 +18,7 @@ class Recipe(models.Model):
     image_4 = models.FileField(upload_to='recipes/', null=True, blank=True)
 
     family_1 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, verbose_name='Stammbaum 1')
-    family_2 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, verbose_name='Stammbaum 2')
+    family_2 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, null=True, verbose_name='Stammbaum 2')
 
 
     def save(self, *args, **kwargs):
