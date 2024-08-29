@@ -25,7 +25,7 @@ class PersonResource(resources.ModelResource):
                   'obje_titl_1', 'obje_file_2', 'obje_titl_2', 'obje_file_3',
                   'obje_titl_3', 'obje_file_4', 'obje_titl_4', 'obje_file_5',
                   'obje_titl_5', 'obje_file_6', 'obje_titl_6', 'confidential',
-                  'family_tree_1', 'family_tree_2', 'creation_date', 'last_modified_date',
+                  'family_1', 'family_2', 'creation_date', 'last_modified_date',
                   'created_by', 'last_modified_by')
 
 

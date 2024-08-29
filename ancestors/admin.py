@@ -6,8 +6,8 @@ from django.contrib import admin
 
 class PersonAdmin(ImportExportModelAdmin):
     resource_class = PersonResource
-    list_display = ('id', 'name', 'note', 'family_tree_1', 'family_tree_2', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
-    list_filter = ('family_tree_1', 'family_tree_2')
+    list_display = ('id', 'name', 'note', 'family_1', 'family_2', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
+    list_filter = ('family_1', 'family_2')
     search_fields = ('name', 'id')  # Felder, die durchsuchbar sind
     readonly_fields = ('name', 'refn', 'creation_date', 'last_modified_date', 'created_by', 'last_modified_by')
 
@@ -30,7 +30,7 @@ class PersonAdmin(ImportExportModelAdmin):
             'classes': ('collapse',),
         }),
         ('Vertraulichkeit', {
-            'fields': ('confidential', 'family_tree_1', 'family_tree_2')
+            'fields': ('confidential', 'family_1', 'family_2')
         }),
         ('Metadaten', {
             'fields': ('creation_date', 'last_modified_date', 'created_by', 'last_modified_by'),
