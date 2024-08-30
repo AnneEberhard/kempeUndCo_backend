@@ -81,24 +81,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['email', 'password', 'first_name', 'last_name', 'guarantor', 'guarantor_email', 'selected_families']
 
-    def generate_random_username(self, email):
-        """
-        Generate a random username based on the email.
-
-        Create a base username from the email prefix and append a random string.
-
-        Parameters:
-        - email: User's email address
-
-        Returns:
-        - string: Generated username
-        """
-        import random
-        import string
-        base_username = email.split('@')[0]
-        random_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
-        return base_username + random_string
-
     def create(self, validated_data):
         """
         Create a new user with the validated data.
@@ -111,16 +93,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         Returns:
         - CustomUser: The created user instance
         """
-        if not validated_data.get('username'):
-            username = self.generate_random_username(validated_data['email'])
-            validated_data['username'] = username
 
-        # Verarbeite die ausgewählten Familien
         selected_families = validated_data.get('selected_families', [])
-        print(f"Selected Families: {selected_families}")
         family_1 = selected_families[0] if len(selected_families) > 0 else None
         family_2 = selected_families[1] if len(selected_families) > 1 else None
 
+        # Beware this user has selected families and still needs verfication as done in the view
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
@@ -130,7 +108,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             guarantor_email=validated_data.get('guarantor_email'),
             family_1=family_1,
             family_2=family_2,
-            username=validated_data['username']
+            username=validated_data['email']
         )
         return user
 

@@ -7,25 +7,23 @@ from .models import CustomUser
 processing_signal = False
 
 @receiver(post_save, sender=CustomUser)
-def assign_user_to_groups(sender, instance, **kwargs):
-    for group_name in ["Stammbaum Kempe", "Stammbaum Hünten"]:
-        print(Group.objects.filter(name=group_name).exists())
-    # Lösche alle bestehenden Gruppenmitgliedschaften
-    print(f"pre: {instance.groups}")
-    instance.groups.clear()
-    print(f"cleared: {instance.groups}")
+def assign_user_to_groups(sender, instance, created, **kwargs):
+    global processing_signal
 
-    # Bestimme die Gruppen basierend auf den family_-Werten
-    families = {instance.family_1, instance.family_2}
-    print(f"Zuordnen: {families}")
+    if not processing_signal:
+        processing_signal = True
 
-    for family in families:
-        if family:
-            group_name = f"Stammbaum {family.capitalize()}"
-            print(f"Erstelle oder hole Gruppe: {group_name}")
-            group, created = Group.objects.get_or_create(name=group_name)
-            instance.groups.add(group)
-            print(f"Gruppe hinzugefügt: {group.name}")
+        # Lösche alle bestehenden Gruppenmitgliedschaften
+        instance.groups.clear()
 
-    # Kein erneutes Speichern des Benutzers nötig
-    print(f"Benutzer-Gruppen nach dem Speichern: {[group.name for group in instance.groups.all()]}")
+        # Bestimme die Gruppen basierend auf den family_-Werten
+        families = {instance.family_1, instance.family_2}
+
+        for family in families:
+            if family:
+                group_name = f"Stammbaum {family.capitalize()}"
+                group, created = Group.objects.get_or_create(name=group_name)
+                instance.groups.add(group)
+
+        # Kein erneutes Speichern des Benutzers nötig
+        processing_signal = False
