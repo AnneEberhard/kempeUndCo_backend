@@ -1,4 +1,3 @@
-# comments/models.py
 from django.db import models
 from accounts.models import CustomUser
 from infos.models import Info
@@ -17,4 +16,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author} on {self.created_at}"
-

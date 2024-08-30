@@ -14,28 +14,28 @@ class DiscussionListView(generics.ListAPIView):
     serializer_class = DiscussionSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_allowed_family_trees(self):
+    def get_allowed_families(self):
         """Holt die erlaubten Stammbaum-Namen für den aktuellen Benutzer."""
         user = self.request.user
-        allowed_trees = set()
+        allowed_families = set()
 
         # Sammle alle Stammbäume, die der Benutzer sehen darf
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
-                tree_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_trees.add(tree_name)
+                family_name = group.name.replace("Stammbaum ", "").lower()
+                allowed_families.add(family_name)
         
-        return allowed_trees
+        return allowed_families
 
     def get_queryset(self):
         """Filtert die Diskussionen basierend auf den erlaubten Stammbaum-Namen des Benutzers."""
-        allowed_family_trees = self.get_allowed_family_trees()
-        if not allowed_family_trees:
+        allowed_families = self.get_allowed_families()
+        if not allowed_families:
             return Discussion.objects.none()  # Keine Diskussionen zurückgeben, wenn keine erlaubten Stammbäume vorhanden sind
 
         return Discussion.objects.filter(
-            Q(person__family_tree_1__in=allowed_family_trees) |
-            Q(person__family_tree_2__in=allowed_family_trees)
+            Q(person__family_1__in=allowed_families) |
+            Q(person__family_2__in=allowed_families)
         ).distinct()
 
 
