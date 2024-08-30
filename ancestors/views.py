@@ -11,17 +11,17 @@ class PersonListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        allowed_trees = set()
+        allowed_families = set()
 
         # Sammle alle Stammbäume, die der Benutzer sehen darf
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
-                tree_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_trees.add(tree_name)
+                family_name = group.name.replace("Stammbaum ", "").lower()
+                allowed_families.add(family_name)
 
         # Filtere Personen basierend auf den erlaubten Stammbäumen
         return Person.objects.filter(
-            Q(family_tree_1__in=allowed_trees) | Q(family_tree_2__in=allowed_trees)
+            Q(family_1__in=allowed_families) | Q(family_2__in=allowed_families)
         ).distinct()
 
 
@@ -31,17 +31,17 @@ class PersonDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        allowed_trees = set()
+        allowed_families = set()
 
         # Sammle alle Stammbäume, die der Benutzer sehen darf
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
-                tree_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_trees.add(tree_name)
+                family_name = group.name.replace("Stammbaum ", "").lower()
+                allowed_families.add(family_name)
 
         # Filtere Personen basierend auf den erlaubten Stammbäumen
         return Person.objects.filter(
-            Q(family_tree_1__in=allowed_trees) | Q(family_tree_2__in=allowed_trees)
+            Q(family_1__in=allowed_families) | Q(family_2__in=allowed_families)
         ).distinct()
 
 
@@ -51,17 +51,17 @@ class RelationListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        allowed_trees = set()
+        allowed_families = set()
 
         # Sammle alle Stammbäume, die der Benutzer sehen darf
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
-                tree_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_trees.add(tree_name)
+                family_name = group.name.replace("Stammbaum ", "").lower()
+                allowed_families.add(family_name)
 
         # Filtere Beziehungen basierend auf den erlaubten Stammbäumen
         return Relation.objects.filter(
-            Q(person__family_tree_1__in=allowed_trees) | Q(person__family_tree_2__in=allowed_trees)
+            Q(person__family_1__in=allowed_families) | Q(person__family_2__in=allowed_families)
         ).distinct()
 
 
@@ -72,16 +72,16 @@ class RelationDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        allowed_trees = set()
+        allowed_families = set()
 
         # Sammle alle Stammbäume, die der Benutzer sehen darf
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
-                tree_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_trees.add(tree_name)
+                family_name = group.name.replace("Stammbaum ", "").lower()
+                allowed_families.add(family_name)
 
         # Filtere Beziehungen basierend auf den erlaubten Stammbäumen und der person_id
         return Relation.objects.filter(
-            Q(person__family_tree_1__in=allowed_trees) | Q(person__family_tree_2__in=allowed_trees),
+            Q(person__family_1__in=allowed_families) | Q(person__family_2__in=allowed_families),
             person_id=self.kwargs['person_id']
         ).distinct()
