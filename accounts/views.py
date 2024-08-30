@@ -77,23 +77,32 @@ class RegistrationView(generics.CreateAPIView):
 
                 # Erlaubte Familien des Bürgen ermitteln
                 allowed_families = {guarantor_user.family_1, guarantor_user.family_2}
-                print(allowed_families)
 
                 # Benutzer wählt mehrere Familien aus
                 selected_families = user_data.get('selected_families', [])
-                print(selected_families)
                 valid_families = [fam for fam in selected_families if fam in allowed_families]
-                print(valid_families)
                 if not valid_families:
                     raise serializers.ValidationError("Der Bürge ist für die ausgewählten Familien nicht berechtigt.")
 
                 # Anpassen der Benutzer-Familienfelder basierend auf validierten Familien
                 user_data['family_1'] = valid_families[0] if len(valid_families) > 0 else None
                 user_data['family_2'] = valid_families[1] if len(valid_families) > 1 else None
-
+                print("user_data", user_data)
 
                 # Benutzer erstellen
-                user = serializer.save()
+                user = CustomUser(
+                    username=user_data['email'],
+                    email=user_data['email'],
+                    password=user_data['password'],
+                    first_name=user_data['first_name'],
+                    last_name=user_data['last_name'],
+                    guarantor=user_data['guarantor'],
+                    guarantor_email=user_data.get('guarantor_email'),
+                    family_1=user_data['family_1'],
+                    family_2=user_data['family_2']
+                )
+                user.set_password(user_data['password'])  # Passwort hashing
+                user.save()
 
                 # Senden einer Aktivierungs-E-Mail an den Bürgen
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
