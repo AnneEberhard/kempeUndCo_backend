@@ -4,15 +4,16 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import Group
 from .models import Info
 from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from accounts.models import CustomUser
 
 
 class InfoTests(APITestCase):
 
     def setUp(self):
         # Create test user and assign groups
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             username='testuser',
             email="testuser@example.com",
             password='testpassword',

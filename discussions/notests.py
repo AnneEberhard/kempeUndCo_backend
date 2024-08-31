@@ -4,12 +4,15 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from ancestors.models import Person
 from .models import Discussion, DiscussionEntry
+from accounts.models import CustomUser
 
 
 class DiscussionListViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com'
@@ -44,7 +47,9 @@ class DiscussionListViewTests(TestCase):
 class GetOrCreateDiscussionTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com'
@@ -72,7 +77,9 @@ class GetOrCreateDiscussionTests(TestCase):
 class CreateDiscussionEntryViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com'
@@ -99,7 +106,9 @@ class CreateDiscussionEntryViewTests(TestCase):
 class DiscussionEntryDetailViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com'

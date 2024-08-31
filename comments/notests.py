@@ -4,11 +4,14 @@ from django.contrib.auth.models import User
 from .models import Comment
 from .serializers import CommentSerializer
 from rest_framework.reverse import reverse
+from accounts.models import CustomUser
 
 
 class CommentCreateViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com')
@@ -30,7 +33,9 @@ class CommentCreateViewTests(APITestCase):
 
 class CommentListViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com')
@@ -59,7 +64,9 @@ class CommentListViewTests(APITestCase):
 
 class CommentDetailViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com')
