@@ -6,6 +6,7 @@ from .models import CustomUser
 # Ein Flag, um zu verhindern, dass save() innerhalb des Signals erneut aufgerufen wird
 processing_signal = False
 
+
 @receiver(post_save, sender=CustomUser)
 def assign_user_to_groups(sender, instance, created, **kwargs):
     global processing_signal

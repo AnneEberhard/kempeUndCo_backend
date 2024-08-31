@@ -4,7 +4,7 @@ from .models import Person, Relation
 
 class PersonSerializer(serializers.ModelSerializer):
     """
-    Serializer for the Person model that includes all relevant fields for detailed 
+    Serializer for the Person model that includes all relevant fields for detailed
     representation of a person.
 
     Fields:
@@ -173,7 +173,7 @@ class PersonSerializer(serializers.ModelSerializer):
 
 class PersonListSerializer(serializers.ModelSerializer):
     """
-    Serializer for the Person model that customizes the representation 
+    Serializer for the Person model that customizes the representation
     of the `Person` instances based on their confidentiality status.
 
     Fields:
@@ -193,13 +193,13 @@ class PersonListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         """
-        Customize the representation of the Person instance based on 
+        Customize the representation of the Person instance based on
         the confidentiality status.
 
         If the `confidential` field is 'yes', the name is masked as 'vertraulich',
         and surname and given name are omitted.
-        
-        If the `confidential` field is 'restricted', the name is included, but 
+
+        If the `confidential` field is 'restricted', the name is included, but
         the surname and given name are omitted.
 
         Parameters:

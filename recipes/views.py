@@ -51,22 +51,22 @@ class RecipeListView(generics.ListAPIView):
     serializer_class = RecipeSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_allowed_family_trees(self):
+    def get_allowed_families(self):
         """
-        Get the allowed family tree names for the current user.
+        Get the allowed family names for the current user.
 
         **Returns:**
-        - A set of allowed family tree names based on the groups the user belongs to.
+        - A set of allowed family names based on the groups the user belongs to.
         """
         user = self.request.user
-        allowed_trees = set()
+        allowed_families = set()
 
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
-                tree_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_trees.add(tree_name)
-        
-        return allowed_trees
+                family_name = group.name.replace("Stammbaum ", "").lower()
+                allowed_families.add(family_name)
+
+        return allowed_families
 
     def get_queryset(self):
         """
@@ -75,13 +75,12 @@ class RecipeListView(generics.ListAPIView):
         **Returns:**
         - A queryset of recipes where `family_1` or `family_2` is in the allowed family trees.
         """
-        allowed_family_trees = self.get_allowed_family_trees()
-        if not allowed_family_trees:
+        allowed_families = self.get_allowed_families()
+        if not allowed_families:
             return Recipe.objects.none()
 
         return Recipe.objects.filter(
-            Q(family_1__in=allowed_family_trees) |
-            Q(family_2__in=allowed_family_trees)
+            Q(family_1__in=allowed_families) | Q(family_2__in=allowed_families)
         ).distinct()
 
 
@@ -93,6 +92,7 @@ class RecipeDetailView(APIView):
     **Methods:** `GET`, `PUT`, `DELETE`
     """
     permission_classes = [IsAuthenticated]
+
     def get(self, request, pk, *args, **kwargs):
         """
         Retrieve the details of a specific recipe.
@@ -121,7 +121,7 @@ class RecipeDetailView(APIView):
         - The updated recipe data in JSON format if the update is successful.
         """
         recipe = get_object_or_404(Recipe, pk=pk)
-        deleted_images = json.loads(request.data.get('deletedImages', '[]'))
+        # deleted_images = json.loads(request.data.get('deletedImages', '[]'))
 
         for field in ['image_1', 'image_2', 'image_3', 'image_4']:
             if field in request.data and request.data[field] == '':

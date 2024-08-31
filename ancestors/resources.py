@@ -7,7 +7,7 @@ class PersonResource(resources.ModelResource):
     A resource class for importing and exporting `Person` model data using Django's import-export framework.
 
     This class defines how the `Person` model's data is imported and exported, including specifying the fields
-    to be included and setting the import ID fields. 
+    to be included and setting the import ID fields.
 
     Attributes:
     - model: The Django model that this resource is associated with. In this case, it is the `Person` model.

@@ -137,13 +137,12 @@ class RegistrationViewTests(TestCase):
         error_messages = [error for error in response.data]
         self.assertIn('Der angegebene Bürge existiert nicht.', error_messages)
 
-
     def test_registration_missing_required_fields(self):
         """Test that registration with missing required fields returns an error."""
         data = {
             'email': 'missingfield@example.com',
             'password': 'newpassword',
-           # 'first_name': 'John',
+            # 'first_name': 'John',
             'last_name': 'Doe',
             'guarantor': False,
             'selected_families': ['family1']
@@ -159,7 +158,7 @@ class ActivationViewTests(TestCase):
         settings.EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
         self.client = APIClient()
         self.user_model = get_user_model()
-        
+
         # Create a test user
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
@@ -170,7 +169,7 @@ class ActivationViewTests(TestCase):
         )
         self.user.is_active = False
         self.user.save()
-        
+
         # Generate activation token and UID
         self.uidb64 = urlsafe_base64_encode(force_bytes(self.user.pk))
         self.token = default_token_generator.make_token(self.user)
@@ -180,14 +179,14 @@ class ActivationViewTests(TestCase):
         """Test successful account activation."""
         response = self.client.get(self.activation_url)
         self.user.refresh_from_db()
-        
+
         # Überprüfen, ob der Benutzer aktiviert wurde
         self.assertTrue(self.user.is_active)
-        
+
         # Überprüfen, ob die Weiterleitung zur korrekten Seite erfolgt
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertIn(f"{settings.FRONTEND_URL}/activation-success", response.url)
-        
+
         # Überprüfen, ob E-Mails gesendet wurden
         email_messages = mail.outbox
         self.assertEqual(len(email_messages), 1)
@@ -198,15 +197,15 @@ class ActivationViewTests(TestCase):
         invalid_token = 'invalid_token'
         invalid_activation_url = reverse('activate', kwargs={'uidb64': self.uidb64, 'token': invalid_token})
         response = self.client.get(invalid_activation_url)
-        
+
         # Überprüfen, ob der Benutzer nicht aktiviert wurde
         self.user.refresh_from_db()
         self.assertFalse(self.user.is_active)
-        
+
         # Überprüfen, ob die Weiterleitung zur Fehlerseite erfolgt
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertIn(f"{settings.FRONTEND_URL}/activation-failure", response.url)
-        
+
         # Überprüfen, dass keine E-Mails gesendet wurden
         email_messages = mail.outbox
         self.assertEqual(len(email_messages), 0)
@@ -216,15 +215,15 @@ class ActivationViewTests(TestCase):
         invalid_uidb64 = urlsafe_base64_encode(force_bytes(9999))  # Non-existent user ID
         invalid_activation_url = reverse('activate', kwargs={'uidb64': invalid_uidb64, 'token': self.token})
         response = self.client.get(invalid_activation_url)
-        
+
         # Überprüfen, ob der Benutzer nicht aktiviert wurde
         self.user.refresh_from_db()
         self.assertFalse(self.user.is_active)
-        
+
         # Überprüfen, ob die Weiterleitung zur Fehlerseite erfolgt
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertIn(f"{settings.FRONTEND_URL}/activation-failure", response.url)
-        
+
         # Überprüfen, dass keine E-Mails gesendet wurden
         email_messages = mail.outbox
         self.assertEqual(len(email_messages), 0)
@@ -273,7 +272,7 @@ class PasswordResetRequestViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user_model = CustomUser
-        
+
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
@@ -282,16 +281,16 @@ class PasswordResetRequestViewTests(TestCase):
         )
         self.user.is_active = True
         self.user.save()
-        self.password_reset_url = reverse('password_reset_request')  
+        self.password_reset_url = reverse('password_reset_request')
 
     def test_password_reset_request_success(self):
         """Test successful password reset request."""
         data = {'email': 'testuser@example.com'}
         response = self.client.post(self.password_reset_url, data, format='json')
-        
+
         # Überprüfen, ob der Statuscode 200 OK ist
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         # Überprüfen, dass eine E-Mail gesendet wurde
         email_messages = mail.outbox
         self.assertEqual(len(email_messages), 1)
@@ -301,10 +300,10 @@ class PasswordResetRequestViewTests(TestCase):
         """Test password reset request with an invalid email."""
         data = {'email': 'invaliduser@example.com'}
         response = self.client.post(self.password_reset_url, data, format='json')
-        
+
         # Überprüfen, ob der Statuscode 400 Bad Request ist
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
         # Überprüfen, dass keine E-Mails gesendet wurden
         email_messages = mail.outbox
         self.assertEqual(len(email_messages), 0)
@@ -314,7 +313,7 @@ class PasswordResetConfirmViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user_model = CustomUser
-        
+
         # Create a test user
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
@@ -332,10 +331,10 @@ class PasswordResetConfirmViewTests(TestCase):
         """Test successful password reset confirmation."""
         data = {'password': 'newpassword'}
         response = self.client.post(self.password_reset_confirm_url, data, format='json')
-        
+
         # Überprüfen, ob der Statuscode 200 OK ist
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         # Überprüfen, ob das Passwort erfolgreich geändert wurde
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password('newpassword'))
@@ -345,10 +344,10 @@ class PasswordResetConfirmViewTests(TestCase):
         invalid_token_url = reverse('password_reset_confirm', kwargs={'uidb64': self.uidb64, 'token': 'invalidtoken'})
         data = {'password': 'newpassword'}
         response = self.client.post(invalid_token_url, data, format='json')
-        
+
         # Überprüfen, ob der Statuscode 400 Bad Request ist
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
         # Überprüfen, ob das Passwort nicht geändert wurde
         self.user.refresh_from_db()
         self.assertFalse(self.user.check_password('newpassword'))
@@ -359,10 +358,10 @@ class PasswordResetConfirmViewTests(TestCase):
         invalid_uid_url = reverse('password_reset_confirm', kwargs={'uidb64': invalid_uid, 'token': self.token})
         data = {'password': 'newpassword'}
         response = self.client.post(invalid_uid_url, data, format='json')
-        
+
         # Überprüfen, ob der Statuscode 400 Bad Request ist
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
         # Überprüfen, ob das Passwort nicht geändert wurde
         self.user.refresh_from_db()
         self.assertFalse(self.user.check_password('newpassword'))

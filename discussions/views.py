@@ -12,9 +12,9 @@ class DiscussionListView(generics.ListAPIView):
     """
     API view to list discussions based on the allowed family trees for the current user.
 
-    This view filters the discussions to only include those that are linked to 
-    family trees the current user has permission to view. The filtering is based 
-    on the group names that start with "Stammbaum ", indicating the user's allowed 
+    This view filters the discussions to only include those that are linked to
+    family trees the current user has permission to view. The filtering is based
+    on the group names that start with "Stammbaum ", indicating the user's allowed
     families.
 
     Methods:
@@ -34,7 +34,7 @@ class DiscussionListView(generics.ListAPIView):
             if group.name.startswith("Stammbaum "):
                 family_name = group.name.replace("Stammbaum ", "").lower()
                 allowed_families.add(family_name)
-        
+
         return allowed_families
 
     def get_queryset(self):
@@ -44,8 +44,7 @@ class DiscussionListView(generics.ListAPIView):
             return Discussion.objects.none()  # Return no discussions if no allowed families are found
 
         return Discussion.objects.filter(
-            Q(person__family_1__in=allowed_families) |
-            Q(person__family_2__in=allowed_families)
+            Q(person__family_1__in=allowed_families) | Q(person__family_2__in=allowed_families)
         ).distinct()
 
 
@@ -55,8 +54,8 @@ def get_or_create_discussion(request, id):
     """
     API view to retrieve or create a discussion for a specific person.
 
-    This view handles GET requests to retrieve an existing discussion and POST 
-    requests to create a new discussion if one does not already exist for the 
+    This view handles GET requests to retrieve an existing discussion and POST
+    requests to create a new discussion if one does not already exist for the
     person with the provided ID.
 
     Parameters:
@@ -82,16 +81,16 @@ class CreateDiscussionEntryView(views.APIView):
     """
     API view to create a new discussion entry in an existing discussion.
 
-    This view handles POST requests to add a new entry to a discussion. 
+    This view handles POST requests to add a new entry to a discussion.
     The user must provide the discussion ID and the entry data.
 
     Methods:
-    - post: Validates the request data, creates a new discussion entry, 
+    - post: Validates the request data, creates a new discussion entry,
       and associates it with the discussion and the author.
     """
     def post(self, request, *args, **kwargs):
         discussion_id = request.data.get('discussion')
-        
+
         if not discussion_id:
             return Response({'error': 'Discussion ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -112,8 +111,8 @@ class DiscussionEntryDetailView(views.APIView):
     """
     API view to retrieve, update, or delete a specific discussion entry.
 
-    This view handles GET, PUT, and DELETE requests for a discussion entry 
-    identified by its primary key (pk). The user must be the author to update 
+    This view handles GET, PUT, and DELETE requests for a discussion entry
+    identified by its primary key (pk). The user must be the author to update
     or delete the entry.
 
     Methods:
@@ -163,7 +162,7 @@ class DiscussionDetailCreateView(views.APIView):
     """
     API view to retrieve or create a discussion for a specific person.
 
-    This view handles GET requests to retrieve a discussion for a given person ID 
+    This view handles GET requests to retrieve a discussion for a given person ID
     and POST requests to create a new discussion if one does not already exist.
 
     Methods:

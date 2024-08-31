@@ -51,7 +51,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         if user is None:
             raise serializers.ValidationError('Invalid credentials')
-       
 
         data = super().validate(attrs)
         data['user'] = {
