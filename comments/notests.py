@@ -8,8 +8,11 @@ from rest_framework.reverse import reverse
 
 class CommentCreateViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
-        self.client.login(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com')
+        self.client.login(email='testuser@example.com', password='testpassword')
         self.url = reverse('comment-create')  # Adjust if using a different URL name
 
     def test_create_comment(self):
@@ -27,8 +30,11 @@ class CommentCreateViewTests(APITestCase):
 
 class CommentListViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
-        self.client.login(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com')
+        self.client.login(email='testuser@example.com', password='testpassword')
         self.url = reverse('comment-list')  # Adjust if using a different URL name
         self.comment1 = Comment.objects.create(info_id=1, recipe_id=1, content='Comment 1', author=self.user)
         self.comment2 = Comment.objects.create(info_id=2, recipe_id=2, content='Comment 2', author=self.user)
@@ -53,8 +59,11 @@ class CommentListViewTests(APITestCase):
 
 class CommentDetailViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
-        self.client.login(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com')
+        self.client.login(email='testuser@example.com', password='testpassword')
         self.comment = Comment.objects.create(info_id=1, recipe_id=1, content='Detail Comment', author=self.user)
         self.url = reverse('comment-detail', args=[self.comment.pk])  # Adjust if using a different URL name
 

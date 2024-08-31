@@ -8,7 +8,10 @@ from .models import Person, Relation
 class PersonListCreateViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com')
         self.client.force_authenticate(user=self.user)
 
         # Create a group and assign it to the user
@@ -37,7 +40,10 @@ class PersonListCreateViewTests(TestCase):
 class PersonDetailViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com')
         self.client.force_authenticate(user=self.user)
 
         # Create a group and assign it to the user
@@ -71,7 +77,9 @@ class PersonDetailViewTests(TestCase):
 class RelationListCreateViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com')
         self.client.force_authenticate(user=self.user)
 
         # Create a group and assign it to the user
@@ -105,7 +113,9 @@ class RelationListCreateViewTests(TestCase):
 class RelationDetailViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com')
         self.client.force_authenticate(user=self.user)
 
         # Create a group and assign it to the user
