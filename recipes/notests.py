@@ -8,6 +8,7 @@ from .models import Recipe
 
 User = get_user_model()
 
+
 class RecipeViewsTestCase(APITestCase):
     def setUp(self):
         """
@@ -19,7 +20,7 @@ class RecipeViewsTestCase(APITestCase):
             password='testpassword',
             username='testuser@example.com', family_1='tree1', family_2='tree2')
         self.other_user = User.objects.create_user(
-            email='otheruser@example.com', 
+            email='otheruser@example.com',
             password='otherpassword',
             username='otheruser@example.com')
 

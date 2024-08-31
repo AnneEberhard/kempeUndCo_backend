@@ -17,7 +17,7 @@ class DiscussionPageAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
-    
+
 
 class DiscussionEntryAdmin(admin.ModelAdmin):
     list_display = ('id', 'discussion_for', 'author', 'created_at', 'updated_at')

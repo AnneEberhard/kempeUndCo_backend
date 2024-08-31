@@ -15,12 +15,13 @@ ALLOWED_ATTRIBUTES = {
     'img': ['src', 'alt', 'width', 'height'],
 }
 
+
 def clean_html(content):
     """Cleans the HTML content using bleach and returns cleaned content before saving."""
     return bleach.clean(
-        content, 
-        tags=ALLOWED_TAGS, 
-        attributes=ALLOWED_ATTRIBUTES, 
-        strip=True, 
+        content,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRIBUTES,
+        strip=True,
         css_sanitizer=css_sanitizer
     )

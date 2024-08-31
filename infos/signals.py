@@ -4,6 +4,7 @@ from django.dispatch import receiver
 
 from infos.models import Info
 
+
 @receiver(post_delete, sender=Info)
 def delete_images_on_info_delete(sender, instance, **kwargs):
     """

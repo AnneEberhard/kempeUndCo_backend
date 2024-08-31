@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Info
 
+
 class InfoSerializer(serializers.ModelSerializer):
     """
     Serializer for the Info model, including additional fields for image URLs.
@@ -15,7 +16,7 @@ class InfoSerializer(serializers.ModelSerializer):
         image_2_url (serializers.SerializerMethodField): The absolute URL of the second image, if available.
         image_3_url (serializers.SerializerMethodField): The absolute URL of the third image, if available.
         image_4_url (serializers.SerializerMethodField): The absolute URL of the fourth image, if available.
-    
+
     Meta:
         model (Info): The model associated with this serializer.
         fields (list): The list of fields to be included in the serialized representation.

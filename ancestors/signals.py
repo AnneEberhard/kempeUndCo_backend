@@ -12,10 +12,10 @@ def rename_files_on_save(sender, instance, created, **kwargs):
     """
     After saving a Person instance, this function renames associated file fields.
 
-    This function checks if any file fields (obje_file_1 to obje_file_6) are present on the instance. 
-    If files are found, their names are altered based on the instance's attributes. The old file paths 
-    are then renamed to the new paths within the MEDIA_ROOT directory. The database fields are updated 
-    with the new file names. To avoid recursive calls to this post-save signal, a flag 
+    This function checks if any file fields (obje_file_1 to obje_file_6) are present on the instance.
+    If files are found, their names are altered based on the instance's attributes. The old file paths
+    are then renamed to the new paths within the MEDIA_ROOT directory. The database fields are updated
+    with the new file names. To avoid recursive calls to this post-save signal, a flag
     (_performing_post_save) is used.
 
     Parameters:
@@ -59,7 +59,7 @@ def delete_old_files_on_update(sender, instance, **kwargs):
     Before saving an updated Person instance, this function deletes old files.
 
     This function checks if the Person instance already exists in the database (by checking the primary key).
-    If the instance exists and the file fields (obje_file_1 to obje_file_6) are being updated, the old files 
+    If the instance exists and the file fields (obje_file_1 to obje_file_6) are being updated, the old files
     associated with these fields are deleted from the file system.
 
     Parameters:
@@ -90,7 +90,7 @@ def delete_files_on_delete(sender, instance, **kwargs):
     """
     After a Person instance is deleted, this function removes associated files from the file system.
 
-    This function iterates over the file fields (obje_file_1 to obje_file_6) and deletes the files from 
+    This function iterates over the file fields (obje_file_1 to obje_file_6) and deletes the files from
     the file system if they exist.
 
     Parameters:

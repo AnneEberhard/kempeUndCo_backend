@@ -20,5 +20,5 @@ class Command(BaseCommand):
                     group, created = Group.objects.get_or_create(name=group_name)
                     user.groups.add(group)
                     users_assigned += 1
-        
+
         self.stdout.write(self.style.SUCCESS(f'{users_assigned} users were successfully assigned to groups.'))

@@ -7,8 +7,9 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class InfoTests(APITestCase):
-    
+
     def setUp(self):
         # Create test user and assign groups
         self.user = User.objects.create_user(

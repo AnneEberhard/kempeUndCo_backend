@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Recipe
 
+
 class RecipeSerializer(serializers.ModelSerializer):
     """
     Serializer for the `Recipe` model.
@@ -36,7 +37,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     image_2_url = serializers.SerializerMethodField()
     image_3_url = serializers.SerializerMethodField()
     image_4_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Recipe
         fields = [

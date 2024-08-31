@@ -4,6 +4,7 @@ from django.conf import settings
 from kempeUndCo_backend.constants import FAMILY_CHOICES
 from utils.html_cleaner import clean_html
 
+
 class Recipe(models.Model):
     """
     Represents a recipe in the system.
@@ -35,7 +36,6 @@ class Recipe(models.Model):
 
     family_1 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, verbose_name='Stammbaum 1')
     family_2 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, null=True, verbose_name='Stammbaum 2')
-
 
     def save(self, *args, **kwargs):
         """

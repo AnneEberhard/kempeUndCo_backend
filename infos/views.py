@@ -18,8 +18,8 @@ class InfoCreateView(APIView):
         """
         Creates a new Info instance with `family_1` and `family_2` fields populated from the current user.
 
-        If the user is authenticated, `family_1` and `family_2` from the user are added to the request data before 
-        saving a new Info instance. If the request data is valid, the Info instance is created and returned with 
+        If the user is authenticated, `family_1` and `family_2` from the user are added to the request data before
+        saving a new Info instance. If the request data is valid, the Info instance is created and returned with
         a 201 Created status. Otherwise, a 400 Bad Request status is returned with validation errors.
 
         Args:
@@ -51,8 +51,8 @@ class InfoListView(generics.ListAPIView):
         """
         Retrieves the allowed family tree names for the current user based on their group memberships.
 
-        The method checks all groups of the user to find groups whose names start with 'Stammbaum ' and extracts 
-        the family tree names from those group names.
+        The method checks all groups of the user to find groups whose names start with 'Stammbaum '
+        and extracts the family tree names from those group names.
 
         Returns:
             set: A set of allowed family tree names for the current user.
@@ -64,7 +64,7 @@ class InfoListView(generics.ListAPIView):
             if group.name.startswith("Stammbaum "):
                 tree_name = group.name.replace("Stammbaum ", "").lower()
                 allowed_trees.add(tree_name)
-        
+
         return allowed_trees
 
     def get_queryset(self):
@@ -79,16 +79,16 @@ class InfoListView(generics.ListAPIView):
         """
         allowed_family_trees = self.get_allowed_family_trees()
         if not allowed_family_trees:
-            return Info.objects.none()  
+            return Info.objects.none()
 
         return Info.objects.filter(
-            Q(family_1__in=allowed_family_trees) |
-            Q(family_2__in=allowed_family_trees)
+            Q(family_1__in=allowed_family_trees) | Q(family_2__in=allowed_family_trees)
         ).distinct()
 
 
 class InfoDetailView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request, pk, *args, **kwargs):
         """
         Retrieves the details of a specific Info instance.
@@ -118,7 +118,7 @@ class InfoDetailView(APIView):
             Response: The API response containing the updated Info instance or validation errors, or a 404 Not Found status if the Info instance does not exist.
         """
         info = get_object_or_404(Info, pk=pk)
-        deleted_images = json.loads(request.data.get('deletedImages', '[]'))
+        # deleted_images = json.loads(request.data.get('deletedImages', '[]'))
 
         for field in ['image_1', 'image_2', 'image_3', 'image_4']:
             if field in request.data and request.data[field] == '':

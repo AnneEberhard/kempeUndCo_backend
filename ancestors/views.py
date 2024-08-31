@@ -5,25 +5,26 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from django.db.models import Q
 
+
 @permission_classes([IsAuthenticated])
 class PersonListCreateView(generics.ListCreateAPIView):
     """
     API view to list and create Person objects.
 
-    This view returns a list of persons filtered by the family affiliations 
-    that the authenticated user is allowed to view. Only persons belonging 
-    to the family trees that the user is permitted to access are displayed. 
+    This view returns a list of persons filtered by the family affiliations
+    that the authenticated user is allowed to view. Only persons belonging
+    to the family trees that the user is permitted to access are displayed.
     The user must be authenticated to access these resources.
     """
     serializer_class = PersonListSerializer
 
     def get_queryset(self):
         """
-        Returns the queryset of persons belonging to the family trees 
+        Returns the queryset of persons belonging to the family trees
         that the current user is allowed to view.
 
-        The family trees that the user can access are determined by the groups 
-        the user belongs to. The group name must start with "Stammbaum " 
+        The family trees that the user can access are determined by the groups
+        the user belongs to. The group name must start with "Stammbaum "
         followed by the family name.
         """
         user = self.request.user
@@ -46,20 +47,20 @@ class PersonDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     API view to retrieve, update, or delete a single Person object.
 
-    This view allows retrieving, updating, or deleting a person based on their ID. 
-    Access is restricted to persons belonging to the family trees that the 
-    authenticated user is allowed to view. The user must be authenticated to 
+    This view allows retrieving, updating, or deleting a person based on their ID.
+    Access is restricted to persons belonging to the family trees that the
+    authenticated user is allowed to view. The user must be authenticated to
     access these resources.
     """
     serializer_class = PersonSerializer
 
     def get_queryset(self):
         """
-        Returns the queryset of persons belonging to the family trees 
+        Returns the queryset of persons belonging to the family trees
         that the current user is allowed to view.
 
-        The family trees that the user can access are determined by the groups 
-        the user belongs to. The group name must start with "Stammbaum " 
+        The family trees that the user can access are determined by the groups
+        the user belongs to. The group name must start with "Stammbaum "
         followed by the family name.
         """
         user = self.request.user
@@ -82,19 +83,19 @@ class RelationListCreateView(generics.ListCreateAPIView):
     """
     API view to list and create Relation objects between persons.
 
-    This view returns a list of relations between persons, filtered by the 
-    family affiliations that the authenticated user is allowed to view. 
+    This view returns a list of relations between persons, filtered by the
+    family affiliations that the authenticated user is allowed to view.
     The user must be authenticated to access these resources.
     """
     serializer_class = RelationSerializer
 
     def get_queryset(self):
         """
-        Returns the queryset of relations involving persons belonging to the family 
+        Returns the queryset of relations involving persons belonging to the family
         trees that the current user is allowed to view.
 
-        The family trees that the user can access are determined by the groups 
-        the user belongs to. The group name must start with "Stammbaum " 
+        The family trees that the user can access are determined by the groups
+        the user belongs to. The group name must start with "Stammbaum "
         followed by the family name.
         """
         user = self.request.user
@@ -117,9 +118,9 @@ class RelationDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     API view to retrieve, update, or delete a single Relation object.
 
-    This view allows retrieving, updating, or deleting a relation between 
-    two persons based on the person_id. Access is restricted to relations 
-    involving persons belonging to the family trees that the authenticated 
+    This view allows retrieving, updating, or deleting a relation between
+    two persons based on the person_id. Access is restricted to relations
+    involving persons belonging to the family trees that the authenticated
     user is allowed to view. The user must be authenticated to access these resources.
     """
     serializer_class = RelationSerializer
@@ -127,12 +128,12 @@ class RelationDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         """
-        Returns the queryset of relations involving persons belonging to the family 
+        Returns the queryset of relations involving persons belonging to the family
         trees that the current user is allowed to view.
 
-        The family trees that the user can access are determined by the groups 
-        the user belongs to. The group name must start with "Stammbaum " 
-        followed by the family name. The queryset is filtered by the `person_id` 
+        The family trees that the user can access are determined by the groups
+        the user belongs to. The group name must start with "Stammbaum "
+        followed by the family name. The queryset is filtered by the `person_id`
         to find the specific relation.
         """
         user = self.request.user
