@@ -34,14 +34,24 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         Raises:
         - serializers.ValidationError: If authentication fails or account is inactive
         """
+
+        try:
+            user = CustomUser.objects.get(email=attrs['email'])
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError('Invalid credentials')
+
+        if not user.is_active:
+            raise serializers.ValidationError('Inactive account')
+
         authenticate_kwargs = {
             'email': attrs['email'],
             'password': attrs['password'],
         }
         user = authenticate(**authenticate_kwargs)
 
-        if user is None or not user.is_active:
-            raise serializers.ValidationError('Invalid credentials or inactive account')
+        if user is None:
+            raise serializers.ValidationError('Invalid credentials')
+       
 
         data = super().validate(attrs)
         data['user'] = {
