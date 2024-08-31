@@ -87,7 +87,6 @@ class RegistrationView(generics.CreateAPIView):
                 # Anpassen der Benutzer-Familienfelder basierend auf validierten Familien
                 user_data['family_1'] = valid_families[0] if len(valid_families) > 0 else None
                 user_data['family_2'] = valid_families[1] if len(valid_families) > 1 else None
-                print("user_data", user_data)
 
                 # Benutzer erstellen
                 user = CustomUser(
@@ -160,10 +159,8 @@ class RegistrationView(generics.CreateAPIView):
         - 201: User registered successfully with email notification sent
         - 400: Validation error or other request issues
         """
-        print("Raw request data:", request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print("Validated data:", serializer.validated_data)
         self.perform_create(serializer)
         return Response({'success': 'Please check the respective email.'}, status=status.HTTP_201_CREATED)
 

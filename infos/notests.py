@@ -13,6 +13,7 @@ class InfoTests(APITestCase):
         # Create test user and assign groups
         self.user = User.objects.create_user(
             username='testuser',
+            email="testuser@example.com",
             password='testpassword',
             family_1='Family1',
             family_2='Family2'

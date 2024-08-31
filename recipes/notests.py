@@ -14,8 +14,14 @@ class RecipeViewsTestCase(APITestCase):
         Create test data for recipes and users.
         """
         # Create users
-        self.user = User.objects.create_user(username='testuser', password='testpassword', family_1='tree1', family_2='tree2')
-        self.other_user = User.objects.create_user(username='otheruser', password='otherpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com', family_1='tree1', family_2='tree2')
+        self.other_user = User.objects.create_user(
+            email='otheruser@example.com', 
+            password='otherpassword',
+            username='otheruser@example.com')
 
         # Create recipes
         self.recipe1 = Recipe.objects.create(
@@ -39,7 +45,7 @@ class RecipeViewsTestCase(APITestCase):
         self.detail_url = reverse('recipe-detail', args=[self.recipe1.pk])
 
         # Authentication
-        self.client.login(username='testuser', password='testpassword')
+        self.client.login(email='testuser@example.com', password='testpassword')
 
     def test_create_recipe(self):
         """
@@ -99,7 +105,7 @@ class RecipeViewsTestCase(APITestCase):
         Test that recipes from non-allowed family trees are not listed.
         """
         self.client.logout()
-        self.client.login(username='otheruser', password='otherpassword')
+        self.client.login(email='otheruser@example.com', password='otherpassword')
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 0)  # The other user should not see recipes from the testuser's allowed family trees

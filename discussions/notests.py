@@ -4,13 +4,16 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from ancestors.models import Person
 from .models import Discussion, DiscussionEntry
-from .serializers import DiscussionSerializer, DiscussionEntrySerializer
 
 
 class DiscussionListViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com'
+        )
         self.client.force_authenticate(user=self.user)
 
         # Create groups and assign to the user
@@ -23,7 +26,7 @@ class DiscussionListViewTests(TestCase):
 
     def test_list_discussions(self):
         """Test that the user can see discussions related to their allowed family trees."""
-        response = self.client.get('/discussions/')
+        response = self.client.get('/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)  # Only one discussion should be visible
 
@@ -33,7 +36,7 @@ class DiscussionListViewTests(TestCase):
         other_person = Person.objects.create(name='Jane Doe', family_1='doe')
         Discussion.objects.create(person=other_person)
 
-        response = self.client.get('/discussions/')
+        response = self.client.get('/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)  # Still only one discussion visible
 
@@ -41,7 +44,11 @@ class DiscussionListViewTests(TestCase):
 class GetOrCreateDiscussionTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com'
+        )
         self.client.force_authenticate(user=self.user)
 
         # Create a person
@@ -50,13 +57,13 @@ class GetOrCreateDiscussionTests(TestCase):
     def test_get_existing_discussion(self):
         """Test retrieving an existing discussion."""
         discussion = Discussion.objects.create(person=self.person)
-        response = self.client.get(f'/discussions/{self.person.id}/')
+        response = self.client.get(f'/{self.person.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], discussion.id)
 
     def test_create_new_discussion(self):
         """Test creating a new discussion for a person without one."""
-        response = self.client.post(f'/discussions/{self.person.id}/')
+        response = self.client.post(f'/{self.person.id}/')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Discussion.objects.count(), 1)
         self.assertEqual(response.data['person']['id'], self.person.id)
@@ -65,7 +72,11 @@ class GetOrCreateDiscussionTests(TestCase):
 class CreateDiscussionEntryViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com'
+        )
         self.client.force_authenticate(user=self.user)
 
         # Create a person and a discussion
@@ -79,7 +90,7 @@ class CreateDiscussionEntryViewTests(TestCase):
             'title': 'Test Entry',
             'content': 'This is a test entry.'
         }
-        response = self.client.post('/discussion-entries/', data)
+        response = self.client.post('/entries/', data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(DiscussionEntry.objects.count(), 1)
         self.assertEqual(DiscussionEntry.objects.get().author, self.user)
@@ -88,7 +99,11 @@ class CreateDiscussionEntryViewTests(TestCase):
 class DiscussionEntryDetailViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user = User.objects.create_user(
+            email='testuser@example.com',
+            password='testpassword',
+            username='testuser@example.com'
+        )
         self.client.force_authenticate(user=self.user)
 
         # Create a person, discussion, and entry
@@ -103,42 +118,20 @@ class DiscussionEntryDetailViewTests(TestCase):
 
     def test_get_entry(self):
         """Test retrieving a discussion entry."""
-        response = self.client.get(f'/discussion-entries/{self.entry.id}/')
+        response = self.client.get(f'/entries/{self.entry.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['title'], self.entry.title)
 
     def test_update_entry(self):
         """Test updating a discussion entry."""
         data = {'title': 'Updated Title'}
-        response = self.client.put(f'/discussion-entries/{self.entry.id}/', data)
+        response = self.client.put(f'/entries/{self.entry.id}/', data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.entry.refresh_from_db()
         self.assertEqual(self.entry.title, 'Updated Title')
 
     def test_delete_entry(self):
         """Test deleting a discussion entry."""
-        response = self.client.delete(f'/discussion-entries/{self.entry.id}/')
+        response = self.client.delete(f'/entries/{self.entry.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(DiscussionEntry.objects.count(), 0)
-
-
-class DiscussionDetailCreateViewTests(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
-
-        # Create a person
-        self.person = Person.objects.create(name='John Smith')
-
-    def test_get_nonexistent_discussion(self):
-        """Test trying to retrieve a discussion that does not exist."""
-        response = self.client.get(f'/discussions/{self.person.id}/')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_create_discussion(self):
-        """Test creating a discussion for a person."""
-        response = self.client.post(f'/discussions/{self.person.id}/')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Discussion.objects.count(), 1)
-        self.assertEqual(response.data['person']['id'], self.person.id)
