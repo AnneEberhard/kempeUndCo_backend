@@ -4,9 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from rest_framework import status
 from .models import Recipe
-
-
-User = get_user_model()
+from accounts.models import CustomUser
 
 
 class RecipeViewsTestCase(APITestCase):
@@ -15,11 +13,13 @@ class RecipeViewsTestCase(APITestCase):
         Create test data for recipes and users.
         """
         # Create users
-        self.user = User.objects.create_user(
+        self.user_model = CustomUser
+
+        self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com', family_1='tree1', family_2='tree2')
-        self.other_user = User.objects.create_user(
+        self.other_user = self.user_model.objects.create_user(
             email='otheruser@example.com',
             password='otherpassword',
             username='otheruser@example.com')
