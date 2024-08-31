@@ -1,25 +1,35 @@
 from django.db.models import Q
-from rest_framework import status, generics
-from rest_framework.response import Response
+from rest_framework import generics, status, views
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import views
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from ancestors.models import Person
 from .models import Discussion, DiscussionEntry
-from .serializers import DiscussionEntrySerializer, DiscussionSerializer
+from .serializers import DiscussionSerializer, DiscussionEntrySerializer
 
 
 class DiscussionListView(generics.ListAPIView):
+    """
+    API view to list discussions based on the allowed family trees for the current user.
+
+    This view filters the discussions to only include those that are linked to 
+    family trees the current user has permission to view. The filtering is based 
+    on the group names that start with "Stammbaum ", indicating the user's allowed 
+    families.
+
+    Methods:
+    - get_allowed_families: Returns the set of allowed family names for the current user.
+    - get_queryset: Filters and returns the queryset of discussions the user is allowed to see.
+    """
     serializer_class = DiscussionSerializer
     permission_classes = [IsAuthenticated]
 
     def get_allowed_families(self):
-        """Holt die erlaubten Stammbaum-Namen für den aktuellen Benutzer."""
+        """Retrieves the allowed family tree names for the current user."""
         user = self.request.user
         allowed_families = set()
 
-        # Sammle alle Stammbäume, die der Benutzer sehen darf
+        # Collect all family trees the user is allowed to view
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
                 family_name = group.name.replace("Stammbaum ", "").lower()
@@ -28,10 +38,10 @@ class DiscussionListView(generics.ListAPIView):
         return allowed_families
 
     def get_queryset(self):
-        """Filtert die Diskussionen basierend auf den erlaubten Stammbaum-Namen des Benutzers."""
+        """Filters discussions based on the allowed family tree names of the user."""
         allowed_families = self.get_allowed_families()
         if not allowed_families:
-            return Discussion.objects.none()  # Keine Diskussionen zurückgeben, wenn keine erlaubten Stammbäume vorhanden sind
+            return Discussion.objects.none()  # Return no discussions if no allowed families are found
 
         return Discussion.objects.filter(
             Q(person__family_1__in=allowed_families) |
@@ -42,6 +52,20 @@ class DiscussionListView(generics.ListAPIView):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def get_or_create_discussion(request, id):
+    """
+    API view to retrieve or create a discussion for a specific person.
+
+    This view handles GET requests to retrieve an existing discussion and POST 
+    requests to create a new discussion if one does not already exist for the 
+    person with the provided ID.
+
+    Parameters:
+    - id: The ID of the person linked to the discussion.
+
+    Returns:
+    - On success: The discussion data and a 200 or 201 status code.
+    - On failure: An error message and a 404 status code if the person or discussion is not found.
+    """
     try:
         person = Person.objects.get(id=id)
     except Person.DoesNotExist:
@@ -54,8 +78,17 @@ def get_or_create_discussion(request, id):
 
 
 @permission_classes([IsAuthenticated])
-class CreateDiscussionEntryView(APIView):
+class CreateDiscussionEntryView(views.APIView):
+    """
+    API view to create a new discussion entry in an existing discussion.
 
+    This view handles POST requests to add a new entry to a discussion. 
+    The user must provide the discussion ID and the entry data.
+
+    Methods:
+    - post: Validates the request data, creates a new discussion entry, 
+      and associates it with the discussion and the author.
+    """
     def post(self, request, *args, **kwargs):
         discussion_id = request.data.get('discussion')
         
@@ -75,7 +108,20 @@ class CreateDiscussionEntryView(APIView):
 
 
 @permission_classes([IsAuthenticated])
-class DiscussionEntryDetailView(APIView):
+class DiscussionEntryDetailView(views.APIView):
+    """
+    API view to retrieve, update, or delete a specific discussion entry.
+
+    This view handles GET, PUT, and DELETE requests for a discussion entry 
+    identified by its primary key (pk). The user must be the author to update 
+    or delete the entry.
+
+    Methods:
+    - get_object: Retrieves the discussion entry object or returns None if not found.
+    - get: Returns the discussion entry data.
+    - put: Updates the discussion entry if the request user is the author.
+    - delete: Deletes the discussion entry if the request user is the author.
+    """
     permission_classes = [IsAuthenticated]
 
     def get_object(self, pk):
@@ -113,8 +159,18 @@ class DiscussionEntryDetailView(APIView):
         return Response({'error': 'Discussion entry not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-# not yet tested:
 class DiscussionDetailCreateView(views.APIView):
+    """
+    API view to retrieve or create a discussion for a specific person.
+
+    This view handles GET requests to retrieve a discussion for a given person ID 
+    and POST requests to create a new discussion if one does not already exist.
+
+    Methods:
+    - get_person: Helper method to retrieve the Person object by ID.
+    - get: Returns the discussion data or an error if not found.
+    - post: Creates a new discussion for the person or returns the existing discussion.
+    """
     permission_classes = [IsAuthenticated]
 
     def get_person(self, id):

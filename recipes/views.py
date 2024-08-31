@@ -13,9 +13,17 @@ from recipes.serializers import RecipeSerializer
 
 
 class RecipeCreateView(APIView):
+    """
+    View to create a new Recipe.
+
+    Only authenticated users are allowed to create recipes. The view automatically sets
+    the `family_1` and `family_2` fields based on the logged-in user's family trees.
+
+    **URL:** `/recipes/`
+    **Method:** `POST`
+    """
     def post(self, request, *args, **kwargs):
         user = request.user
-        print(user.family_1)
         family_1 = user.family_1
         family_2 = user.family_2
 
@@ -31,15 +39,28 @@ class RecipeCreateView(APIView):
 
 
 class RecipeListView(generics.ListAPIView):
+    """
+    View to list all Recipes accessible to the current user.
+
+    The recipes are filtered based on the allowed family trees for the logged-in user. Only
+    recipes where `family_1` or `family_2` matches the allowed family trees are returned.
+
+    **URL:** `/recipes/`
+    **Method:** `GET`
+    """
     serializer_class = RecipeSerializer
     permission_classes = [IsAuthenticated]
 
     def get_allowed_family_trees(self):
-        """Holt die erlaubten Stammbaum-Namen für den aktuellen Benutzer."""
+        """
+        Get the allowed family tree names for the current user.
+
+        **Returns:**
+        - A set of allowed family tree names based on the groups the user belongs to.
+        """
         user = self.request.user
         allowed_trees = set()
 
-        # Sammle alle Stammbäume, die der Benutzer sehen darf
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
                 tree_name = group.name.replace("Stammbaum ", "").lower()
@@ -48,10 +69,15 @@ class RecipeListView(generics.ListAPIView):
         return allowed_trees
 
     def get_queryset(self):
-        """Filtert die Rezepte basierend auf den erlaubten Stammbaum-Namen des Benutzers."""
+        """
+        Filter recipes based on the allowed family trees for the current user.
+
+        **Returns:**
+        - A queryset of recipes where `family_1` or `family_2` is in the allowed family trees.
+        """
         allowed_family_trees = self.get_allowed_family_trees()
         if not allowed_family_trees:
-            return Recipe.objects.none()  # Keine Rezepte zurückgeben, wenn keine erlaubten Stammbäume vorhanden sind
+            return Recipe.objects.none()
 
         return Recipe.objects.filter(
             Q(family_1__in=allowed_family_trees) |
@@ -60,13 +86,40 @@ class RecipeListView(generics.ListAPIView):
 
 
 class RecipeDetailView(APIView):
+    """
+    View to retrieve, update, or delete a specific Recipe.
+
+    **URL:** `/recipes/<pk>/`
+    **Methods:** `GET`, `PUT`, `DELETE`
+    """
     permission_classes = [IsAuthenticated]
     def get(self, request, pk, *args, **kwargs):
+        """
+        Retrieve the details of a specific recipe.
+
+        **URL Parameter:**
+        - `pk`: The primary key of the recipe to retrieve.
+
+        **Returns:**
+        - The details of the requested recipe in JSON format.
+        """
         recipe = get_object_or_404(Recipe, pk=pk)
         serializer = RecipeSerializer(recipe, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk, *args, **kwargs):
+        """
+        Update a specific recipe, including handling image removal.
+
+        **URL Parameter:**
+        - `pk`: The primary key of the recipe to update.
+
+        **Request Data:**
+        - `deletedImages`: JSON-encoded list of images to remove.
+
+        **Returns:**
+        - The updated recipe data in JSON format if the update is successful.
+        """
         recipe = get_object_or_404(Recipe, pk=pk)
         deleted_images = json.loads(request.data.get('deletedImages', '[]'))
 
@@ -85,6 +138,15 @@ class RecipeDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, *args, **kwargs):
+        """
+        Delete a specific recipe.
+
+        **URL Parameter:**
+        - `pk`: The primary key of the recipe to delete.
+
+        **Returns:**
+        - HTTP status code 204 No Content if the deletion is successful.
+        """
         recipe = get_object_or_404(Recipe, pk=pk)
         recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

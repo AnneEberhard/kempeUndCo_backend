@@ -5,6 +5,22 @@ from kempeUndCo_backend.constants import FAMILY_CHOICES
 from utils.html_cleaner import clean_html
 
 class Recipe(models.Model):
+    """
+    Represents a recipe in the system.
+
+    **Fields:**
+    - `title`: The title of the recipe.
+    - `content`: The content or instructions for the recipe.
+    - `author`: The user who created the recipe (ForeignKey to the user model).
+    - `created_at`: The timestamp when the recipe was created (auto-populated).
+    - `updated_at`: The timestamp when the recipe was last updated (auto-populated).
+    - `image_1`: The first image associated with the recipe.
+    - `image_2`: The second image associated with the recipe.
+    - `image_3`: The third image associated with the recipe.
+    - `image_4`: The fourth image associated with the recipe.
+    - `family_1`: The first family tree associated with the recipe.
+    - `family_2`: The second family tree associated with the recipe.
+    """
     title = models.CharField(max_length=255)
     content = models.TextField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -22,6 +38,24 @@ class Recipe(models.Model):
 
 
     def save(self, *args, **kwargs):
+        """
+        Save the recipe instance.
+
+        Cleans the HTML content using `clean_html`, and handles deletion of old images
+        if they have been replaced with new ones.
+
+        **Parameters:**
+        - `*args`: Variable length argument list.
+        - `**kwargs`: Keyword arguments.
+
+        **Behavior:**
+        - If the recipe instance already exists (i.e., it is being updated), it checks
+          if any old images are being replaced by new ones. If so, it deletes the old images
+          from the filesystem.
+
+        **Notes:**
+        - The `clean_html` function is used to sanitize the content field before saving.
+        """
         self.content = clean_html(self.content)
 
         if self.pk:  # Only if instance already exists
@@ -36,4 +70,10 @@ class Recipe(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
+        """
+        Return a string representation of the recipe.
+
+        **Returns:**
+        - `str`: The title of the recipe.
+        """
         return self.title
