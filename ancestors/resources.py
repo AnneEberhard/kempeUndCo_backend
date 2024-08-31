@@ -3,6 +3,24 @@ from .models import Person, Relation
 
 
 class PersonResource(resources.ModelResource):
+    """
+    A resource class for importing and exporting `Person` model data using Django's import-export framework.
+
+    This class defines how the `Person` model's data is imported and exported, including specifying the fields
+    to be included and setting the import ID fields. 
+
+    Attributes:
+    - model: The Django model that this resource is associated with. In this case, it is the `Person` model.
+    - import_id_fields: A tuple of fields used to identify unique records during import. These fields are used
+      to check if records already exist or if they should be created.
+    - fields: A tuple of field names to be included in the import and export process. This includes all relevant
+      attributes of the `Person` model.
+
+    Meta class:
+    - Defines the model (`Person`) that this resource operates on.
+    - Specifies the fields to include in the import/export operations.
+    - Defines which fields are used as unique identifiers during import operations.
+    """
     class Meta:
         model = Person
         import_id_fields = ('refn', 'uid', 'name')
@@ -30,9 +48,29 @@ class PersonResource(resources.ModelResource):
 
 
 class RelationResource(resources.ModelResource):
+    """
+    A resource class for importing and exporting `Relation` model data using Django's import-export framework.
+
+    This class handles the conversion and processing of `Relation` model data for import and export operations,
+    including the parsing of Many-to-Many relationships.
+
+    Attributes:
+    - model: The Django model that this resource is associated with. In this case, it is the `Relation` model.
+    - import_id_fields: A tuple of fields used to uniquely identify records during import. This field is used to
+      check if records should be updated or created.
+
+    Meta class:
+    - Defines the model (`Relation`) that this resource operates on.
+    - Specifies the fields to be included in the import/export operations.
+    - Defines which fields are used as unique identifiers during import operations.
+
+    Methods:
+    - before_import_row(row, **kwargs): Converts the IDs in Many-to-Many fields into lists of IDs before importing
+      the row. This ensures that the imported data is correctly formatted for processing.
+    """
     class Meta:
         model = Relation
-        import_id_fields = ('person',)  # Verwenden Sie 'person' als Import-ID
+        import_id_fields = ('person',)  # Use 'person' as the import ID
         fields = ('person', 'fath_refn', 'moth_refn', 'marr_spou_refn_1',
                   'marr_date_1', 'marr_plac_1', 'children_1', 'fam_stat_1',
                   'marr_spou_refn_2', 'marr_date_2', 'marr_plac_2', 'children_2',
@@ -41,7 +79,19 @@ class RelationResource(resources.ModelResource):
                   'marr_plac_4', 'children_4', 'fam_stat_4')
 
     def before_import_row(self, row, **kwargs):
-        # Konvertieren Sie die IDs der Many-to-Many-Felder in eine Liste von IDs
+        """
+        Converts the IDs in Many-to-Many fields into lists of IDs before importing the row.
+
+        This method ensures that any comma-separated values in Many-to-Many fields are split into lists, which
+        allows the import process to handle the relationships correctly.
+
+        Parameters:
+        - row: The row of data being imported.
+        - **kwargs: Additional keyword arguments.
+
+        Returns:
+        - None: The row is modified in place.
+        """
         for field_name in ['children_1', 'children_2', 'children_3', 'children_4']:
             if field_name in row:
                 row[field_name] = row[field_name].split(',')

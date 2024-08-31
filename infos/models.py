@@ -6,6 +6,22 @@ from utils.html_cleaner import clean_html
 
 
 class Info(models.Model):
+    """
+    Model representing an informational entry with optional images and associated family trees.
+
+    Attributes:
+        title (CharField): The title of the informational entry, with a maximum length of 255 characters.
+        content (TextField): The content of the entry, which is cleaned of HTML tags before saving.
+        author (ForeignKey): The user who created the entry, linked to the AUTH_USER_MODEL.
+        created_at (DateTimeField): Timestamp when the entry was created, automatically set on creation.
+        updated_at (DateTimeField): Timestamp when the entry was last updated, automatically updated on save.
+        image_1 (FileField): The first image associated with the entry, stored under the 'infos/' directory.
+        image_2 (FileField): The second image associated with the entry, stored under the 'infos/' directory.
+        image_3 (FileField): The third image associated with the entry, stored under the 'infos/' directory.
+        image_4 (FileField): The fourth image associated with the entry, stored under the 'infos/' directory.
+        family_1 (CharField): The first family tree associated with the entry, chosen from FAMILY_CHOICES.
+        family_2 (CharField): The second family tree associated with the entry, chosen from FAMILY_CHOICES.
+    """
     title = models.CharField(max_length=255)
     content = models.TextField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -24,9 +40,20 @@ class Info(models.Model):
 
 
     def save(self, *args, **kwargs):
+        """
+        Overrides the save method to clean HTML from content and handle image file management.
+
+        If the instance already exists (i.e., it's being updated), this method:
+        - Cleans the HTML content of the entry.
+        - Deletes old images that are being replaced by new ones.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
         self.content = clean_html(self.content)
 
-        if self.pk:  # Only if instance already exists
+        if self.pk:
             old_info = Info.objects.get(pk=self.pk)
             for i in range(1, 5):
                 old_image = getattr(old_info, f'image_{i}')
@@ -38,5 +65,10 @@ class Info(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title
+        """
+        Returns a string representation of the Info instance.
 
+        Returns:
+            str: The title of the informational entry.
+        """
+        return self.title
