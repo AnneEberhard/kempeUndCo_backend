@@ -20,6 +20,8 @@ class InfoTests(APITestCase):
             family_1='Family1',
             family_2='Family2'
         )
+        self.user.is_active = True
+        self.user.save()
         self.group = Group.objects.create(name='Stammbaum Family1')
         self.user.groups.add(self.group)
 

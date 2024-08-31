@@ -39,6 +39,8 @@ class CommentListViewTests(APITestCase):
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com')
+        self.user.is_active = True
+        self.user.save()
         self.client.login(email='testuser@example.com', password='testpassword')
         self.url = reverse('comment-list')  # Adjust if using a different URL name
         self.comment1 = Comment.objects.create(info_id=1, recipe_id=1, content='Comment 1', author=self.user)
@@ -70,6 +72,8 @@ class CommentDetailViewTests(APITestCase):
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com')
+        self.user.is_active = True
+        self.user.save()
         self.client.login(email='testuser@example.com', password='testpassword')
         self.comment = Comment.objects.create(info_id=1, recipe_id=1, content='Detail Comment', author=self.user)
         self.url = reverse('comment-detail', args=[self.comment.pk])  # Adjust if using a different URL name

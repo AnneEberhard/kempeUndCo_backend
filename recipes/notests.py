@@ -19,10 +19,14 @@ class RecipeViewsTestCase(APITestCase):
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com', family_1='tree1', family_2='tree2')
+        self.user.is_active = True
+        self.user.save()
         self.other_user = self.user_model.objects.create_user(
             email='otheruser@example.com',
             password='otherpassword',
             username='otheruser@example.com')
+        self.other_user.is_active = True
+        self.other_user.save()
 
         # Create recipes
         self.recipe1 = Recipe.objects.create(
