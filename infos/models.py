@@ -3,6 +3,9 @@ from django.db import models
 from django.conf import settings
 from kempeUndCo_backend.constants import FAMILY_CHOICES
 from utils.html_cleaner import clean_html
+from PIL import Image
+import io
+from django.core.files.base import ContentFile
 
 
 class Info(models.Model):
@@ -37,6 +40,19 @@ class Info(models.Model):
     family_1 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, verbose_name='Stammbaum 1')
     family_2 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, null=True, verbose_name='Stammbaum 2')
 
+    def compress_image(self, image_file):
+        """
+        Compresses an image and returns it as a ContentFile.
+        """
+        if not image_file:
+            return image_file
+
+        img = Image.open(image_file)
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=70)
+        output.seek(0)
+        return ContentFile(output.read(), image_file.name)
+
     def save(self, *args, **kwargs):
         """
         Overrides the save method to clean HTML from content and handle image file management.
@@ -50,6 +66,13 @@ class Info(models.Model):
             **kwargs: Arbitrary keyword arguments.
         """
         self.content = clean_html(self.content)
+
+        for i in range(1, 5):
+            image_field = getattr(self, f'image_{i}')
+            if image_field and hasattr(image_field, 'file'):
+                # Komprimiere das Bild
+                compressed_image = self.compress_image(image_field.file)
+                setattr(self, f'image_{i}', compressed_image)
 
         if self.pk:
             old_info = Info.objects.get(pk=self.pk)
