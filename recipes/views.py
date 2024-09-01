@@ -130,6 +130,12 @@ class RecipeDetailView(APIView):
                     if os.path.isfile(image_field.path):
                         os.remove(image_field.path)
                     setattr(recipe, field, None)
+                
+                thumbnail_field = f'{field}_thumbnail'
+                thumbnail = getattr(recipe, thumbnail_field, None)
+                if thumbnail and os.path.isfile(thumbnail.path):
+                    os.remove(thumbnail.path)
+                    setattr(recipe, thumbnail_field, None)
 
         serializer = RecipeSerializer(recipe, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
