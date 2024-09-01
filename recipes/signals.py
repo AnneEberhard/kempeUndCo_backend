@@ -6,9 +6,9 @@ from recipes.models import Recipe
 
 
 @receiver(post_delete, sender=Recipe)
-def delete_images_on_info_delete(sender, instance, **kwargs):
+def delete_images_on_recipe_delete(sender, instance, **kwargs):
     """
-    Deletes associated image files and thumbnails when an Info instance is deleted.
+    Deletes associated image files and thumbnails when a Recipe instance is deleted.
     """
     for field in ['image_1', 'image_2', 'image_3', 'image_4']:
         image = getattr(instance, field)
