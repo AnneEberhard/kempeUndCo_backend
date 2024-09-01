@@ -49,7 +49,7 @@ class RecipeViewsTestCase(TestCase):
         self.detail_url = reverse('recipe-detail', args=[self.recipe1.pk])
 
         group, created = Group.objects.get_or_create(name='Stammbaum Tree1')
-        self.user.groups.add(group)  
+        self.user.groups.add(group)
         self.client.force_authenticate(user=self.user)
 
     def test_create_recipe(self):

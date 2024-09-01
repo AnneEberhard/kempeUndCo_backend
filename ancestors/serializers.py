@@ -81,6 +81,7 @@ class PersonSerializer(serializers.ModelSerializer):
             'obje_file_6',
             'confidential'
         ]
+        ref_name = 'AncestorsPersonSerializer'
 
     def to_representation(self, instance):
         """

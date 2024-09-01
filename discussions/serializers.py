@@ -12,6 +12,7 @@ class PersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Person
         fields = ['id', 'name']
+        ref_name = 'DiscussionsPersonSerializer'
 
 
 class DiscussionEntrySerializer(serializers.ModelSerializer):
