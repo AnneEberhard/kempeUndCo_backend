@@ -119,7 +119,7 @@ class Recipe(models.Model):
             thumb_name = f"{base_name}_thumbnail.jpg"
             thumb_file = ContentFile(thumb_io.getvalue(), name=thumb_name)
             setattr(self, thumbnail_field_name, thumb_file)
-
+            
     def __str__(self):
         """
         Return a string representation of the recipe.
