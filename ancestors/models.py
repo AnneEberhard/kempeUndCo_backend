@@ -3,6 +3,9 @@ from django.db import models
 from datetime import datetime
 from django.utils import timezone
 from kempeUndCo_backend.constants import FAMILY_CHOICES
+from PIL import Image
+import io
+from django.core.files.base import ContentFile
 
 
 class Person(models.Model):
@@ -189,6 +192,20 @@ class Person(models.Model):
         new_num = max_num + 1
         return f'@I{new_num}@'
 
+    def compress_image(self, image_file):
+        """
+        Compresses an image and returns it as a ContentFile.
+        """
+        if not image_file:
+            return image_file
+
+        img = Image.open(image_file)
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=70)
+        output.seek(0)
+        return ContentFile(output.read(), image_file.name)
+
+
     def save(self, *args, **kwargs):
         """
         Save the Person instance including metadata and automatic birth/death date generation.
@@ -201,18 +218,23 @@ class Person(models.Model):
         """
         user = kwargs.pop('user', None)
 
-        if not self.pk:  # Neues Objekt
+        for i in range(1, 5):
+            image_field = getattr(self, f'image_{i}')
+            if image_field and hasattr(image_field, 'file'):
+                compressed_image = self.compress_image(image_field.file)
+                setattr(self, f'image_{i}', compressed_image)
+
+        if not self.pk:
             if not self.refn:
                 self.refn = self._generate_unique_refn()
             self.creation_date = timezone.now()
             if user:
                 self.created_by = user
-        else:  # Bestehendes Objekt
+        else:
             self.last_modified_date = timezone.now()
             if user:
                 self.last_modified_by = user
 
-        # Automatisch den Name-Feld setzen
         if self.name_npfx:
             name_parts = [self.name_npfx]
         else:
@@ -227,10 +249,8 @@ class Person(models.Model):
         if self.surn:
             name_parts.append(self.surn)
 
-        # Join the parts with a space
         self.name = " ".join(name_parts) if name_parts else "Unbekannt"
 
-        # Geburts- und Todesdaten formatieren
         if self.birt_date:
             try:
                 birth_date = datetime.strptime(self.birt_date, '%d.%m.%Y').date()
