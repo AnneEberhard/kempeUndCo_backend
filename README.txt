@@ -4,6 +4,9 @@ Create Groups:
     then run (for existing users): python manage.py assign_users_to_groups
         file can be found: kempeUndCo_backend/accounts/management/commands/assign_users_to_groups.py
 
+Compress existing images: run script_python compress_images.py
+    it will overwrite the images with a smaller version for better performance
+
 If adding new family choices:
     from kempeUndCo_backend.constants import FAMILY_CHOICES
 

@@ -128,7 +128,14 @@ class InfoDetailView(APIView):
                 if image_field:
                     if os.path.isfile(image_field.path):
                         os.remove(image_field.path)
-                    setattr(info, field, None)
+                        setattr(info, field, None)
+
+                thumbnail_field = f'{field}_thumbnail'
+                thumbnail = getattr(info, thumbnail_field, None)
+                if thumbnail and os.path.isfile(thumbnail.path):
+                    os.remove(thumbnail.path)
+                    setattr(info, thumbnail_field, None)
+                    
 
         serializer = InfoSerializer(info, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
