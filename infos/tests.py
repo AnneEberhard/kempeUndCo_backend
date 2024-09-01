@@ -22,8 +22,8 @@ class InfoTests(TestCase):
         self.user.save()
         self.client.force_authenticate(user=self.user)
         group, created = Group.objects.get_or_create(name='Stammbaum Kempe')
-        self.user.groups.add(group)        
-        
+        self.user.groups.add(group)
+
         # Create an Info instance
         self.info = Info.objects.create(
             title='Test Info',

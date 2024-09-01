@@ -82,7 +82,7 @@ class InfoListView(generics.ListAPIView):
             return Info.objects.none()
 
         queryset = Info.objects.filter(
-        Q(family_1__in=allowed_families) | Q(family_2__in=allowed_families)
+            Q(family_1__in=allowed_families) | Q(family_2__in=allowed_families)
         ).distinct()
 
         return queryset
