@@ -1,27 +1,29 @@
-from rest_framework.test import APITestCase
+from django.test import TestCase
 from rest_framework import status
-from django.contrib.auth.models import User
+from rest_framework.test import APIClient
+
+from infos.models import Info
+from recipes.models import Recipe
 from .models import Comment
-from .serializers import CommentSerializer
 from rest_framework.reverse import reverse
 from accounts.models import CustomUser
 
 
-class CommentCreateViewTests(APITestCase):
+class CommentCreateViewTests(TestCase):
     def setUp(self):
+        self.client = APIClient()
         self.user_model = CustomUser
 
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
             username='testuser@example.com')
-        self.client.login(email='testuser@example.com', password='testpassword')
+        self.client.force_authenticate(user=self.user)
         self.url = reverse('comment-create')  # Adjust if using a different URL name
 
     def test_create_comment(self):
         data = {
             'info_id': 1,
-            'recipe_id': 1,
             'content': 'This is a test comment'
         }
         response = self.client.post(self.url, data, format='json')
@@ -31,8 +33,9 @@ class CommentCreateViewTests(APITestCase):
         self.assertEqual(Comment.objects.get().author, self.user)
 
 
-class CommentListViewTests(APITestCase):
+class CommentListViewTests(TestCase):
     def setUp(self):
+        self.client = APIClient()
         self.user_model = CustomUser
 
         self.user = self.user_model.objects.create_user(
@@ -41,31 +44,51 @@ class CommentListViewTests(APITestCase):
             username='testuser@example.com')
         self.user.is_active = True
         self.user.save()
-        self.client.login(email='testuser@example.com', password='testpassword')
+        self.client.force_authenticate(user=self.user)
+
         self.url = reverse('comment-list')  # Adjust if using a different URL name
-        self.comment1 = Comment.objects.create(info_id=1, recipe_id=1, content='Comment 1', author=self.user)
-        self.comment2 = Comment.objects.create(info_id=2, recipe_id=2, content='Comment 2', author=self.user)
+
+        self.recipe1 = Recipe.objects.create(
+            title='Recipe 1',
+            content='Content for recipe 1',
+            author=self.user
+        )
+        self.recipe2 = Recipe.objects.create(
+            title='Recipe 2',
+            content='Content for recipe 2',
+            author=self.user
+        )
+        self.info1 = Info.objects.create(
+            title='Info 1',
+            content='Content for Info 1',
+            author=self.user
+        )
+
+        self.comment1 = Comment.objects.create(recipe_id=1, content='Comment 1', author=self.user)
+        self.comment2 = Comment.objects.create(recipe_id=2, content='Comment 2', author=self.user)
+        self.comment3 = Comment.objects.create(info_id=1, content='Comment Info', author=self.user)
 
     def test_list_all_comments(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 3)
+
+    def test_filter_by_recipe_id(self):
+        response = self.client.get(self.url, {'recipe': 1})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['content'], 'Comment 1')
 
     def test_filter_by_info_id(self):
         response = self.client.get(self.url, {'info': 1})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['content'], 'Comment 1')
-
-    def test_filter_by_recipe_id(self):
-        response = self.client.get(self.url, {'recipe': 2})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['content'], 'Comment 2')
+        self.assertEqual(response.data[0]['content'], 'Comment Info')
 
 
-class CommentDetailViewTests(APITestCase):
+class CommentDetailViewTests(TestCase):
     def setUp(self):
+        self.client = APIClient()
         self.user_model = CustomUser
 
         self.user = self.user_model.objects.create_user(
@@ -74,8 +97,15 @@ class CommentDetailViewTests(APITestCase):
             username='testuser@example.com')
         self.user.is_active = True
         self.user.save()
-        self.client.login(email='testuser@example.com', password='testpassword')
-        self.comment = Comment.objects.create(info_id=1, recipe_id=1, content='Detail Comment', author=self.user)
+        self.client.force_authenticate(user=self.user)
+
+        self.info1 = Info.objects.create(
+            title='Info 1',
+            content='Content for Info 1',
+            author=self.user
+        )
+
+        self.comment = Comment.objects.create(info_id=1, content='Detail Comment', author=self.user)
         self.url = reverse('comment-detail', args=[self.comment.pk])  # Adjust if using a different URL name
 
     def test_get_comment(self):
