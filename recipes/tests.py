@@ -1,24 +1,25 @@
 import json
 from django.urls import reverse
-from django.contrib.auth import get_user_model
-from rest_framework.test import APITestCase
+from django.test import TestCase
+from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Recipe
 from accounts.models import CustomUser
+from django.contrib.auth.models import Group
 
 
-class RecipeViewsTestCase(APITestCase):
+class RecipeViewsTestCase(TestCase):
     def setUp(self):
         """
         Create test data for recipes and users.
         """
-        # Create users
+        self.client = APIClient()
         self.user_model = CustomUser
 
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
-            username='testuser@example.com', family_1='tree1', family_2='tree2')
+            username='testuser@example.com')
         self.user.is_active = True
         self.user.save()
         self.other_user = self.user_model.objects.create_user(
@@ -33,15 +34,13 @@ class RecipeViewsTestCase(APITestCase):
             title='Recipe 1',
             content='Content for recipe 1',
             author=self.user,
-            family_1='tree1',
-            family_2='tree2'
+            family_1='tree1'
         )
         self.recipe2 = Recipe.objects.create(
             title='Recipe 2',
             content='Content for recipe 2',
             author=self.other_user,
-            family_1='tree3',
-            family_2='tree4'
+            family_1='tree2'
         )
 
         # URLs
@@ -49,8 +48,9 @@ class RecipeViewsTestCase(APITestCase):
         self.list_url = reverse('recipe-list')
         self.detail_url = reverse('recipe-detail', args=[self.recipe1.pk])
 
-        # Authentication
-        self.client.login(email='testuser@example.com', password='testpassword')
+        group, created = Group.objects.get_or_create(name='Stammbaum Tree1')
+        self.user.groups.add(group)  
+        self.client.force_authenticate(user=self.user)
 
     def test_create_recipe(self):
         """
@@ -110,7 +110,16 @@ class RecipeViewsTestCase(APITestCase):
         Test that recipes from non-allowed family trees are not listed.
         """
         self.client.logout()
-        self.client.login(email='otheruser@example.com', password='otherpassword')
+        data = {
+            'email': 'otheruser@example.com',
+            'password': 'otherpassword'
+        }
+        response = self.client.post('/login/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Set the token in the authorization header
+        token = response.data['access']
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 0)  # The other user should not see recipes from the testuser's allowed family trees

@@ -1,36 +1,34 @@
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APIClient
 from django.contrib.auth.models import Group
 from .models import Info
-from django.contrib.auth import get_user_model
 from accounts.models import CustomUser
 
 
-class InfoTests(APITestCase):
+class InfoTests(TestCase):
 
     def setUp(self):
-        # Create test user and assign groups
+        self.client = APIClient()
         self.user_model = CustomUser
 
         self.user = self.user_model.objects.create_user(
             username='testuser',
             email="testuser@example.com",
-            password='testpassword',
-            family_1='Family1',
-            family_2='Family2'
+            password='testpassword'
         )
         self.user.is_active = True
         self.user.save()
-        self.group = Group.objects.create(name='Stammbaum Family1')
-        self.user.groups.add(self.group)
-
+        self.client.force_authenticate(user=self.user)
+        group, created = Group.objects.get_or_create(name='Stammbaum Kempe')
+        self.user.groups.add(group)        
+        
         # Create an Info instance
         self.info = Info.objects.create(
             title='Test Info',
             content='This is a test info.',
-            family_1='Family1',
-            family_2='Family2',
+            family_1='kempe',
             author=self.user
         )
         self.info_url = reverse('info-detail', args=[self.info.pk])
@@ -41,7 +39,6 @@ class InfoTests(APITestCase):
         """
         Test creating a new Info instance.
         """
-        self.client.force_authenticate(user=self.user)
         data = {
             'title': 'New Info',
             'content': 'Content for new info',
@@ -55,17 +52,15 @@ class InfoTests(APITestCase):
         """
         Test listing Info instances with filtering based on allowed family trees.
         """
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('results', response.data)
-        self.assertEqual(len(response.data['results']), 1)  # Expect 1 because of the created Info instance
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], 'Test Info')
 
     def test_retrieve_info(self):
         """
         Test retrieving a single Info instance.
         """
-        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.info_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['title'], 'Test Info')
@@ -96,6 +91,7 @@ class InfoTests(APITestCase):
         """
         Test creating an Info instance without authentication.
         """
+        self.client.force_authenticate(user=None)
         data = {
             'title': 'Unauthorized Info',
             'content': 'Content for unauthorized info',

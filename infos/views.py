@@ -47,7 +47,7 @@ class InfoListView(generics.ListAPIView):
     serializer_class = InfoSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_allowed_family_trees(self):
+    def get_allowed_families(self):
         """
         Retrieves the allowed family tree names for the current user based on their group memberships.
 
@@ -55,17 +55,17 @@ class InfoListView(generics.ListAPIView):
         and extracts the family tree names from those group names.
 
         Returns:
-            set: A set of allowed family tree names for the current user.
+            set: A set of allowed family names for the current user.
         """
         user = self.request.user
-        allowed_trees = set()
+        allowed_families = set()
 
         for group in user.groups.all():
             if group.name.startswith("Stammbaum "):
-                tree_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_trees.add(tree_name)
+                family_name = group.name.replace("Stammbaum ", "").lower()
+                allowed_families.add(family_name)
 
-        return allowed_trees
+        return allowed_families
 
     def get_queryset(self):
         """
@@ -77,13 +77,15 @@ class InfoListView(generics.ListAPIView):
         Returns:
             QuerySet: A queryset of Info instances filtered by allowed family trees.
         """
-        allowed_family_trees = self.get_allowed_family_trees()
-        if not allowed_family_trees:
+        allowed_families = self.get_allowed_families()
+        if not allowed_families:
             return Info.objects.none()
 
-        return Info.objects.filter(
-            Q(family_1__in=allowed_family_trees) | Q(family_2__in=allowed_family_trees)
+        queryset = Info.objects.filter(
+        Q(family_1__in=allowed_families) | Q(family_2__in=allowed_families)
         ).distinct()
+
+        return queryset
 
 
 class InfoDetailView(APIView):
