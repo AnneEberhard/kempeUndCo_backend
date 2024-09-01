@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.views import APIView
+from django.contrib.auth.models import Group
 
 from infos.models import Info
 from infos.serializers import InfoSerializer
@@ -28,13 +29,7 @@ class InfoCreateView(APIView):
         Returns:
             Response: The API response containing the created Info instance or validation errors.
         """
-        user = request.user
-        family_1 = user.family_1
-        family_2 = user.family_2
-
         data = request.data.copy()
-        data['family_1'] = family_1
-        data['family_2'] = family_2
 
         serializer = InfoSerializer(data=data, context={'request': request})
         if serializer.is_valid():
