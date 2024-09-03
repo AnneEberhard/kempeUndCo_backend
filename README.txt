@@ -6,6 +6,7 @@ Create Groups:
 
 Compress existing images: run script_python compress_images.py
     it will overwrite the images with a smaller version for better performance
+    CAVE: no redis installed, no compression wil upload feasible due to thumbnails
 
 If adding new family choices:
     from kempeUndCo_backend.constants import FAMILY_CHOICES
