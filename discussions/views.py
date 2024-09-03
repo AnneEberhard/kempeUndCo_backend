@@ -71,7 +71,7 @@ def get_or_create_discussion(request, id):
         return Response({'error': 'Person not found'}, status=404)
 
     discussion, created = Discussion.objects.get_or_create(person=person)
-    serializer = DiscussionSerializer(discussion)
+    serializer = DiscussionSerializer(discussion, context={'request': request})
 
     return Response(serializer.data, status=201 if created else 200)
 

@@ -1,6 +1,12 @@
+import io
+import os
 from django.db import models
 from django.conf import settings
 from ancestors.models import Person
+from utils.html_cleaner import clean_html
+from PIL import Image
+import io
+from django.core.files.base import ContentFile
 
 
 class Discussion(models.Model):
@@ -45,3 +51,69 @@ class DiscussionEntry(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    image_1 = models.FileField(upload_to='discussions/', null=True, blank=True)
+    image_1_thumbnail = models.ImageField(upload_to='discussions/thumbnails/', null=True, blank=True)
+    image_2 = models.FileField(upload_to='discussions/', null=True, blank=True)
+    image_2_thumbnail = models.ImageField(upload_to='discussions/thumbnails/', null=True, blank=True)
+    image_3 = models.FileField(upload_to='discussions/', null=True, blank=True)
+    image_3_thumbnail = models.ImageField(upload_to='discussions/thumbnails/', null=True, blank=True)
+    image_4 = models.FileField(upload_to='discussions/', null=True, blank=True)
+    image_4_thumbnail = models.ImageField(upload_to='discussions/thumbnails/', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Overrides the save method to clean HTML from content and handle image file management.
+
+        If the instance already exists (i.e., it's being updated), this method:
+        - Cleans the HTML content of the entry.
+        - Deletes old images that are being replaced by new ones.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        self.content = clean_html(self.content)
+
+        if self.pk:
+            old_entry = DiscussionEntry.objects.get(pk=self.pk)
+            for i in range(1, 5):
+                old_image = getattr(old_entry, f'image_{i}')
+                new_image = getattr(self, f'image_{i}')
+                if old_image and old_image != new_image:
+                    if os.path.isfile(old_image.path):
+                        os.remove(old_image.path)
+
+        if self.image_1 and not self.image_1_thumbnail:
+            self.create_thumbnail(self.image_1, 'image_1_thumbnail')
+        if self.image_2 and not self.image_2_thumbnail:
+            self.create_thumbnail(self.image_2, 'image_2_thumbnail')
+        if self.image_3 and not self.image_3_thumbnail:
+            self.create_thumbnail(self.image_3, 'image_3_thumbnail')
+        if self.image_4 and not self.image_4_thumbnail:
+            self.create_thumbnail(self.image_4, 'image_4_thumbnail')
+
+        super().save(*args, **kwargs)
+
+    def create_thumbnail(self, image_field, thumbnail_field_name):
+        """Erstellt ein Thumbnail für das gegebene Bildfeld."""
+        with Image.open(image_field) as img:
+            img = img.convert('RGB')
+            img.thumbnail((200, 200))
+            thumb_io = io.BytesIO()
+            img.save(thumb_io, format='JPEG', quality=70)
+
+            original_path = image_field.name
+            base_name = os.path.basename(original_path)
+            base_name, ext = os.path.splitext(base_name)
+            thumb_name = f"{base_name}_thumbnail.jpg"
+            thumb_file = ContentFile(thumb_io.getvalue(), name=thumb_name)
+            setattr(self, thumbnail_field_name, thumb_file)
+
+    def __str__(self):
+        """
+        Returns a string representation of the DiscussionEntry instance.
+
+        Returns:
+            str: The title of the informational entry.
+        """
+        return self.title
