@@ -30,7 +30,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'https://kempeundco.pythonanywhere.com/'
+    'https://kempeundco.pythonanywhere.com/',
+    'kempeundco.pythonanywhere.com',
 ]
 
 CORS_ALLOWED_ORIGINS = [
