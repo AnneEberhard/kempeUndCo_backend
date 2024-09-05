@@ -43,12 +43,14 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:4200',
-    'https://kempeundco.de'
+    'https://kempeundco.de',
+    'http://kempeundco.de'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:4200',
-    'https://kempeundco.de'
+    'https://kempeundco.de',
+    'http://kempeundco.de'
 ]
 
 # Application definition
