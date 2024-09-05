@@ -182,8 +182,60 @@ class RelationResource(resources.ModelResource):
                 refn_value = row['person']
                 person = Person.objects.get(refn=refn_value)
                 row['person'] = person.id  # Set the correct id for ForeignKey reference
-
-            # Processing children fields
+            # Mapping fath_refn using refn
+            if 'fath_refn' in row:
+                refn_value = row['fath_refn']
+                try:
+                    father = Person.objects.get(refn=refn_value)
+                    row['fath_refn'] = father.id  # Set the correct id for ForeignKey reference
+                except Person.DoesNotExist:
+                    row['fath_refn'] = None
+        
+            # Mapping moth_refn using refn
+            if 'moth_refn' in row:
+                refn_value = row['moth_refn']
+                try:
+                    mother = Person.objects.get(refn=refn_value)
+                    row['moth_refn'] = mother.id  # Set the correct id for ForeignKey reference
+                except Person.DoesNotExist:
+                    row['moth_refn'] = None
+        
+            # Mapping marr_spou_refn_1 using refn
+            if 'marr_spou_refn_1' in row:
+                refn_value = row['marr_spou_refn_1']
+                try:
+                    spouse_1 = Person.objects.get(refn=refn_value)
+                    row['marr_spou_refn_1'] = spouse_1.id  # Set the correct id for ForeignKey reference
+                except Person.DoesNotExist:
+                    row['marr_spou_refn_1'] = None
+        
+            # Mapping marr_spou_refn_2 using refn
+            if 'marr_spou_refn_2' in row:
+                refn_value = row['marr_spou_refn_2']
+                try:
+                    spouse_2 = Person.objects.get(refn=refn_value)
+                    row['marr_spou_refn_2'] = spouse_2.id  # Set the correct id for ForeignKey reference
+                except Person.DoesNotExist:
+                    row['marr_spou_refn_2'] = None
+        
+            # Mapping marr_spou_refn_3 using refn
+            if 'marr_spou_refn_3' in row:
+                refn_value = row['marr_spou_refn_3']
+                try:
+                    spouse_3 = Person.objects.get(refn=refn_value)
+                    row['marr_spou_refn_3'] = spouse_3.id  # Set the correct id for ForeignKey reference
+                except Person.DoesNotExist:
+                    row['marr_spou_refn_3'] = None
+        
+            # Mapping marr_spou_refn_4 using refn
+            if 'marr_spou_refn_4' in row:
+                refn_value = row['marr_spou_refn_4']
+                try:
+                    spouse_4 = Person.objects.get(refn=refn_value)
+                    row['marr_spou_refn_4'] = spouse_4.id  # Set the correct id for ForeignKey reference
+                except Person.DoesNotExist:
+                    row['marr_spou_refn_4'] = None
+                    # Processing children fields
             for field_name in ['children_1', 'children_2', 'children_3', 'children_4']:
                 if field_name in row:
                     # Splitting the string of refn values and fetching corresponding Person objects
