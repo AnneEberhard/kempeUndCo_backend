@@ -60,6 +60,121 @@ class RelationResource(resources.ModelResource):
                   'marr_plac_4', 'children_4', 'fam_stat_4')
         import_id_fields = ('person',)  # Verwende 'person' als Import-ID
 
+    def get_instance(self, instance_loader, row):
+        try:
+            person_refn = row['person']
+            return self._meta.model.objects.get(person__refn=person_refn)
+        except ObjectDoesNotExist:
+            return None
+
+    def before_import_row(self, row, **kwargs):
+        for field_name in ['children_1', 'children_2', 'children_3', 'children_4']:
+            if field_name in row:
+                row[field_name] = row[field_name].split(',')
+
+    def dehydrate_person(self, relation):
+        return relation.person.refn
+
+    def dehydrate_fath_refn(self, relation):
+        return relation.fath_refn.refn if relation.fath_refn else None
+
+    def dehydrate_moth_refn(self, relation):
+        return relation.moth_refn.refn if relation.moth_refn else None
+
+    def dehydrate_marr_spou_refn_1(self, relation):
+        return relation.marr_spou_refn_1.refn if relation.marr_spou_refn_1 else None
+
+    def dehydrate_marr_spou_refn_2(self, relation):
+        return relation.marr_spou_refn_2.refn if relation.marr_spou_refn_2 else None
+
+    def dehydrate_marr_spou_refn_3(self, relation):
+        return relation.marr_spou_refn_3.refn if relation.marr_spou_refn_3 else None
+
+    def dehydrate_marr_spou_refn_4(self, relation):
+        return relation.marr_spou_refn_4.refn if relation.marr_spou_refn_4 else None
+
+    def dehydrate_children_1(self, relation):
+        return ','.join([child.refn for child in relation.children_1.all()])
+
+    def dehydrate_children_2(self, relation):
+        return ','.join([child.refn for child in relation.children_2.all()])
+
+    def dehydrate_children_3(self, relation):
+        return ','.join([child.refn for child in relation.children_3.all()])
+
+    def dehydrate_children_4(self, relation):
+        return ','.join([child.refn for child in relation.children_4.all()])
+
+    def import_obj(self, obj, data, dry_run=False, **kwargs):
+        try:
+            obj.person = Person.objects.get(refn=data['person'])
+        except Person.DoesNotExist:
+            pass
+
+        if data.get('fath_refn'):
+            try:
+                obj.fath_refn = Person.objects.get(refn=data['fath_refn'])
+            except Person.DoesNotExist:
+                obj.fath_refn = None
+
+        if data.get('moth_refn'):
+            try:
+                obj.moth_refn = Person.objects.get(refn=data['moth_refn'])
+            except Person.DoesNotExist:
+                obj.moth_refn = None
+
+        if data.get('marr_spou_refn_1'):
+            try:
+                obj.marr_spou_refn_1 = Person.objects.get(refn=data['marr_spou_refn_1'])
+            except Person.DoesNotExist:
+                obj.marr_spou_refn_1 = None
+
+        if data.get('marr_spou_refn_2'):
+            try:
+                obj.marr_spou_refn_2 = Person.objects.get(refn=data['marr_spou_refn_2'])
+            except Person.DoesNotExist:
+                obj.marr_spou_refn_2 = None
+
+        if data.get('marr_spou_refn_3'):
+            try:
+                obj.marr_spou_refn_3 = Person.objects.get(refn=data['marr_spou_refn_3'])
+            except Person.DoesNotExist:
+                obj.marr_spou_refn_3 = None
+
+        if data.get('marr_spou_refn_4'):
+            try:
+                obj.marr_spou_refn_4 = Person.objects.get(refn=data['marr_spou_refn_4'])
+            except Person.DoesNotExist:
+                obj.marr_spou_refn_4 = None
+
+        for field_name in ['children_1', 'children_2', 'children_3', 'children_4']:
+            children_refns = data.get(field_name, '').split(',')
+            children = []
+            for refn in children_refns:
+                try:
+                    child = Person.objects.get(refn=refn)
+                    children.append(child)
+                except Person.DoesNotExist:
+                    continue
+            getattr(obj, field_name).set(children)
+
+        super().import_obj(obj, data, dry_run, **kwargs)
+
+
+
+
+class RelationResource2(resources.ModelResource):
+
+    class Meta:
+        model = Relation
+        fields = ('person', 'fath_refn', 'moth_refn', 'marr_spou_refn_1',
+                  'marr_date_1', 'marr_plac_1', 'children_1', 'fam_stat_1',
+                  'marr_spou_refn_2', 'marr_date_2', 'marr_plac_2', 'children_2',
+                  'fam_stat_2', 'marr_spou_refn_3', 'marr_date_3', 'marr_plac_3',
+                  'children_3', 'fam_stat_3', 'marr_spou_refn_4', 'marr_date_4',
+                  'marr_plac_4', 'children_4', 'fam_stat_4')
+        import_id_fields = ('person',)
+
     def before_import_row(self, row, **kwargs):
         try:
             # Mapping person using refn
