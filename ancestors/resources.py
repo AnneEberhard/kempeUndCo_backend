@@ -48,7 +48,7 @@ class PersonResource(resources.ModelResource):
                   'created_by', 'last_modified_by')
 
 
-class RelationResource(resources.ModelResource):
+class RelationResource2(resources.ModelResource):
 
     class Meta:
         model = Relation
@@ -163,7 +163,7 @@ class RelationResource(resources.ModelResource):
 
 
 
-class RelationResource2(resources.ModelResource):
+class RelationResource(resources.ModelResource):
 
     class Meta:
         model = Relation
