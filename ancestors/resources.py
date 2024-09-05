@@ -1,5 +1,6 @@
 from import_export import resources
 from .models import Person, Relation
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class PersonResource(resources.ModelResource):
@@ -48,50 +49,64 @@ class PersonResource(resources.ModelResource):
 
 
 class RelationResource(resources.ModelResource):
-    """
-    A resource class for importing and exporting `Relation` model data using Django's import-export framework.
 
-    This class handles the conversion and processing of `Relation` model data for import and export operations,
-    including the parsing of Many-to-Many relationships.
-
-    Attributes:
-    - model: The Django model that this resource is associated with. In this case, it is the `Relation` model.
-    - import_id_fields: A tuple of fields used to uniquely identify records during import. This field is used to
-      check if records should be updated or created.
-
-    Meta class:
-    - Defines the model (`Relation`) that this resource operates on.
-    - Specifies the fields to be included in the import/export operations.
-    - Defines which fields are used as unique identifiers during import operations.
-
-    Methods:
-    - before_import_row(row, **kwargs): Converts the IDs in Many-to-Many fields into lists of IDs before importing
-      the row. This ensures that the imported data is correctly formatted for processing.
-    """
     class Meta:
         model = Relation
-        import_id_fields = ('person',)  # Use 'person' as the import ID
         fields = ('person', 'fath_refn', 'moth_refn', 'marr_spou_refn_1',
                   'marr_date_1', 'marr_plac_1', 'children_1', 'fam_stat_1',
                   'marr_spou_refn_2', 'marr_date_2', 'marr_plac_2', 'children_2',
                   'fam_stat_2', 'marr_spou_refn_3', 'marr_date_3', 'marr_plac_3',
                   'children_3', 'fam_stat_3', 'marr_spou_refn_4', 'marr_date_4',
                   'marr_plac_4', 'children_4', 'fam_stat_4')
+        import_id_fields = ('person',)  # Verwende 'person' als Import-ID
 
     def before_import_row(self, row, **kwargs):
-        """
-        Converts the IDs in Many-to-Many fields into lists of IDs before importing the row.
+        try:
+            # Mapping person using refn
+            if 'person' in row:
+                refn_value = row['person']
+                person = Person.objects.get(refn=refn_value)
+                row['person'] = person.id  # Set the correct id for ForeignKey reference
 
-        This method ensures that any comma-separated values in Many-to-Many fields are split into lists, which
-        allows the import process to handle the relationships correctly.
+            # Processing children fields
+            for field_name in ['children_1', 'children_2', 'children_3', 'children_4']:
+                if field_name in row:
+                    # Splitting the string of refn values and fetching corresponding Person objects
+                    children_refns = row[field_name].split(',')
+                    children = Person.objects.filter(refn__in=children_refns)
+                    row[field_name] = ','.join([str(child.id) for child in children])  # Store ids as comma-separated string
+        except ObjectDoesNotExist:
+            pass  # Handle cases where a person or child is not found
 
-        Parameters:
-        - row: The row of data being imported.
-        - **kwargs: Additional keyword arguments.
+    def dehydrate_person(self, relation):
+        return relation.person.refn
 
-        Returns:
-        - None: The row is modified in place.
-        """
-        for field_name in ['children_1', 'children_2', 'children_3', 'children_4']:
-            if field_name in row:
-                row[field_name] = row[field_name].split(',')
+    def dehydrate_fath_refn(self, relation):
+        return relation.fath_refn.refn if relation.fath_refn else None
+
+    def dehydrate_moth_refn(self, relation):
+        return relation.moth_refn.refn if relation.moth_refn else None
+
+    def dehydrate_marr_spou_refn_1(self, relation):
+        return relation.marr_spou_refn_1.refn if relation.marr_spou_refn_1 else None
+
+    def dehydrate_marr_spou_refn_2(self, relation):
+        return relation.marr_spou_refn_2.refn if relation.marr_spou_refn_2 else None
+
+    def dehydrate_marr_spou_refn_3(self, relation):
+        return relation.marr_spou_refn_3.refn if relation.marr_spou_refn_3 else None
+
+    def dehydrate_marr_spou_refn_4(self, relation):
+        return relation.marr_spou_refn_4.refn if relation.marr_spou_refn_4 else None
+
+    def dehydrate_children_1(self, relation):
+        return ','.join([child.refn for child in relation.children_1.all()])
+
+    def dehydrate_children_2(self, relation):
+        return ','.join([child.refn for child in relation.children_2.all()])
+
+    def dehydrate_children_3(self, relation):
+        return ','.join([child.refn for child in relation.children_3.all()])
+
+    def dehydrate_children_4(self, relation):
+        return ','.join([child.refn for child in relation.children_4.all()])
