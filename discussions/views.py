@@ -12,11 +12,6 @@ class DiscussionListView(generics.ListAPIView):
     """
     API view to list discussions based on the allowed family trees for the current user.
 
-    This view filters the discussions to only include those that are linked to
-    family trees the current user has permission to view. The filtering is based
-    on the group names that start with "Stammbaum ", indicating the user's allowed
-    families.
-
     Methods:
     - get_allowed_families: Returns the set of allowed family names for the current user.
     - get_queryset: Filters and returns the queryset of discussions the user is allowed to see.
@@ -29,11 +24,10 @@ class DiscussionListView(generics.ListAPIView):
         user = self.request.user
         allowed_families = set()
 
-        # Collect all family trees the user is allowed to view
-        for group in user.groups.all():
-            if group.name.startswith("Stammbaum "):
-                family_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_families.add(family_name)
+        if user.family_1:
+            allowed_families.add(user.family_1.lower())
+        if user.family_2:
+            allowed_families.add(user.family_2.lower())
 
         return allowed_families
 

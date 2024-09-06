@@ -44,10 +44,7 @@ class InfoListView(generics.ListAPIView):
 
     def get_allowed_families(self):
         """
-        Retrieves the allowed family tree names for the current user based on their group memberships.
-
-        The method checks all groups of the user to find groups whose names start with 'Stammbaum '
-        and extracts the family tree names from those group names.
+        Retrieves the allowed family tree names for the current user .
 
         Returns:
             set: A set of allowed family names for the current user.
@@ -55,10 +52,10 @@ class InfoListView(generics.ListAPIView):
         user = self.request.user
         allowed_families = set()
 
-        for group in user.groups.all():
-            if group.name.startswith("Stammbaum "):
-                family_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_families.add(family_name)
+        if user.family_1:
+            allowed_families.add(user.family_1.lower())
+        if user.family_2:
+            allowed_families.add(user.family_2.lower())
 
         return allowed_families
 

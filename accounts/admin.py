@@ -5,10 +5,15 @@ from django.contrib.auth.admin import UserAdmin
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('id', 'username', 'email')
+    list_display = ('id', 'username', 'email', 'get_allowed_families', )
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('guarantor', 'guarantor_email', 'family_1', 'family_2', 'notes')}),
     )
+
+    def get_allowed_families(self, obj):
+        return ', '.join(obj.allowed_families)
+    get_allowed_families.short_description = 'Allowed Families'
+
 
     def get_queryset(self, request):
         # Beschränke den Queryset auf Benutzer, die nicht superuser sind
