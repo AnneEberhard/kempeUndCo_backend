@@ -1,7 +1,9 @@
+from accounts import models
 from .resources import PersonResource, RelationResource
 from .models import Person, Relation
 from import_export.admin import ImportExportModelAdmin
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 
 
 class PersonAdmin(ImportExportModelAdmin):
@@ -50,11 +52,46 @@ class PersonAdmin(ImportExportModelAdmin):
         })
     )
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        allowed_families = request.user.allowed_families
+        return qs.filter(family_1__in=allowed_families) | qs.filter(family_2__in=allowed_families)
+
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
 
     def save_model(self, request, obj, form, change):
         obj.save(user=request.user)
+
+
+class Family1Filter(SimpleListFilter):
+    title = 'Family 1'
+    parameter_name = 'person__family_1'
+
+    def lookups(self, request, model_admin):
+        families = set(Person.objects.values_list('family_1', flat=True).distinct())
+        return [(family, family) for family in families if family]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(person__family_1=self.value())
+        return queryset
+
+
+class Family2Filter(SimpleListFilter):
+    title = 'Family 2'
+    parameter_name = 'person__family_2'
+
+    def lookups(self, request, model_admin):
+        families = set(Person.objects.values_list('family_2', flat=True).distinct())
+        return [(family, family) for family in families if family]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(person__family_2=self.value())
+        return queryset
 
 
 class RelationAdmin(ImportExportModelAdmin):
@@ -67,6 +104,18 @@ class RelationAdmin(ImportExportModelAdmin):
     search_fields = ('person__name', 'fath_refn__name', 'moth_refn__name', 'marr_spou_refn_1__name', 'marr_spou_refn_2__name', 'marr_spou_refn_3__name', 'marr_spou_refn_4__name')
     raw_id_fields = ('fath_refn', 'moth_refn', 'marr_spou_refn_1', 'marr_spou_refn_2', 'marr_spou_refn_3', 'marr_spou_refn_4')
     filter_horizontal = ('children_1', 'children_2', 'children_3', 'children_4')
+    list_filter = (Family1Filter, Family2Filter)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        allowed_families = request.user.allowed_families
+        return qs.filter(
+            person__family_1__in=allowed_families
+        ) | qs.filter(
+            person__family_2__in=allowed_families
+        )
 
     def display_children_1(self, obj):
         return ", ".join([child.name for child in obj.children_1.all()])

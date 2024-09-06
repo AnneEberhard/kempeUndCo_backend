@@ -84,6 +84,10 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
+    @property
+    def allowed_families(self):
+        return [self.family_1, self.family_2] if self.family_2 else [self.family_1]
+
     def __str__(self):
         """
         Return the email address of the user.

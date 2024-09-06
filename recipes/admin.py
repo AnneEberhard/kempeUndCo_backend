@@ -7,7 +7,15 @@ from recipes.models import Recipe
 class RecipeAdmin(ImportExportModelAdmin):
     model = Recipe
     list_display = ('id', 'title', 'author')
+    list_filter = ('family_1', 'family_2')
     exclude = ('image_1_thumbnail', 'image_2_thumbnail', 'image_3_thumbnail', 'image_4_thumbnail')
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        allowed_families = request.user.allowed_families
+        return qs.filter(family_1__in=allowed_families) | qs.filter(family_2__in=allowed_families)
 
 
 admin.site.register(Recipe, RecipeAdmin)

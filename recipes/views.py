@@ -61,10 +61,10 @@ class RecipeListView(generics.ListAPIView):
         user = self.request.user
         allowed_families = set()
 
-        for group in user.groups.all():
-            if group.name.startswith("Stammbaum "):
-                family_name = group.name.replace("Stammbaum ", "").lower()
-                allowed_families.add(family_name)
+        if user.family_1:
+            allowed_families.add(user.family_1.lower())
+        if user.family_2:
+            allowed_families.add(user.family_2.lower())
 
         return allowed_families
 
