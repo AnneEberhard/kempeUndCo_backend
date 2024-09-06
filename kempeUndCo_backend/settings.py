@@ -183,3 +183,23 @@ NO_REPLY_EMAIL = config('NO_REPLY_EMAIL')
 REPLY_TO_EMAIL = config('REPLY_TO_EMAIL')
 BACKEND_URL = config('BACKEND_URL', default='http://localhost:8000')
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:4200')
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        # Hier kannst du auch andere Handler hinzufügen (Dateien, etc.)
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

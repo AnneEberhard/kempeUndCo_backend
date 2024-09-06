@@ -37,7 +37,7 @@ class PersonAdmin(ImportExportModelAdmin):
             'classes': ('collapse',),  # Optional: macht diesen Abschnitt einklappbar
         }),
         ('Familiendaten', {
-            'fields': ('marr_spou_name_1', 'marr_spou_refn_1', 'fam_husb_1',
+            'fields': ('fath_refn', 'moth_refn', 'marr_spou_name_1', 'marr_spou_refn_1', 'fam_husb_1',
                 'fam_wife_1', 'marr_date_1', 'marr_plac_1', 'fam_chil_1',
                 'fam_marr_1', 'fam_stat_1',
                 'marr_spou_name_2', 'marr_spou_refn_2', 'fam_husb_2', 'fam_wife_2', 'marr_date_2',
