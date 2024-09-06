@@ -6,6 +6,7 @@ from kempeUndCo_backend.constants import FAMILY_CHOICES
 from PIL import Image
 import io
 from django.core.files.base import ContentFile
+import logging
 
 
 class Person(models.Model):
@@ -336,3 +337,57 @@ class Relation(models.Model):
     marr_date_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsdatum 4')
     marr_plac_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsort 4')
     fam_stat_4 = models.CharField(max_length=255, choices=FAMILY_STATUS_CHOICES, null=True, blank=True, verbose_name='Familienstand 4')
+
+    _updating_related = False
+
+    def save(self, *args, **kwargs):
+        if self._updating_related:
+            return
+
+        logger = logging.getLogger(__name__)
+
+        def update_or_create_relation_for_person(person, spouse=None, fath=None, moth=None, child=None):
+            logger.debug(f"Updating or creating relation for {person.name}. Spouse: {spouse}, Father: {fath}, Mother: {moth}, Child: {child}")
+            relation, created = Relation.objects.get_or_create(person=person)
+            # Ehepartner-Logik
+            if spouse:
+                spouse_refn = spouse.refn
+                logger.debug(f"Spouse refn: {spouse_refn}")
+                for i in range(1, 5):
+                    current_spouse = getattr(relation, f'marr_spou_refn_{i}')
+                    logger.debug(f"Current spouse for {f'marr_spou_refn_{i}'}: {current_spouse}")
+                    if not current_spouse or current_spouse.refn == spouse_refn:
+                        logger.debug(f"Setting {f'marr_spou_refn_{i}'} to {spouse}")
+                        setattr(relation, f'marr_spou_refn_{i}', spouse)
+                        setattr(relation, f'marr_date_{i}', getattr(self, f'marr_date_{i}'))
+                        setattr(relation, f'marr_plac_{i}', getattr(self, f'marr_plac_{i}'))
+                        break
+                    
+            # Vater/Mutter-Logik
+            if fath:
+                relation.fath_refn = fath.refn
+            if moth:
+                relation.moth_refn = moth.refn
+            # Kinder-Logik
+            if child:
+                for i in range(1, 5):
+                    if not getattr(relation, f'children_{i}').exists():
+                        getattr(relation, f'children_{i}').add(child)
+                        break
+
+            logger.debug(f"Saving relation: {relation}")            
+            relation._updating_related = True
+            relation.save()
+            relation._updating_related = False
+
+        # Relations für Ehepartner Y, Mutter Z und Vater A anlegen/aktualisieren
+        if self.marr_spou_refn_1:
+            update_or_create_relation_for_person(self.marr_spou_refn_1, spouse=self.person)
+        if self.marr_spou_refn_2:
+            update_or_create_relation_for_person(self.marr_spou_refn_2, spouse=self.person)
+        if self.moth_refn:
+            update_or_create_relation_for_person(self.moth_refn, child=self.person)
+        if self.fath_refn:
+            update_or_create_relation_for_person(self.fath_refn, child=self.person)
+
+        super().save(*args, **kwargs)

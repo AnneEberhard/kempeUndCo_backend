@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete, pre_save
 
 from .tasks import rename_image
-from .models import Person
+from .models import Person, Relation
 
 
 @receiver(post_save, sender=Person)
@@ -105,3 +105,113 @@ def delete_files_on_delete(sender, instance, **kwargs):
             file_path = file_field.path
             if os.path.exists(file_path):
                 os.remove(file_path)
+
+
+@receiver(pre_save, sender=Relation)
+def update_own_person_fields(sender, instance, **kwargs):
+    if instance.fath_refn:
+        print(instance.fath_refn.refn)
+        instance.person.fath_refn = instance.fath_refn.refn
+    if instance.moth_refn:
+        instance.person.moth_refn = instance.moth_refn.refn
+    if instance.marr_spou_refn_1:
+        instance.person.marr_spou_refn_1 = instance.marr_spou_refn_1.refn
+        instance.person.marr_date_1 = instance.marr_date_1
+        instance.person.marr_plac_1 = instance.marr_plac_1
+    if instance.marr_spou_refn_2:
+        instance.person.marr_spou_refn_2 = instance.marr_spou_refn_2.refn
+        instance.person.marr_date_2 = instance.marr_date_2
+        instance.person.marr_plac_2 = instance.marr_plac_2
+    if instance.marr_spou_refn_3:
+        instance.person.marr_spou_refn_3 = instance.marr_spou_refn_3.refn
+        instance.person.marr_date_3 = instance.marr_date_3
+        instance.person.marr_plac_3 = instance.marr_plac_3
+    if instance.marr_spou_refn_4:
+        instance.person.marr_spou_refn_4 = instance.marr_spou_refn_4.refn
+        instance.person.marr_date_4 = instance.marr_date_4
+        instance.person.marr_plac_4 = instance.marr_plac_4
+    if instance.children_1.exists():
+        instance.person.fam_chil_1 = ','.join(child.refn for child in instance.children_1.all())
+    if instance.children_2.exists():
+        instance.person.fam_chil_2 = ','.join(child.refn for child in instance.children_1.all())
+    if instance.children_3.exists():
+        instance.person.fam_chil_3 = ','.join(child.refn for child in instance.children_1.all())
+    if instance.children_4.exists():
+        instance.person.fam_chil_4 = ','.join(child.refn for child in instance.children_1.all())
+
+    instance.person.save()
+
+
+@receiver(pre_save, sender=Relation)
+def update_child_person_fields(sender, instance, **kwargs):
+    for child in instance.children_1.all():
+        if instance.person.sex == 'F':
+            child.moth_refn = instance.person.refn
+            if instance.marr_spou_refn_1:
+                child.fath_refn = instance.marr_spou_refn_1.refn
+        else:
+            child.fath_refn = instance.person.refn
+            if instance.marr_spou_refn_1:
+                child.moth_refn = instance.marr_spou_refn_1.refn
+        child.save()
+    for child in instance.children_2.all():
+        if instance.person.sex == 'F':
+            child.moth_refn = instance.person.refn
+            if instance.marr_spou_refn_2:
+                child.fath_refn = instance.marr_spou_refn_2.refn
+        else:
+            child.fath_refn = instance.person.refn
+            if instance.marr_spou_refn_2:
+                child.moth_refn = instance.marr_spou_refn_2.refn
+        child.save()
+    for child in instance.children_3.all():
+        if instance.person.sex == 'F':
+            child.moth_refn = instance.person.refn
+            if instance.marr_spou_refn_3:
+                child.fath_refn = instance.marr_spou_refn_3.refn
+        else:
+            child.fath_refn = instance.person.refn
+            if instance.marr_spou_refn_3:
+                child.moth_refn = instance.marr_spou_refn_3.refn
+        child.save()
+    for child in instance.children_4.all():
+        if instance.person.sex == 'F':
+            child.moth_refn = instance.person.refn
+            if instance.marr_spou_refn_4:
+                child.fath_refn = instance.marr_spou_refn_4.refn
+        else:
+            child.fath_refn = instance.person.refn
+            if instance.marr_spou_refn_4:
+                child.moth_refn = instance.marr_spou_refn_4.refn
+        child.save()
+
+
+@receiver(pre_save, sender=Relation)
+def update_spouse_person_fields(sender, instance, **kwargs):
+
+    def update_spouse(spouse_field, spouse_date, spouse_place, children_field, next_spouse_field):
+        spouse = getattr(instance, spouse_field)
+        if spouse:
+            if not getattr(spouse, spouse_field) or getattr(spouse, spouse_field) == instance.person.refn:
+                setattr(spouse, spouse_field, instance.person.refn)
+                setattr(spouse, spouse_date, getattr(instance, spouse_date))
+                setattr(spouse, spouse_place, getattr(instance, spouse_place))
+                setattr(spouse, children_field, getattr(instance.person, children_field))
+            elif getattr(spouse, next_spouse_field) in [None, '']:
+                setattr(spouse, next_spouse_field, instance.person.refn)
+            spouse.save()
+
+            if spouse:
+                for i in range(1, 5):
+                    if not getattr(spouse, f'marr_spou_refn_{i}') or getattr(spouse, f'marr_spou_refn_{i}') == instance.person.refn:
+                        setattr(spouse, f'marr_spou_refn_{i}', instance.person.refn)
+                        setattr(spouse, f'marr_date_{i}', getattr(instance, spouse_date))
+                        setattr(spouse, f'marr_plac_{i}', getattr(instance, spouse_place))
+                        setattr(spouse, f'fam_chil_{i}', getattr(instance.person, children_field))
+                        spouse.save()
+                        break
+
+    update_spouse('marr_spou_refn_1', 'marr_date_1', 'marr_plac_1', 'fam_chil_1', 'marr_spou_refn_2')
+    update_spouse('marr_spou_refn_2', 'marr_date_2', 'marr_plac_2', 'fam_chil_2', 'marr_spou_refn_3')
+    update_spouse('marr_spou_refn_3', 'marr_date_3', 'marr_plac_3', 'fam_chil_3', 'marr_spou_refn_4')
+    update_spouse('marr_spou_refn_4', 'marr_date_4', 'marr_plac_4', 'fam_chil_4', None)
