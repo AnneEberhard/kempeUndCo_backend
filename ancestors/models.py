@@ -161,7 +161,7 @@ class Person(models.Model):
         default='no',
         verbose_name='Vertraulichkeit'
     )
-    family_1 = models.CharField(choices=FAMILY_CHOICES, max_length=100, blank=False, default='kempe', verbose_name='Stammbaum 1')
+    family_1 = models.CharField(choices=FAMILY_CHOICES, max_length=100, blank=False, verbose_name='Stammbaum 1')
     family_2 = models.CharField(max_length=255, choices=FAMILY_CHOICES, blank=True, null=True, verbose_name='Stammbaum 2')
 
     creation_date = models.DateTimeField(default=timezone.now, verbose_name='Erstellungsdatum')
