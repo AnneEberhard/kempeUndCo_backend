@@ -1,9 +1,3 @@
-Create Groups:
-    run: python manage.py create_groups
-        file can be found: kempeUndCo_backend/accounts/management/commands/create_groups.py
-    then run (for existing users): python manage.py assign_users_to_groups
-        file can be found: kempeUndCo_backend/accounts/management/commands/assign_users_to_groups.py
-
 Compress existing images: run script_python compress_images.py
     it will overwrite the images with a smaller version for better performance
     CAVE: no redis installed, no compression wil upload feasible due to thumbnails
@@ -63,6 +57,7 @@ ADMIN View
 1. moved exported fields to resources.py
 2. excluded view of not used fields in person (or double with now related data, such as father)
 3. changed admin.py view von exclude to fieldsets
+4. added queryset based on CustomUser.family_x
 
 Created by and last modified
 1. added to person model:
@@ -84,6 +79,14 @@ saved data set: Relation-2024-08-05_2_children_cleaned_up
 
 BEWARE: family_tree_ was changed to family_
     saved data set: Person-2024-08-29_family
+
+BEWARE: Groups was taken out for usability reasons
+Create Groups:
+    run: python manage.py create_groups
+        file can be found: kempeUndCo_backend/accounts/management/commands/create_groups.py
+    then run (for existing users): python manage.py assign_users_to_groups
+        file can be found: kempeUndCo_backend/accounts/management/commands/assign_users_to_groups.py
+
 
 Backup:
     exclude = ('fath_name', 'fath_refn', 'moth_name', 'moth_refn',

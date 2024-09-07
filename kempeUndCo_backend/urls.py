@@ -9,7 +9,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from accounts.views import ActivationView, LoginView, PasswordResetConfirmView, PasswordResetRequestView, RegistrationView
+from accounts.views import ActivationView, BlacklistTokenView, LoginView, PasswordResetConfirmView, PasswordResetRequestView, RegistrationView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from drf_yasg.views import get_schema_view
@@ -35,6 +35,7 @@ urlpatterns = [
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', RegistrationView.as_view(), name='register'),
     path('activate/<uidb64>/<token>/', ActivationView.as_view(), name='activate'),
+    path('token/blacklist/', BlacklistTokenView.as_view(), name='token_blacklist'),
     path('password-reset-request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('api/discussions/', include('discussions.urls')),

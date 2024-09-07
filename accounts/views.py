@@ -14,6 +14,7 @@ from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
 from .models import CustomUser
 from .serializers import PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class LoginView(TokenObtainPairView):
@@ -326,3 +327,15 @@ class PasswordResetConfirmView(APIView):
             return Response({'success': 'Das Passwort wurde erfolgreich zurückgesetzt.'}, status=status.HTTP_200_OK)
         except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
             return Response({'error': 'Ungültiger Link.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BlacklistTokenView(APIView):
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
