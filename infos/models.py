@@ -72,11 +72,11 @@ class Info(models.Model):
         """
         self.content = clean_html(self.content)
 
-       # for i in range(1, 5):
-       #     image_field = getattr(self, f'image_{i}')
-       #     if image_field and hasattr(image_field, 'file'):
-       #         compressed_image = self.compress_image(image_field.file)
-       #         setattr(self, f'image_{i}', compressed_image)
+        # for i in range(1, 5):
+        #     image_field = getattr(self, f'image_{i}')
+        #     if image_field and hasattr(image_field, 'file'):
+        #        compressed_image = self.compress_image(image_field.file)
+        #         setattr(self, f'image_{i}', compressed_image)
 
         if self.pk:
             old_info = Info.objects.get(pk=self.pk)

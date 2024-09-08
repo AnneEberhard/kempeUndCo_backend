@@ -206,7 +206,6 @@ class Person(models.Model):
         output.seek(0)
         return ContentFile(output.read(), image_file.name)
 
-
     def save(self, *args, **kwargs):
         """
         Save the Person instance including metadata and automatic birth/death date generation.
@@ -219,11 +218,11 @@ class Person(models.Model):
         """
         user = kwargs.pop('user', None)
 
-       # for i in range(1, 5):
-       #     image_field = getattr(self, f'image_{i}')
-       #     if image_field and hasattr(image_field, 'file'):
-       #         compressed_image = self.compress_image(image_field.file)
-       #         setattr(self, f'image_{i}', compressed_image)
+        # for i in range(1, 5):
+        #     image_field = getattr(self, f'image_{i}')
+        #     if image_field and hasattr(image_field, 'file'):
+        #         compressed_image = self.compress_image(image_field.file)
+        #         setattr(self, f'image_{i}', compressed_image)
 
         if not self.pk:
             if not self.refn:

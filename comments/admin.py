@@ -39,7 +39,7 @@ class CommentsAdmin(ImportExportModelAdmin):
     model = Comment
     list_display = ('id', 'author', 'info', 'recipe')
     list_filter = (InfoFamilyFilter, RecipeFamilyFilter)
-    
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
