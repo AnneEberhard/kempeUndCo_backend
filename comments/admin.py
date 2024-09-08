@@ -8,6 +8,12 @@ from recipes.models import Recipe
 
 
 class InfoFamilyFilter(SimpleListFilter):
+    """
+    A Django admin filter for filtering `Info` objects by their associated `family_1` or `family_2` fields.
+
+    The filter displays distinct family values from the `Info` model, allowing admin users
+    to filter the queryset based on the selected family.
+    """
     title = 'Info Family'
     parameter_name = 'info__family_1'
 
@@ -22,6 +28,12 @@ class InfoFamilyFilter(SimpleListFilter):
 
 
 class RecipeFamilyFilter(SimpleListFilter):
+    """
+    A Django admin filter for filtering `Recipe` objects by their associated `family_1` or `family_2` fields.
+
+    The filter displays distinct family values from the `Recipe` model, allowing admin users
+    to filter the queryset based on the selected family.
+    """
     title = 'Recipe Family'
     parameter_name = 'recipe__family_1'
 
@@ -36,6 +48,12 @@ class RecipeFamilyFilter(SimpleListFilter):
 
 
 class CommentsAdmin(ImportExportModelAdmin):
+    """
+    Custom Django admin configuration for the `Comment` model.
+
+    Displays comments with additional filters for `Info` and `Recipe` families. 
+    Filters the queryset based on the logged-in user's allowed families unless the user is a superuser.
+    """
     model = Comment
     list_display = ('id', 'author', 'info', 'recipe')
     list_filter = (InfoFamilyFilter, RecipeFamilyFilter)
