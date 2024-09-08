@@ -257,7 +257,7 @@ def update_or_create_spouse_relation(sender, instance, created, **kwargs):
                     setattr(spouse_relation, date_field_spouse, getattr(instance, date_field))
                     setattr(spouse_relation, plac_field_spouse, getattr(instance, plac_field))
                     break
-            
+
             spouse_relation.save()
             spouse_relation._updating = False
 
@@ -268,7 +268,7 @@ def update_or_create_child_relation(sender, instance, action, reverse, model, pk
         for child_id in pk_set:
             child = Person.objects.get(pk=child_id)
             relation, created = Relation.objects.get_or_create(person=child)
-            
+
             # Verhindere Endlosschleifen
             relation._updating = True
 
@@ -292,12 +292,12 @@ def update_parent_relations(sender, instance, **kwargs):
     # Verhindere Endlosschleifen
     if getattr(instance, '_updating', False):
         return
-    
+
     # Logik für Mutter (moth_refn)
     if instance.moth_refn:
         mother_relation, created = Relation.objects.get_or_create(person=instance.moth_refn)
         mother_relation._updating = True
-        
+
         # Finde den passenden Ehemann (fath_refn)
         if mother_relation.marr_spou_refn_1 is None or mother_relation.marr_spou_refn_1 == instance.fath_refn:
             mother_relation.marr_spou_refn_1 = instance.fath_refn
@@ -311,15 +311,15 @@ def update_parent_relations(sender, instance, **kwargs):
         elif mother_relation.marr_spou_refn_4 is None or mother_relation.marr_spou_refn_4 == instance.fath_refn:
             mother_relation.marr_spou_refn_4 = instance.fath_refn
             mother_relation.children_4.add(instance.person)
-        
+
         mother_relation.save()
         mother_relation._updating = False
-    
+
     # Logik für Vater (fath_refn)
     if instance.fath_refn:
         father_relation, created = Relation.objects.get_or_create(person=instance.fath_refn)
         father_relation._updating = True
-        
+
         # Finde die passende Ehefrau (moth_refn)
         if father_relation.marr_spou_refn_1 is None or father_relation.marr_spou_refn_1 == instance.moth_refn:
             father_relation.marr_spou_refn_1 = instance.moth_refn
@@ -333,7 +333,6 @@ def update_parent_relations(sender, instance, **kwargs):
         elif father_relation.marr_spou_refn_4 is None or father_relation.marr_spou_refn_4 == instance.moth_refn:
             father_relation.marr_spou_refn_4 = instance.moth_refn
             father_relation.children_4.add(instance.person)
-        
+
         father_relation.save()
         father_relation._updating = False
-

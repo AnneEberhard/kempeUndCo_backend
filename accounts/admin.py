@@ -14,14 +14,13 @@ class CustomUserAdmin(UserAdmin):
         return ', '.join(obj.allowed_families)
     get_allowed_families.short_description = 'Allowed Families'
 
-
     def get_queryset(self, request):
         # Beschränke den Queryset auf Benutzer, die nicht superuser sind
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
         return qs.filter(is_superuser=False)
- 
+
     def get_form(self, request, obj=None, **kwargs):
         # Verhindere, dass staff-Benutzer Berechtigungen ändern können
         form = super().get_form(request, obj, **kwargs)

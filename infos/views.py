@@ -73,9 +73,7 @@ class InfoListView(generics.ListAPIView):
         if not allowed_families:
             return Info.objects.none()
 
-        queryset = Info.objects.filter(
-            Q(family_1__in=allowed_families) | Q(family_2__in=allowed_families)
-        ).distinct()
+        queryset = Info.objects.filter(Q(family_1__in=allowed_families) | Q(family_2__in=allowed_families)).distinct()
 
         return queryset
 
@@ -127,7 +125,6 @@ class InfoDetailView(APIView):
                 if thumbnail and os.path.isfile(thumbnail.path):
                     os.remove(thumbnail.path)
                     setattr(info, thumbnail_field, None)
-                    
 
         serializer = InfoSerializer(info, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():

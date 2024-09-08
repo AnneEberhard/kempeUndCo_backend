@@ -32,7 +32,7 @@ class DiscussionEntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DiscussionEntry
-        fields = ['id', 'author', 'title', 'content', 'created_at', 'updated_at','image_1', 'image_2', 'image_3', 'image_4',
+        fields = ['id', 'author', 'title', 'content', 'created_at', 'updated_at', 'image_1', 'image_2', 'image_3', 'image_4',
             'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url']
 
     def get_image_1_url(self, obj):

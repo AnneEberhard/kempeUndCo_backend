@@ -61,26 +61,25 @@ def set_default_staff_permissions(sender, instance, created, **kwargs):
         instance.user_permissions.clear()
 
 
-
 # @receiver(post_save, sender=CustomUser)
 # def assign_user_to_groups(sender, instance, created, **kwargs):
 #     global processing_signal
-# 
+#
 #     if not processing_signal:
 #         processing_signal = True
-# 
+#
 #         # Lösche alle bestehenden Gruppenmitgliedschaften
 #         instance.groups.clear()
-# 
+#
 #         # Bestimme die Gruppen basierend auf den family_-Werten
 #         families = {instance.family_1, instance.family_2}
-# 
+#
 #         for family in families:
 #             if family:
 #                 group_name = f"Stammbaum {family.capitalize()}"
 #                 group, created = Group.objects.get_or_create(name=group_name)
 #                 instance.groups.add(group)
-# 
+#
 #         processing_signal = True
 #         instance.save()
 #         processing_signal = False
