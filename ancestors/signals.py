@@ -1,7 +1,7 @@
 import os
 from django.conf import settings
 from django.dispatch import receiver
-from django.db.models.signals import post_save, post_delete, pre_save
+from django.db.models.signals import post_save, post_delete, pre_save, m2m_changed
 
 from .tasks import rename_image
 from .models import Person, Relation
@@ -107,7 +107,7 @@ def delete_files_on_delete(sender, instance, **kwargs):
                 os.remove(file_path)
 
 
-@receiver(pre_save, sender=Relation)
+@receiver(post_save, sender=Relation)
 def update_own_person_fields(sender, instance, **kwargs):
     if instance.fath_refn:
         print(instance.fath_refn.refn)
@@ -142,7 +142,7 @@ def update_own_person_fields(sender, instance, **kwargs):
     instance.person.save()
 
 
-@receiver(pre_save, sender=Relation)
+@receiver(post_save, sender=Relation)
 def update_child_person_fields(sender, instance, **kwargs):
     for child in instance.children_1.all():
         if instance.person.sex == 'F':
@@ -186,7 +186,7 @@ def update_child_person_fields(sender, instance, **kwargs):
         child.save()
 
 
-@receiver(pre_save, sender=Relation)
+@receiver(post_save, sender=Relation)
 def update_spouse_person_fields(sender, instance, **kwargs):
 
     def update_spouse(spouse_field, spouse_date, spouse_place, children_field, next_spouse_field):
@@ -215,3 +215,125 @@ def update_spouse_person_fields(sender, instance, **kwargs):
     update_spouse('marr_spou_refn_2', 'marr_date_2', 'marr_plac_2', 'fam_chil_2', 'marr_spou_refn_3')
     update_spouse('marr_spou_refn_3', 'marr_date_3', 'marr_plac_3', 'fam_chil_3', 'marr_spou_refn_4')
     update_spouse('marr_spou_refn_4', 'marr_date_4', 'marr_plac_4', 'fam_chil_4', None)
+
+
+@receiver(post_save, sender=Relation)
+def update_or_create_spouse_relation(sender, instance, created, **kwargs):
+    if getattr(instance, '_updating', False):
+        return
+
+    spouse_fields_instance = [
+        ('marr_spou_refn_1', 'marr_date_1', 'marr_plac_1'),
+        ('marr_spou_refn_2', 'marr_date_2', 'marr_plac_2'),
+        ('marr_spou_refn_3', 'marr_date_3', 'marr_plac_3'),
+        ('marr_spou_refn_4', 'marr_date_4', 'marr_plac_4')
+    ]
+
+    for spou_refn_field, date_field, plac_field in spouse_fields_instance:
+        spouse_refn = getattr(instance, spou_refn_field)
+        if spouse_refn:
+            spouse_relation, created = Relation.objects.get_or_create(person=spouse_refn)
+
+            # Verhindere eine Endlosschleife
+            spouse_relation._updating = True
+
+            spouse_fields_spouse = [
+                ('marr_spou_refn_1', 'marr_date_1', 'marr_plac_1'),
+                ('marr_spou_refn_2', 'marr_date_2', 'marr_plac_2'),
+                ('marr_spou_refn_3', 'marr_date_3', 'marr_plac_3'),
+                ('marr_spou_refn_4', 'marr_date_4', 'marr_plac_4')
+            ]
+
+            # Durchlaufe die Felder beim Ehepartner, um das entsprechende Datum und den Ort zu setzen
+            for spou_refn_field_spouse, date_field_spouse, plac_field_spouse in spouse_fields_spouse:
+                if getattr(spouse_relation, spou_refn_field_spouse) == instance.person:
+                    if getattr(instance, date_field):
+                        setattr(spouse_relation, date_field_spouse, getattr(instance, date_field))
+                    if getattr(instance, plac_field):
+                        setattr(spouse_relation, plac_field_spouse, getattr(instance, plac_field))
+                    break
+                elif not getattr(spouse_relation, spou_refn_field_spouse):
+                    setattr(spouse_relation, spou_refn_field_spouse, instance.person)
+                    setattr(spouse_relation, date_field_spouse, getattr(instance, date_field))
+                    setattr(spouse_relation, plac_field_spouse, getattr(instance, plac_field))
+                    break
+            
+            spouse_relation.save()
+            spouse_relation._updating = False
+
+
+@receiver(m2m_changed, sender=Relation.children_1.through)
+def update_or_create_child_relation(sender, instance, action, reverse, model, pk_set, **kwargs):
+    if action in ["post_add", "post_remove", "post_clear"]:
+        for child_id in pk_set:
+            child = Person.objects.get(pk=child_id)
+            relation, created = Relation.objects.get_or_create(person=child)
+            
+            # Verhindere Endlosschleifen
+            relation._updating = True
+
+            if instance.person.sex == 'F':
+                relation.moth_refn = instance.person
+            elif instance.person.sex == 'M':
+                relation.fath_refn = instance.person
+            else:
+                # Wenn das Geschlecht 'D' ist oder nicht angegeben, finde eine freie Stelle
+                if not relation.fath_refn:
+                    relation.fath_refn = instance.person
+                elif not relation.moth_refn:
+                    relation.moth_refn = instance.person
+
+            relation.save()
+            relation._updating = False
+
+
+@receiver(post_save, sender=Relation)
+def update_parent_relations(sender, instance, **kwargs):
+    # Verhindere Endlosschleifen
+    if getattr(instance, '_updating', False):
+        return
+    
+    # Logik für Mutter (moth_refn)
+    if instance.moth_refn:
+        mother_relation, created = Relation.objects.get_or_create(person=instance.moth_refn)
+        mother_relation._updating = True
+        
+        # Finde den passenden Ehemann (fath_refn)
+        if mother_relation.marr_spou_refn_1 is None or mother_relation.marr_spou_refn_1 == instance.fath_refn:
+            mother_relation.marr_spou_refn_1 = instance.fath_refn
+            mother_relation.children_1.add(instance.person)
+        elif mother_relation.marr_spou_refn_2 is None or mother_relation.marr_spou_refn_2 == instance.fath_refn:
+            mother_relation.marr_spou_refn_2 = instance.fath_refn
+            mother_relation.children_2.add(instance.person)
+        elif mother_relation.marr_spou_refn_3 is None or mother_relation.marr_spou_refn_3 == instance.fath_refn:
+            mother_relation.marr_spou_refn_3 = instance.fath_refn
+            mother_relation.children_3.add(instance.person)
+        elif mother_relation.marr_spou_refn_4 is None or mother_relation.marr_spou_refn_4 == instance.fath_refn:
+            mother_relation.marr_spou_refn_4 = instance.fath_refn
+            mother_relation.children_4.add(instance.person)
+        
+        mother_relation.save()
+        mother_relation._updating = False
+    
+    # Logik für Vater (fath_refn)
+    if instance.fath_refn:
+        father_relation, created = Relation.objects.get_or_create(person=instance.fath_refn)
+        father_relation._updating = True
+        
+        # Finde die passende Ehefrau (moth_refn)
+        if father_relation.marr_spou_refn_1 is None or father_relation.marr_spou_refn_1 == instance.moth_refn:
+            father_relation.marr_spou_refn_1 = instance.moth_refn
+            father_relation.children_1.add(instance.person)
+        elif father_relation.marr_spou_refn_2 is None or father_relation.marr_spou_refn_2 == instance.moth_refn:
+            father_relation.marr_spou_refn_2 = instance.moth_refn
+            father_relation.children_2.add(instance.person)
+        elif father_relation.marr_spou_refn_3 is None or father_relation.marr_spou_refn_3 == instance.moth_refn:
+            father_relation.marr_spou_refn_3 = instance.moth_refn
+            father_relation.children_3.add(instance.person)
+        elif father_relation.marr_spou_refn_4 is None or father_relation.marr_spou_refn_4 == instance.moth_refn:
+            father_relation.marr_spou_refn_4 = instance.moth_refn
+            father_relation.children_4.add(instance.person)
+        
+        father_relation.save()
+        father_relation._updating = False
+

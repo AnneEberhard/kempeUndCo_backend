@@ -56,8 +56,10 @@ def set_default_staff_permissions(sender, instance, created, **kwargs):
             )
             if permission not in instance.user_permissions.all():
                 instance.user_permissions.add(permission)
-    else:
+    elif not instance.is_superuser:
+        # Clear permissions only if the user is not a superuser
         instance.user_permissions.clear()
+
 
 
 # @receiver(post_save, sender=CustomUser)
