@@ -1,4 +1,3 @@
-from django.contrib.auth.models import Group
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -16,16 +15,13 @@ class DiscussionListViewTests(TestCase):
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
-            username='testuser@example.com'
+            username='testuser@example.com',
+            family_1='smith'
         )
         self.user.is_active = True
         self.user.save()
         self.client.force_authenticate(user=self.user)
         self.url = reverse('get_all_discussions')
-
-        # Create groups and assign to the user
-        group = Group.objects.create(name="Stammbaum Smith")
-        self.user.groups.add(group)
 
         # Create Persons and Discussions
         self.person1 = Person.objects.create(name='John Smith', family_1='smith')
