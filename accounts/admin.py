@@ -21,7 +21,7 @@ class CustomUserAdmin(UserAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(is_superuser=False)
-
+ 
     def get_form(self, request, obj=None, **kwargs):
         # Verhindere, dass staff-Benutzer Berechtigungen ändern können
         form = super().get_form(request, obj, **kwargs)
