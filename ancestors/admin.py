@@ -7,10 +7,32 @@ from django.contrib.admin import SimpleListFilter
 
 
 class PersonAdmin(ImportExportModelAdmin):
+    """
+    Admin configuration for the `Person` model.
+
+    This class customizes the admin interface by:
+    - Displaying specific fields in the list and filter views.
+    - Providing search functionality for `name` and `id`.
+    - Making certain fields read-only.
+    - Organizing fields into collapsible sections for better organization.
+    - Filtering the queryset based on the user's allowed families, unless the user is a superuser.
+    - Restricting delete permissions to superusers only.
+    - Customizing the save behavior to include the current user.
+
+    **Fieldsets:**
+    - `None`: Basic person information.
+    - `Geburts- und Sterbedaten`: Birth and death details.
+    - `Taufe und Beerdigung`: Baptism and burial details.
+    - `Name und Notizen`: Names and notes.
+    - `Bilddateien`: Image files, collapsible.
+    - `Vertraulichkeit`: Confidentiality settings.
+    - `Metadaten`: Metadata, collapsible.
+    - `Familiendaten`: Family data, collapsible.
+    """
     resource_class = PersonResource
     list_display = ('id', 'name', 'note', 'family_1', 'family_2', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
     list_filter = ('family_1', 'family_2')
-    search_fields = ('name', 'id')  # Felder, die durchsuchbar sind
+    search_fields = ('name', 'id')
     readonly_fields = ('name', 'refn', 'creation_date', 'last_modified_date', 'created_by', 'last_modified_by')
 
     fieldsets = (
@@ -67,6 +89,9 @@ class PersonAdmin(ImportExportModelAdmin):
 
 
 class Family1Filter(SimpleListFilter):
+    """
+    Custom filter for the `RelationAdmin` to filter relations by `family_1` of the related person.
+    """
     title = 'Family 1'
     parameter_name = 'person__family_1'
 
@@ -81,6 +106,9 @@ class Family1Filter(SimpleListFilter):
 
 
 class Family2Filter(SimpleListFilter):
+    """
+    Custom filter for the `RelationAdmin` to filter relations by `family_2` of the related person.
+    """
     title = 'Family 2'
     parameter_name = 'person__family_2'
 
@@ -95,6 +123,19 @@ class Family2Filter(SimpleListFilter):
 
 
 class RelationAdmin(ImportExportModelAdmin):
+    """
+    Admin configuration for the `Relation` model.
+
+    This class customizes the admin interface by:
+    - Displaying specific fields in the list view.
+    - Providing search functionality across related persons and their relations.
+    - Using `raw_id_fields` for foreign key relations to improve performance.
+    - Enabling horizontal filtering for the `children` fields.
+    - Adding custom filters for `family_1` and `family_2` of the related person.
+    - Restricting queryset based on the user's allowed families unless the user is a superuser.
+    - Displaying children names in a comma-separated list for each marriage.
+    - Restricting delete permissions to superusers only.
+    """
     resource_class = RelationResource
     list_display = ('person', 'fath_refn', 'moth_refn',
                     'marr_spou_refn_1', 'display_children_1',
