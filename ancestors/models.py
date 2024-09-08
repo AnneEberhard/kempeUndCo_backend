@@ -72,7 +72,7 @@ class Person(models.Model):
     uid = models.CharField(max_length=255, null=True, blank=True, verbose_name='UID')
     surn = models.CharField(max_length=255, null=True, blank=True, verbose_name='Nachname')
     givn = models.CharField(max_length=255, null=True, blank=True, verbose_name='Vorname')
-    sex = models.CharField(max_length=10, choices=SEX_CHOICES, null=True, blank=True, verbose_name='Geschlecht')
+    sex = models.CharField(max_length=10, choices=SEX_CHOICES, default='D', verbose_name='Geschlecht')
     occu = models.CharField(max_length=255, null=True, blank=True, verbose_name='Beruf')
     chan_date = models.CharField(max_length=255, null=True, blank=True, verbose_name='Änderungsdatum')
     chan_date_time = models.CharField(max_length=255, null=True, blank=True, verbose_name='Änderungsdatum und -uhrzeit')
