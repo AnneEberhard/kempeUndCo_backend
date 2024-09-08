@@ -5,7 +5,6 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Recipe
 from accounts.models import CustomUser
-from django.contrib.auth.models import Group
 
 
 class RecipeViewsTestCase(TestCase):
@@ -19,38 +18,37 @@ class RecipeViewsTestCase(TestCase):
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
-            username='testuser@example.com')
+            username='testuser@example.com',
+            family_1='kempe')
         self.user.is_active = True
         self.user.save()
         self.other_user = self.user_model.objects.create_user(
             email='otheruser@example.com',
             password='otherpassword',
-            username='otheruser@example.com')
+            username='otheruser@example.com',
+            family_1='huenten')
         self.other_user.is_active = True
         self.other_user.save()
+        self.client.force_authenticate(user=self.user)
 
         # Create recipes
         self.recipe1 = Recipe.objects.create(
             title='Recipe 1',
             content='Content for recipe 1',
             author=self.user,
-            family_1='tree1'
+            family_1='kempe'
         )
         self.recipe2 = Recipe.objects.create(
             title='Recipe 2',
             content='Content for recipe 2',
             author=self.other_user,
-            family_1='tree2'
+            family_1='huenten'
         )
 
         # URLs
         self.create_url = reverse('recipe-create')
         self.list_url = reverse('recipe-list')
         self.detail_url = reverse('recipe-detail', args=[self.recipe1.pk])
-
-        group, created = Group.objects.get_or_create(name='Stammbaum Tree1')
-        self.user.groups.add(group)
-        self.client.force_authenticate(user=self.user)
 
     def test_create_recipe(self):
         """
@@ -59,6 +57,7 @@ class RecipeViewsTestCase(TestCase):
         data = {
             'title': 'New Recipe',
             'content': 'Content for new recipe',
+            'family_1': 'kempe'
         }
         response = self.client.post(self.create_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -122,4 +121,4 @@ class RecipeViewsTestCase(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 0)  # The other user should not see recipes from the testuser's allowed family trees
+        self.assertEqual(len(response.json()), 1)  # The other user should not see recipes from the testuser's allowed family trees

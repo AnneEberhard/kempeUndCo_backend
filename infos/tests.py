@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from django.contrib.auth.models import Group
 from .models import Info
 from accounts.models import CustomUser
 
@@ -16,13 +15,12 @@ class InfoTests(TestCase):
         self.user = self.user_model.objects.create_user(
             username='testuser',
             email="testuser@example.com",
-            password='testpassword'
+            password='testpassword',
+            family_1='kempe'
         )
         self.user.is_active = True
         self.user.save()
         self.client.force_authenticate(user=self.user)
-        group, created = Group.objects.get_or_create(name='Stammbaum Kempe')
-        self.user.groups.add(group)
 
         # Create an Info instance
         self.info = Info.objects.create(
@@ -42,6 +40,7 @@ class InfoTests(TestCase):
         data = {
             'title': 'New Info',
             'content': 'Content for new info',
+            'family_1': 'kempe'
         }
         response = self.client.post(self.create_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

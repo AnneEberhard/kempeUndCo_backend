@@ -1,4 +1,3 @@
-from django.contrib.auth.models import Group
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -15,14 +14,11 @@ class PersonListCreateViewTests(TestCase):
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
-            username='testuser@example.com')
+            username='testuser@example.com',
+            family_1='smith')
         self.user.is_active = True
         self.user.save()
         self.client.force_authenticate(user=self.user)
-
-        # Create a group and assign it to the user
-        group = Group.objects.create(name="Stammbaum Smith")
-        self.user.groups.add(group)
 
         # Create Persons
         self.person1 = Person.objects.create(givn='John', surn='Smith', family_1='smith', confidential='none')
@@ -72,14 +68,11 @@ class PersonDetailViewTests(TestCase):
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
-            username='testuser@example.com')
+            username='testuser@example.com',
+            family_1='smith')
         self.user.is_active = True
         self.user.save()
         self.client.force_authenticate(user=self.user)
-
-        # Create a group and assign it to the user
-        group = Group.objects.create(name="Stammbaum Smith")
-        self.user.groups.add(group)
 
         # Create a Person
         self.person1 = Person.objects.create(givn='John', surn='Smith', family_1='smith', confidential='none')
@@ -118,15 +111,12 @@ class RelationListViewTests(TestCase):
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
-            username='testuser@example.com'
+            username='testuser@example.com',
+            family_1='smith'
         )
         self.user.is_active = True
         self.user.save()
         self.client.force_authenticate(user=self.user)
-
-        # Erstelle eine Gruppe und füge den Benutzer hinzu
-        group = Group.objects.create(name="Stammbaum Smith")
-        self.user.groups.add(group)
 
         # Erstelle Person-Instanzen
         self.person1 = Person.objects.create(givn='John', surn='Smith', family_1='smith', confidential='none')
@@ -164,15 +154,12 @@ class RelationDetailViewTests(TestCase):
         self.user = self.user_model.objects.create_user(
             email='testuser@example.com',
             password='testpassword',
-            username='testuser@example.com'
+            username='testuser@example.com',
+            family_1='smith'
         )
         self.user.is_active = True
         self.user.save()
         self.client.force_authenticate(user=self.user)
-
-        # Erstelle eine Gruppe und füge den Benutzer hinzu
-        group = Group.objects.create(name="Stammbaum Smith")
-        self.user.groups.add(group)
 
         # Erstelle Person-Instanzen
         self.person1 = Person.objects.create(givn='John', surn='Smith', family_1='smith', confidential='none')
