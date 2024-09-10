@@ -23,5 +23,5 @@ def clean_html(content):
         tags=ALLOWED_TAGS,
         attributes=ALLOWED_ATTRIBUTES,
         strip=True,
-        css_sanitizer=css_sanitizer
+        # css_sanitizer=css_sanitizer
     )
