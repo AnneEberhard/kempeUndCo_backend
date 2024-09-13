@@ -32,7 +32,7 @@ class PersonAdmin(ImportExportModelAdmin):
     resource_class = PersonResource
     list_display = ('id', 'name', 'note', 'family_1', 'family_2', 'birt_date', 'deat_date', 'confidential')  # Felder, die in der Listenansicht angezeigt werden
     list_filter = ('family_1', 'family_2')
-    search_fields = ('name', 'id')
+    search_fields = ('name', 'id', 'refn')
     readonly_fields = ('name', 'refn', 'creation_date', 'last_modified_date', 'created_by', 'last_modified_by')
 
     fieldsets = (
