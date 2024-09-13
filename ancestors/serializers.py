@@ -189,7 +189,8 @@ class PersonListSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'surn',
-            'givn'
+            'givn',
+            'refn'
         ]
 
     def to_representation(self, instance):
