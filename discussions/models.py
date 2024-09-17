@@ -94,6 +94,9 @@ class DiscussionEntry(models.Model):
 
         super().save(*args, **kwargs)
 
+        self.discussion.updated_at = self.updated_at
+        self.discussion.save(update_fields=['updated_at'])
+
     def create_thumbnail(self, image_field, thumbnail_field_name):
         """Erstellt ein Thumbnail für das gegebene Bildfeld."""
         with Image.open(image_field) as img:

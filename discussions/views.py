@@ -126,7 +126,7 @@ class DiscussionEntryDetailView(views.APIView):
     def get(self, request, pk, *args, **kwargs):
         entry = self.get_object(pk)
         if entry:
-            serializer = DiscussionEntrySerializer(entry)
+            serializer = DiscussionEntrySerializer(entry, context={'request': request})
             return Response(serializer.data)
         return Response({'error': 'Discussion entry not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -135,7 +135,7 @@ class DiscussionEntryDetailView(views.APIView):
         if entry:
             if entry.author != request.user:
                 return Response({'error': 'You are not the author of this entry'}, status=status.HTTP_403_FORBIDDEN)
-            serializer = DiscussionEntrySerializer(entry, data=request.data, partial=True)
+            serializer = DiscussionEntrySerializer(entry, data=request.data, partial=True, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
