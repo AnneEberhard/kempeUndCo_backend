@@ -216,14 +216,16 @@ class PersonListSerializer(serializers.ModelSerializer):
                 'id': instance.id,
                 'name': 'vertraulich',
                 'surn': '',
-                'givn': ''
+                'givn': '',
+                'refn': ''
             }
         elif instance.confidential == 'restricted':
             return {
                 'id': instance.id,
                 'name': instance.name,
                 'surn': '',
-                'givn': ''
+                'givn': '',
+                'refn': instance.refn
             }
         return representation
 
