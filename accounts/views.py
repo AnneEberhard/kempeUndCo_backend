@@ -13,8 +13,9 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
 from .models import CustomUser
-from .serializers import PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
+from .serializers import ChangePasswordSerializer, PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
 
 class LoginView(TokenObtainPairView):
@@ -330,6 +331,12 @@ class PasswordResetConfirmView(APIView):
 
 
 class BlacklistTokenView(APIView):
+    """
+    API view for blacklisting a refresh token.
+
+    Processes a POST request containing a refresh token, which is then blacklisted to invalidate the token.
+    Returns an HTTP 205 status code upon success, or an HTTP 400 status code if an error occurs.
+    """
     def post(self, request):
         try:
             refresh_token = request.data["refresh"]
@@ -339,3 +346,21 @@ class BlacklistTokenView(APIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePasswordView(APIView):
+    """
+    API view for changing a user's password.
+
+    Processes a POST request with the old and new passwords.
+    Returns an HTTP 200 status code with a success message if the password is changed successfully,
+    or an HTTP 400 status code with error details if the provided data is invalid.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"detail": "Passwort erfolgreich geändert."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

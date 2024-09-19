@@ -144,3 +144,33 @@ class SetNewPasswordSerializer(serializers.Serializer):
     - password: string (write-only, min length 8, max length 128)
     """
     password = serializers.CharField(write_only=True, min_length=8, max_length=128)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer for handling password change requests.
+
+    Validates the old password and updates the user's password with the new one.
+
+    Fields:
+        - old_password (CharField): The user's current password, required for verification.
+        - new_password (CharField): The new password to be set, required.
+
+    Methods:
+        - validate_old_password: Validates that the provided old password is correct.
+        - save: Sets and saves the new password for the authenticated user.
+    """
+    old_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Das alte Passwort ist nicht korrekt.")
+        return value
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user
