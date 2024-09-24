@@ -33,6 +33,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     - `updated_at`: The timestamp when the recipe was last updated (read-only).
     """
     author_email = serializers.EmailField(source='author.email', read_only=True)
+    author_name = serializers.CharField(source='author.author_name', read_only=True)
     image_1_url = serializers.SerializerMethodField()
     image_2_url = serializers.SerializerMethodField()
     image_3_url = serializers.SerializerMethodField()
@@ -41,7 +42,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = [
-            'id', 'title', 'content', 'author_email', 'created_at', 'updated_at',
+            'id', 'title', 'content', 'author_email', 'author_name', 'created_at', 'updated_at',
             'image_1', 'image_2', 'image_3', 'image_4',
             'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url', 'family_1', 'family_2'
         ]

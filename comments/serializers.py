@@ -30,8 +30,9 @@ class CommentSerializer(serializers.ModelSerializer):
         - `updated_at`: The last update timestamp of the comment (read-only).
     """
     author_email = serializers.EmailField(source='author.email', read_only=True)
+    author_name = serializers.CharField(source='author.author_name', read_only=True)
 
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'author_email', 'created_at', 'updated_at', 'info', 'recipe']
+        fields = ['id', 'content', 'author_email', 'author_name', 'created_at', 'updated_at', 'info', 'recipe']
         read_only_fields = ['author', 'created_at', 'updated_at']

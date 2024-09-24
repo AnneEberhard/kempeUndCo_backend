@@ -21,7 +21,7 @@ class CustomUserAdmin(UserAdmin):
     model = CustomUser
     list_display = ('id', 'username', 'email', 'get_allowed_families', )
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('guarantor', 'guarantor_email', 'family_1', 'family_2', 'notes')}),
+        (None, {'fields': ('author_name', 'guarantor', 'guarantor_email', 'family_1', 'family_2', 'notes')}),
     )
 
     def get_allowed_families(self, obj):
