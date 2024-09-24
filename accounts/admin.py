@@ -12,7 +12,7 @@ class CustomUserAdmin(UserAdmin):
     - Showing the `allowed_families` of each user in the list view.
     - Restricting the queryset for non-superusers so they cannot see superuser accounts.
     - Disabling certain fields (`is_superuser`, `user_permissions`, `groups`) for non-superuser users when editing user accounts.
-    
+
     **Methods:**
     - `get_allowed_families`: Returns a comma-separated string of allowed families for display.
     - `get_queryset`: Customizes the queryset to exclude superusers for non-superuser admin users.

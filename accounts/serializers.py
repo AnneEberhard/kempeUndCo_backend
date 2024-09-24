@@ -176,3 +176,22 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.set_password(self.validated_data['new_password'])
         user.save()
         return user
+
+
+class ChangeAuthorNameSerializer(serializers.ModelSerializer):
+    """
+    Serializer used for updating the author's name of a CustomUser instance.
+    Only the 'author_name' field is exposed and validated.
+    """
+    class Meta:
+        model = CustomUser
+        fields = ['author_name']
+
+    def update(self, instance, validated_data):
+        """
+        Updates the 'author_name' field of the given CustomUser instance.
+        Saves the updated instance and returns it.
+        """
+        instance.author_name = validated_data.get('author_name', instance.author_name)
+        instance.save()
+        return instance
