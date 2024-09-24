@@ -91,19 +91,21 @@ class RegistrationView(generics.CreateAPIView):
                 user_data['family_2'] = valid_families[1] if len(valid_families) > 1 else None
 
                 # Benutzer erstellen
-                user = CustomUser(
-                    username=user_data['email'],
-                    email=user_data['email'],
-                    password=user_data['password'],
-                    first_name=user_data['first_name'],
-                    last_name=user_data['last_name'],
-                    guarantor=user_data['guarantor'],
-                    guarantor_email=user_data.get('guarantor_email'),
-                    family_1=user_data['family_1'],
-                    family_2=user_data['family_2']
-                )
-                user.set_password(user_data['password'])  # Passwort hashing
-                user.save()
+#               user = CustomUser(
+#                   username=user_data['email'],
+#                   email=user_data['email'],
+#                   password=user_data['password'],
+#                   first_name=user_data['first_name'],
+#                   last_name=user_data['last_name'],
+#                   guarantor=user_data['guarantor'],
+#                   guarantor_email=user_data.get('guarantor_email'),
+#                   family_1=user_data['family_1'],
+#                   family_2=user_data['family_2'],
+#                   author_name=user_data['email'],
+#               )
+#               user.set_password(user_data['password'])  # Passwort hashing
+#               user.save()
+                user = serializer.save()
 
                 # Senden einer Aktivierungs-E-Mail an den Bürgen
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
