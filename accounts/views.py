@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
 from .models import CustomUser
-from .serializers import ChangePasswordSerializer, PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
+from .serializers import ChangeAuthorNameSerializer, ChangePasswordSerializer, PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 
@@ -365,4 +365,33 @@ class ChangePasswordView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({"detail": "Passwort erfolgreich geändert."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangeAuthorNameView(generics.UpdateAPIView):
+    """
+    API view that allows authenticated users to change their author name.
+    Uses the ChangeAuthorNameSerializer for validation and updates the user profile.
+    """
+    serializer_class = ChangeAuthorNameSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        """
+        Returns the current authenticated user.
+        Ensures that the user can only update their own profile.
+        """
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        """
+        Handles the update of the author's name. Validates the input data using the serializer,
+        and if valid, saves the new name. Returns success response on successful update or error
+        response if validation fails.
+        """
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': 'Author name updated successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

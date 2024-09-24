@@ -10,7 +10,7 @@ class CustomUserManager(BaseUserManager):
     Custom manager for CustomUser.
 
     Provides methods to create regular users and superusers with email as the unique identifier.
-    """    
+    """
     def create_user(self, email, password=None, **extra_fields):
         """
         Create and return a regular user with the given email and password.

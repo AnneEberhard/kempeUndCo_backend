@@ -51,7 +51,7 @@ class CommentsAdmin(ImportExportModelAdmin):
     """
     Custom Django admin configuration for the `Comment` model.
 
-    Displays comments with additional filters for `Info` and `Recipe` families. 
+    Displays comments with additional filters for `Info` and `Recipe` families.
     Filters the queryset based on the logged-in user's allowed families unless the user is a superuser.
     """
     model = Comment
