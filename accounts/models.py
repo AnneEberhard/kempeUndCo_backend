@@ -10,13 +10,7 @@ class CustomUserManager(BaseUserManager):
     Custom manager for CustomUser.
 
     Provides methods to create regular users and superusers with email as the unique identifier.
-    """
-    def generate_unique_author_name(self, user):
-        author_name = user.generate_author_name()
-        while CustomUser.objects.filter(author_name=author_name).exists():
-            author_name = user.generate_author_name()
-        return author_name
-    
+    """    
     def create_user(self, email, password=None, **extra_fields):
         """
         Create and return a regular user with the given email and password.
@@ -41,9 +35,6 @@ class CustomUserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-
-        if not user.author_name:
-            user.author_name = self.generate_unique_author_name(user)
 
         user.save(using=self._db)
         return user
@@ -83,7 +74,7 @@ class CustomUser(AbstractUser):
     """
 
     email = models.EmailField(unique=True)
-    author_name = models.CharField(max_length=255, blank=True, null=True, default='Autor')
+    author_name = models.CharField(max_length=255, blank=True, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

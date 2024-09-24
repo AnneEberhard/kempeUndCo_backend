@@ -118,7 +118,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             guarantor_email=validated_data.get('guarantor_email'),
             family_1=family_1,
             family_2=family_2,
-            username=validated_data['email']
+            username=validated_data['email'],
+            author_name=validated_data['email']
         )
         return user
 
