@@ -137,6 +137,7 @@ class PersonSerializer(serializers.ModelSerializer):
             return {
                 'id': instance.id,
                 'name': instance.name,
+                'refn': instance.refn,
                 'surn': '',
                 'givn': '',
                 'sex': '',
