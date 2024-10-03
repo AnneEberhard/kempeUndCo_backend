@@ -1,9 +1,12 @@
 from django.contrib import admin
+
+from accounts.resources import CustomUserResource
 from .models import CustomUser
 from django.contrib.auth.admin import UserAdmin
+from import_export.admin import ImportExportModelAdmin
 
 
-class CustomUserAdmin(UserAdmin):
+class CustomUserAdmin(ImportExportModelAdmin, UserAdmin):
     """
     Custom admin configuration for the `CustomUser` model.
 
@@ -19,6 +22,8 @@ class CustomUserAdmin(UserAdmin):
     - `get_form`: Disables specific fields for non-superuser users when editing user accounts.
     """
     model = CustomUser
+    resource_class = CustomUserResource
+    
     list_display = ('id', 'username', 'email', 'get_allowed_families', )
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('author_name', 'guarantor', 'guarantor_email', 'family_1', 'family_2', 'notes')}),

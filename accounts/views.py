@@ -90,21 +90,6 @@ class RegistrationView(generics.CreateAPIView):
                 user_data['family_1'] = valid_families[0] if len(valid_families) > 0 else None
                 user_data['family_2'] = valid_families[1] if len(valid_families) > 1 else None
 
-                # Benutzer erstellen
-#               user = CustomUser(
-#                   username=user_data['email'],
-#                   email=user_data['email'],
-#                   password=user_data['password'],
-#                   first_name=user_data['first_name'],
-#                   last_name=user_data['last_name'],
-#                   guarantor=user_data['guarantor'],
-#                   guarantor_email=user_data.get('guarantor_email'),
-#                   family_1=user_data['family_1'],
-#                   family_2=user_data['family_2'],
-#                   author_name=user_data['email'],
-#               )
-#               user.set_password(user_data['password'])  # Passwort hashing
-#               user.save()
                 user = serializer.save()
 
                 # Senden einer Aktivierungs-E-Mail an den Bürgen
@@ -113,7 +98,7 @@ class RegistrationView(generics.CreateAPIView):
                 activation_link = f"{settings.BACKEND_URL}/activate/{uidb64}/{token}/"
 
                 subject = 'Bürgen für neuen Nutzer der Familienwebseite'
-                html_message = render_to_string('guarantor_email.html', {'activation_link': activation_link, 'user': user})
+                html_message = render_to_string('guarantor_email.html', {'activation_link': activation_link, 'user': user, 'valid_families': valid_families})
                 plain_message = strip_tags(html_message)
                 from_email = settings.NO_REPLY_EMAIL
                 to_email = [guarantor_user.email]

@@ -5,7 +5,12 @@
 </head>
 <body>
     <p>Hallo,</p>
-    <p>Du wurdest von {{ user.email }} als Bürge für die Familienwebseite angegeben.</p>
+    <p>Du wurdest von {{ user.email }} als Bürge für die Familienwebseite in Bezug auf folgende Familie(n) angegeben:</p>
+    <ul>
+        {% for family in valid_families %}
+            <li>{{ family }}</li>
+        {% endfor %}
+    </ul>
     <p>Wenn dies so korrekt ist, bestätige bitte die Identität, in dem du auf diesen <a href="{{ activation_link }}">Link </a>klickst.</p>
     <p>Falls ein Fehler vorliegt, lass es uns bitte wissen.</p>
     <p>Liebe Grüße,<br><br>Dein Website Team</p>
