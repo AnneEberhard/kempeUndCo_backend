@@ -1,6 +1,10 @@
 import os
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.core.mail import send_mail
+from django.conf import settings
+
+from kempeUndCo_backend.settings import EMAIL_HOST_USER
 
 from .models import DiscussionEntry
 
@@ -30,3 +34,17 @@ def delete_empty_discussion(sender, instance, **kwargs):
     discussion = instance.discussion
     if not discussion.entries.exists():  # Check if there are no more entries
         discussion.delete()  # Delete the discussion if it's empty
+
+
+@receiver(post_save, sender=DiscussionEntry)
+def notify_new_discussion(sender, instance, created, **kwargs):
+    if created:
+        
+        print(instance.discussion.person.name)
+        send_mail(
+            'Neuer Diskussionsbeitrag erstellt',
+            f'Es wurde ein neuer Diskussionsbeitrag zu Person "{instance.discussion.person.name}" auf der Webseite KempeUndCo erstellt.',
+            settings.DEFAULT_FROM_EMAIL,
+            [EMAIL_HOST_USER],
+            fail_silently=False,
+        )
