@@ -19,3 +19,14 @@ def delete_images_on_entry_delete(sender, instance, **kwargs):
         thumbnail = getattr(instance, thumbnail_field)
         if thumbnail and os.path.isfile(thumbnail.path):
             os.remove(thumbnail.path)
+
+
+@receiver(post_delete, sender=DiscussionEntry)
+def delete_empty_discussion(sender, instance, **kwargs):
+    """
+    Signal handler to delete the associated discussion if it has no more entries.
+    Triggered after a DiscussionEntry is deleted.
+    """
+    discussion = instance.discussion
+    if not discussion.entries.exists():  # Check if there are no more entries
+        discussion.delete()  # Delete the discussion if it's empty

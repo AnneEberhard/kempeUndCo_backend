@@ -37,6 +37,9 @@ class DiscussionListView(generics.ListAPIView):
         if not allowed_families:
             return Discussion.objects.none()  # Return no discussions if no allowed families are found
 
+        empty_discussions = Discussion.objects.filter(entries__isnull=True)
+        empty_discussions.delete()
+
         return Discussion.objects.filter(
             Q(person__family_1__in=allowed_families) | Q(person__family_2__in=allowed_families)
         ).distinct()
