@@ -119,7 +119,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             family_1=family_1,
             family_2=family_2,
             username=validated_data['email'],
-            author_name=validated_data['email']
+            author_name=f"{validated_data['first_name']} {validated_data['last_name']}"
+            # author_name=validated_data['email']
         )
         return user
 
