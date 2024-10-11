@@ -45,10 +45,13 @@ class CommentListView(generics.ListAPIView):
         queryset = Comment.objects.all()
         info_id = self.request.query_params.get('info')
         recipe_id = self.request.query_params.get('recipe')
+        famInfo_id = self.request.query_params.get('famInfo')
         if info_id:
             queryset = queryset.filter(info_id=info_id)
         elif recipe_id:
             queryset = queryset.filter(recipe_id=recipe_id)
+        elif famInfo_id:
+            queryset = queryset.filter(famInfo_id=famInfo_id)
         return queryset
 
 

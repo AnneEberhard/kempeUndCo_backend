@@ -43,6 +43,7 @@ urlpatterns = [
     path('api/discussions/', include('discussions.urls')),
     path('api/ancestors/', include('ancestors.urls')),
     path('api/infos/', include('infos.urls')),
+    path('api/fam-infos/', include('famInfos.urls')),
     path('api/recipes/', include('recipes.urls')),
     path('api/comments/', include('comments.urls')),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
