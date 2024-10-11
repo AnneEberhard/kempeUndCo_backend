@@ -109,7 +109,7 @@ class FamInfoDetailView(APIView):
         Returns:
             Response: The API response containing the updated famInfo instance or validation errors, or a 404 Not Found status if the famInfo instance does not exist.
         """
-        famInfo = get_object_or_404(famInfo, pk=pk)
+        famInfo = get_object_or_404(FamInfo, pk=pk)
         # deleted_images = json.loads(request.data.get('deletedImages', '[]'))
 
         for field in ['image_1', 'image_2', 'image_3', 'image_4']:
@@ -143,6 +143,6 @@ class FamInfoDetailView(APIView):
         Returns:
             Response: A 204 No Content response if the famInfo instance was deleted, or a 404 Not Found status if the famInfo instance does not exist.
         """
-        famInfo = get_object_or_404(famInfo, pk=pk)
+        famInfo = get_object_or_404(FamInfo, pk=pk)
         famInfo.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
