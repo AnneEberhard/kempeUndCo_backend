@@ -55,7 +55,7 @@ class CommentsAdmin(ImportExportModelAdmin):
     Filters the queryset based on the logged-in user's allowed families unless the user is a superuser.
     """
     model = Comment
-    list_display = ('id', 'author', 'info', 'recipe')
+    list_display = ('id', 'author', 'info', 'recipe', 'famInfo')
     list_filter = (InfoFamilyFilter, RecipeFamilyFilter)
 
     def get_queryset(self, request):

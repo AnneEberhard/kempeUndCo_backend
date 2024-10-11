@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'infos',
     'recipes',
     'comments',
+    'famInfos',
 ]
 
 MIDDLEWARE = [

@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import CustomUser
+from famInfos.models import FamInfo
 from infos.models import Info
 from recipes.models import Recipe
 
@@ -29,6 +30,7 @@ class Comment(models.Model):
     # Link with Info and Recipe, optional, as only one will be used.
     info = models.ForeignKey(Info, null=True, blank=True, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, null=True, blank=True, on_delete=models.CASCADE)
+    famInfo = models.ForeignKey(FamInfo, null=True, blank=True, on_delete=models.CASCADE)   
 
     def __str__(self):
         return f"Comment by {self.author} on {self.created_at}"
