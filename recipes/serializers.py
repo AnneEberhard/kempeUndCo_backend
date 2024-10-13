@@ -16,14 +16,14 @@ class RecipeSerializer(serializers.ModelSerializer):
     - `author_email`: The email address of the recipe's author (read-only).
     - `created_at`: The timestamp when the recipe was created (read-only).
     - `updated_at`: The timestamp when the recipe was last updated (read-only).
-    - `image_1`: The first image associated with the recipe.
-    - `image_2`: The second image associated with the recipe.
-    - `image_3`: The third image associated with the recipe.
-    - `image_4`: The fourth image associated with the recipe.
     - `image_1_url`: The absolute URL for the first image (computed field).
     - `image_2_url`: The absolute URL for the second image (computed field).
     - `image_3_url`: The absolute URL for the third image (computed field).
     - `image_4_url`: The absolute URL for the fourth image (computed field).
+    - `image_1_thumbnail_url`: The absolute URL for the first thumbnail (computed field).
+    - `image_2_thumbnail_url`: The absolute URL for the second thumbnail (computed field).
+    - `image_3_thumbnail_url`: The absolute URL for the third thumbnail (computed field).
+    - `image_4_thumbnail_url`: The absolute URL for the fourth thumbnail (computed field).
     - `family_1`: The first family tree associated with the recipe.
     - `family_2`: The second family tree associated with the recipe.
 
@@ -34,85 +34,53 @@ class RecipeSerializer(serializers.ModelSerializer):
     """
     author_email = serializers.EmailField(source='author.email', read_only=True)
     author_name = serializers.CharField(source='author.author_name', read_only=True)
+    image_1 = serializers.FileField(required=False)
+    image_2 = serializers.FileField(required=False)
+    image_3 = serializers.FileField(required=False)
+    image_4 = serializers.FileField(required=False)
     image_1_url = serializers.SerializerMethodField()
     image_2_url = serializers.SerializerMethodField()
     image_3_url = serializers.SerializerMethodField()
     image_4_url = serializers.SerializerMethodField()
+    image_1_thumbnail_url = serializers.SerializerMethodField()
+    image_2_thumbnail_url = serializers.SerializerMethodField()
+    image_3_thumbnail_url = serializers.SerializerMethodField()
+    image_4_thumbnail_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = [
             'id', 'title', 'content', 'author_email', 'author_name', 'created_at', 'updated_at',
             'image_1', 'image_2', 'image_3', 'image_4',
-            'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url', 'family_1', 'family_2'
+            'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url', 'family_1', 'family_2',
+            'image_1_thumbnail_url', 'image_2_thumbnail_url', 'image_3_thumbnail_url', 'image_4_thumbnail_url',
         ]
         read_only_fields = ['author', 'created_at', 'updated_at']
 
     def get_image_1_url(self, obj):
-        """
-        Returns the absolute URL for `image_1`.
-
-        If `image_1` is not present, returns `None`.
-
-        **Parameters:**
-        - `obj`: The `Recipe` instance being serialized.
-
-        **Returns:**
-        - `str` or `None`: The absolute URL of `image_1` if available, otherwise `None`.
-        """
         return self.build_absolute_uri(obj.image_1.url) if obj.image_1 else None
 
     def get_image_2_url(self, obj):
-        """
-        Returns the absolute URL for `image_2`.
-
-        If `image_2` is not present, returns `None`.
-
-        **Parameters:**
-        - `obj`: The `Recipe` instance being serialized.
-
-        **Returns:**
-        - `str` or `None`: The absolute URL of `image_2` if available, otherwise `None`.
-        """
         return self.build_absolute_uri(obj.image_2.url) if obj.image_2 else None
 
     def get_image_3_url(self, obj):
-        """
-        Returns the absolute URL for `image_3`.
-
-        If `image_3` is not present, returns `None`.
-
-        **Parameters:**
-        - `obj`: The `Recipe` instance being serialized.
-
-        **Returns:**
-        - `str` or `None`: The absolute URL of `image_3` if available, otherwise `None`.
-        """
         return self.build_absolute_uri(obj.image_3.url) if obj.image_3 else None
 
     def get_image_4_url(self, obj):
-        """
-        Returns the absolute URL for `image_4`.
-
-        If `image_4` is not present, returns `None`.
-
-        **Parameters:**
-        - `obj`: The `Recipe` instance being serialized.
-
-        **Returns:**
-        - `str` or `None`: The absolute URL of `image_4` if available, otherwise `None`.
-        """
         return self.build_absolute_uri(obj.image_4.url) if obj.image_4 else None
 
+    def get_image_1_thumbnail_url(self, obj):
+        return self.build_absolute_uri(obj.image_1_thumbnail.url) if obj.image_1_thumbnail else None
+
+    def get_image_2_thumbnail_url(self, obj):
+        return self.build_absolute_uri(obj.image_2_thumbnail.url) if obj.image_2_thumbnail else None
+
+    def get_image_3_thumbnail_url(self, obj):
+        return self.build_absolute_uri(obj.image_3_thumbnail.url) if obj.image_3_thumbnail else None
+
+    def get_image_4_thumbnail_url(self, obj):
+        return self.build_absolute_uri(obj.image_4_thumbnail.url) if obj.image_4_thumbnail else None
+
     def build_absolute_uri(self, relative_url):
-        """
-        Builds the absolute URI from a relative URL.
-
-        **Parameters:**
-        - `relative_url`: The relative URL to be converted to an absolute URI.
-
-        **Returns:**
-        - `str`: The absolute URI built from the relative URL.
-        """
         request = self.context.get('request')
         return request.build_absolute_uri(relative_url)

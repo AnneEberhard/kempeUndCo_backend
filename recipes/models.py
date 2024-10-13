@@ -77,6 +77,7 @@ class Recipe(models.Model):
         - The `clean_html` function is used to sanitize the content field before saving.
         """
         self.content = clean_html(self.content)
+        super().save(*args, **kwargs)
 
         # for i in range(1, 5):
         #     image_field = getattr(self, f'image_{i}')
@@ -85,7 +86,7 @@ class Recipe(models.Model):
         #         compressed_image = self.compress_image(image_field.file)
         #         setattr(self, f'image_{i}', compressed_image)
 
-        if self.pk:  # Only if instance already exists
+        if self.pk:
             old_recipe = Recipe.objects.get(pk=self.pk)
             for i in range(1, 5):
                 old_image = getattr(old_recipe, f'image_{i}')
@@ -106,7 +107,6 @@ class Recipe(models.Model):
         super().save(*args, **kwargs)
 
     def create_thumbnail(self, image_field, thumbnail_field_name):
-        """Erstellt ein Thumbnail für das gegebene Bildfeld."""
         with Image.open(image_field) as img:
             img = img.convert('RGB')
             img.thumbnail((200, 200))
