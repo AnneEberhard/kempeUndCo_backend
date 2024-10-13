@@ -12,19 +12,6 @@ from django.core.files.storage import default_storage
 class FamInfo(models.Model):
     """
     Model representing an famInformational entry with optional images and associated family trees.
-
-    Attributes:
-        title (CharField): The title of the famInformational entry, with a maximum length of 255 characters.
-        content (TextField): The content of the entry, which is cleaned of HTML tags before saving.
-        author (ForeignKey): The user who created the entry, linked to the AUTH_USER_MODEL.
-        created_at (DateTimeField): Timestamp when the entry was created, automatically set on creation.
-        updated_at (DateTimeField): Timestamp when the entry was last updated, automatically updated on save.
-        image_1 (FileField): The first image associated with the entry, stored under the 'famInfos/' directory.
-        image_2 (FileField): The second image associated with the entry, stored under the 'famInfos/' directory.
-        image_3 (FileField): The third image associated with the entry, stored under the 'famInfos/' directory.
-        image_4 (FileField): The fourth image associated with the entry, stored under the 'famInfos/' directory.
-        family_1 (CharField): The first family tree associated with the entry, chosen from FAMILY_CHOICES.
-        family_2 (CharField): The second family tree associated with the entry, chosen from FAMILY_CHOICES.
     """
     title = models.CharField(max_length=255)
     content = models.TextField()
@@ -45,18 +32,6 @@ class FamInfo(models.Model):
     family_1 = models.CharField(choices=FAMILY_CHOICES, max_length=100, blank=False, verbose_name='Stammbaum 1')
     family_2 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, null=True, verbose_name='Stammbaum 2')
 
-    def compress_image(self, image_file):
-        """
-        Compresses an image and returns it as a ContentFile.
-        """
-        if not image_file:
-            return image_file
-
-        img = Image.open(image_file)
-        output = io.BytesIO()
-        img.save(output, format='JPEG', quality=70)
-        output.seek(0)
-        return ContentFile(output.read(), image_file.name)
 
     def save(self, *args, **kwargs):
         """
@@ -72,12 +47,6 @@ class FamInfo(models.Model):
         """
         self.content = clean_html(self.content)
 
-        # for i in range(1, 5):
-        #     image_field = getattr(self, f'image_{i}')
-        #     if image_field and hasattr(image_field, 'file'):
-        #        compressed_image = self.compress_image(image_field.file)
-        #         setattr(self, f'image_{i}', compressed_image)
-
         if self.pk:
             old_famInfo = FamInfo.objects.get(pk=self.pk)
             for i in range(1, 5):
@@ -86,19 +55,22 @@ class FamInfo(models.Model):
                 if old_image and old_image != new_image:
                     if os.path.isfile(old_image.path):
                         os.remove(old_image.path)
+                    thumbnail_field = f'image_{i}_thumbnail'
+                    old_thumbnail = getattr(old_famInfo, thumbnail_field)
+                    if old_thumbnail and os.path.isfile(old_thumbnail.path):
+                        os.remove(old_thumbnail.path)    
+                    setattr(self, thumbnail_field, None)
 
-        if self.image_1 and not self.image_1_thumbnail:
-            self.create_thumbnail(self.image_1, 'image_1_thumbnail')
-        if self.image_2 and not self.image_2_thumbnail:
-            self.create_thumbnail(self.image_2, 'image_2_thumbnail')
-        if self.image_3 and not self.image_3_thumbnail:
-            self.create_thumbnail(self.image_3, 'image_3_thumbnail')
-        if self.image_4 and not self.image_4_thumbnail:
-            self.create_thumbnail(self.image_4, 'image_4_thumbnail')
+        for i in range(1, 5):
+            image_field = getattr(self, f'image_{i}')
+            thumbnail_field_name = f'image_{i}_thumbnail'
+# 
+            if image_field and not getattr(self, thumbnail_field_name):
+                self.create_thumbnail(image_field, thumbnail_field_name, i)
 
         super().save(*args, **kwargs)
 
-    def create_thumbnail(self, image_field, thumbnail_field_name):
+    def create_thumbnail(self, image_field, thumbnail_field_name, index):
         """Erstellt ein Thumbnail für das gegebene Bildfeld."""
         with Image.open(image_field) as img:
             img = img.convert('RGB')
