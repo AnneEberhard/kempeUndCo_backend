@@ -4,6 +4,7 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 
+from accounts.models import CustomUser
 from famInfos.models import FamInfo
 from kempeUndCo_backend.settings import EMAIL_HOST_USER
 
@@ -35,3 +36,24 @@ def delete_images_on_famInfo_delete(sender, instance, **kwargs):
 #             fail_silently=False,
 #         )
 
+def notify_new_famInfo(sender, instance, created, **kwargs):
+    if created:
+        users_to_notify = CustomUser.objects.filter(alert_faminfo=True)
+
+        email_list = [user.email for user in users_to_notify]
+
+        if email_list:
+            send_mail(
+                'Neue famInfo erstellt',
+                f'Es wurde eine neue famInfo mit dem Titel "{instance.title}" auf der Webseite KempeUndCo erstellt.',
+                settings.DEFAULT_FROM_EMAIL,
+                email_list,
+                fail_silently=False,
+            )
+        send_mail(
+             'Neue famInfo erstellt',
+             f'Es wurde eine neue famInfo mit dem Titel "{instance.title}" auf der Webseite KempeUndCo erstellt.',
+             settings.DEFAULT_FROM_EMAIL,
+             [EMAIL_HOST_USER],
+             fail_silently=False,
+        )

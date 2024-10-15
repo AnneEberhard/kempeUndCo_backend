@@ -84,6 +84,11 @@ class CustomUser(AbstractUser):
     family_2 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, null=True, verbose_name='Stammbaum 2')
     notes = models.TextField(null=True, blank=True, verbose_name='Notizen')
 
+    alert_faminfo = models.BooleanField(default=False, verbose_name='Familen-Info-Benachrichtigungen')
+    alert_info = models.BooleanField(default=False, verbose_name='Website-Info-Benachrichtigungen')
+    alert_recipe = models.BooleanField(default=False, verbose_name='Rezept-Benachrichtigungen')
+    alert_discussion = models.BooleanField(default=False, verbose_name='Diskussions-Benachrichtigungen')
+
     objects = CustomUserManager()
 
     @property

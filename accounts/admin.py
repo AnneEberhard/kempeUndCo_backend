@@ -26,7 +26,8 @@ class CustomUserAdmin(ImportExportModelAdmin, UserAdmin):
     
     list_display = ('id', 'username', 'email', 'get_allowed_families', )
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('author_name', 'guarantor', 'guarantor_email', 'family_1', 'family_2', 'notes')}),
+        (None, {'fields': ('author_name', 'guarantor', 'guarantor_email', 'family_1', 'family_2', 'notes',
+                           'alert_faminfo', 'alert_info', 'alert_recipe', 'alert_discussion')}),
     )
 
     def get_allowed_families(self, obj):
