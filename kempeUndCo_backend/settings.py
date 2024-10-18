@@ -185,7 +185,9 @@ REPLY_TO_EMAIL = config('REPLY_TO_EMAIL')
 BACKEND_URL = config('BACKEND_URL', default='http://localhost:8000')
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:4200')
 
-FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800 # 5 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
+
+DOMAIN = "http://localhost:8000"
 
 LOGGING = {
     'version': 1,

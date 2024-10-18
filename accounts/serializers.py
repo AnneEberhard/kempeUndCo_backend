@@ -60,7 +60,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'authorname': self.user.author_name,
             'first_name': self.user.first_name,
             'family_1': self.user.family_1,
-            'family_2': self.user.family_2
+            'family_2': self.user.family_2,
+            'alert_faminfo': self.user.alert_faminfo,
+            'alert_info': self.user.alert_info,
+            'alert_recipe': self.user.alert_recipe,
+            'alert_discussion': self.user.alert_discussion,
         }
         return data
 
@@ -196,3 +200,13 @@ class ChangeAuthorNameSerializer(serializers.ModelSerializer):
         instance.author_name = validated_data.get('author_name', instance.author_name)
         instance.save()
         return instance
+
+
+class ChangeAlertPreferencesSerializer(serializers.ModelSerializer):
+    """
+    Serializer to update alert preferences for the user.
+    Only allows updating of the alert-related fields.
+    """
+    class Meta:
+        model = CustomUser
+        fields = ['alert_faminfo', 'alert_info', 'alert_recipe', 'alert_discussion']

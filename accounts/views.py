@@ -1,4 +1,4 @@
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status, serializers
 from rest_framework.response import Response
@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
 from .models import CustomUser
-from .serializers import ChangeAuthorNameSerializer, ChangePasswordSerializer, PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
+from .serializers import ChangeAlertPreferencesSerializer, ChangeAuthorNameSerializer, ChangePasswordSerializer, PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 
@@ -380,3 +380,73 @@ class ChangeAuthorNameView(generics.UpdateAPIView):
             serializer.save()
             return Response({'success': 'Author name updated successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangeAlertPreferencesView(generics.UpdateAPIView):
+    """
+    API view that allows authenticated users to update their alert preferences.
+    Uses the ChangeAlertPreferencesSerializer for validation and updates the user profile.
+    """
+    serializer_class = ChangeAlertPreferencesSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        """
+        Returns the current authenticated user.
+        Ensures that the user can only update their own profile.
+        """
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        """
+        Handles the update of the user's alert preferences.
+        Validates the input data using the serializer,
+        and if valid, saves the new preferences. Returns success response on successful update
+        or error response if validation fails.
+        """
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': 'Alert preferences updated successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UnsubcribeAlerts(APIView):
+
+    ALERT_VERBOSE_NAMES = {
+        'faminfo': 'Familien-Informationen',
+        'info': 'Allgemeine Informationen',
+        'recipe': 'Rezepte',
+        'discussion': 'Diskussionen',
+    }
+
+    def get(self, request, uidb64, token, alert_type):
+        """
+        Verarbeitet die Abmeldung von einem spezifischen Alert für einen Nutzer.
+        """
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            if alert_type == 'faminfo':
+                user.alert_faminfo = False
+            elif alert_type == 'info':
+                user.alert_info = False
+            elif alert_type == 'recipe':
+                user.alert_recipe = False
+            elif alert_type == 'discussion':
+                user.alert_discussion = False
+            user.save()
+
+            verbose_name = self.ALERT_VERBOSE_NAMES.get(alert_type, 'Benachrichtigungen')
+            
+            return render(request, 'alerts/unsubscribe_confirmation.html', {
+                'verbose_name': verbose_name
+            })
+        else:
+            return render(request, 'alerts/unsubscribe_invalid.html')
+    

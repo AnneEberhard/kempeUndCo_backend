@@ -3,7 +3,12 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Q
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
 
+from accounts.models import CustomUser
 from kempeUndCo_backend.settings import EMAIL_HOST_USER
 
 from .models import DiscussionEntry
@@ -36,15 +41,43 @@ def delete_empty_discussion(sender, instance, **kwargs):
         discussion.delete()  # Delete the discussion if it's empty
 
 
+# @receiver(post_save, sender=DiscussionEntry)
+# def notify_new_discussion(sender, instance, created, **kwargs):
+#     if created:
+#         
+#         print(instance.discussion.person.name)
+#         send_mail(
+#             'Neuer Diskussionsbeitrag erstellt',
+#             f'Es wurde ein neuer Diskussionsbeitrag zu Person "{instance.discussion.person.name}" auf der Webseite KempeUndCo erstellt.',
+#             settings.DEFAULT_FROM_EMAIL,
+#             [EMAIL_HOST_USER],
+#             fail_silently=False,
+#         )
+
+
 @receiver(post_save, sender=DiscussionEntry)
-def notify_new_discussion(sender, instance, created, **kwargs):
+def notify_new_discussionEntry(sender, instance, created, **kwargs):
     if created:
-        
-        print(instance.discussion.person.name)
-        send_mail(
-            'Neuer Diskussionsbeitrag erstellt',
-            f'Es wurde ein neuer Diskussionsbeitrag zu Person "{instance.discussion.person.name}" auf der Webseite KempeUndCo erstellt.',
-            settings.DEFAULT_FROM_EMAIL,
-            [EMAIL_HOST_USER],
-            fail_silently=False,
-        )
+        related_person = instance.discussion.person
+        users_to_notify = CustomUser.objects.filter(alert_discussion=True)
+
+        family_filter = Q()
+        if related_person.family_1:
+            family_filter |= Q(family_1=related_person.family_1) | Q(family_2=related_person.family_1)
+        if related_person.family_2:
+            family_filter |= Q(family_1=related_person.family_2) | Q(family_2=related_person.family_2)
+
+        users_to_notify = users_to_notify.filter(family_filter)
+        for user in users_to_notify:
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            unsubscribe_url = f"{settings.BACKEND_URL}/unsubscribe/{uid}/{token}/discussion/"
+
+            send_mail(
+                'Neuer Diskussionsbeitrag erstellt',
+                f'Hallo {user.username}! Es wurde ein neuer Diskussionsbeitrag zu Person "{instance.discussion.person.name}" auf der Webseite KempeUndCo erstellt. '
+                f'Wenn du keine Benachrichtigungen zur Webseitendiskussion mehr erhalten möchtest, klicke hier: {unsubscribe_url}',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
