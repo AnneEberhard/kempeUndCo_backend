@@ -87,7 +87,7 @@ class CustomUser(AbstractUser):
     alert_faminfo = models.BooleanField(default=False, verbose_name='Familen-Info-Benachrichtigungen')
     alert_info = models.BooleanField(default=False, verbose_name='Website-Info-Benachrichtigungen')
     alert_recipe = models.BooleanField(default=False, verbose_name='Rezept-Benachrichtigungen')
-    alert_discussion = models.BooleanField(default=False, verbose_name='Diskussions-Benachrichtigungen')
+    alert_discussion = models.BooleanField(default=False, verbose_name='Stammfolge-Diskussion-Benachrichtigungen')
 
     objects = CustomUserManager()
 
