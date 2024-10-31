@@ -104,7 +104,7 @@ class Recipe(models.Model):
         if self.image_4 and not self.image_4_thumbnail:
             self.create_thumbnail(self.image_4, 'image_4_thumbnail')
 
-        super().save(*args, **kwargs)
+        super().save(update_fields=['image_1_thumbnail', 'image_2_thumbnail', 'image_3_thumbnail', 'image_4_thumbnail'])
 
     def create_thumbnail(self, image_field, thumbnail_field_name):
         with Image.open(image_field) as img:

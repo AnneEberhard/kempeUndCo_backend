@@ -7,6 +7,9 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 from accounts.models import CustomUser
 from infos.models import Info
@@ -52,11 +55,28 @@ def notify_new_Info(sender, instance, created, **kwargs):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             unsubscribe_url = f"{settings.BACKEND_URL}/unsubscribe/{uid}/{token}/info/"
-            send_mail(
-                'Neue Info erstellt',
-                f'Hallo {user.username}! Es wurde eine neue Webseiten-Info mit dem Titel "{instance.title}" auf KempeUndCo erstellt. '
-                f'Wenn du keine Benachrichtigungen zur Webseitendiskussion mehr erhalten möchtest, klicke hier: {unsubscribe_url}',
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
+            html_content = render_to_string('emails/new_info_alert.html', {
+                'title': instance.title,
+                'unsubscribe_url': unsubscribe_url,
+                'user.first_name': user.first_name
+            })
+
+            text_content = strip_tags(html_content)
+            print('email')
+            email = EmailMultiAlternatives(
+                subject='Neue Webseiten-Info erstellt',
+                body=text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[user.email],
             )
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+
+           #send_mail(
+           #    'Neue Info erstellt',
+           #    f'Hallo {user.username}! Es wurde eine neue Webseiten-Info mit dem Titel "{instance.title}" auf KempeUndCo erstellt. '
+           #    f'Wenn du keine Benachrichtigungen zur Webseitendiskussion mehr erhalten möchtest, klicke hier: {unsubscribe_url}',
+           #    settings.DEFAULT_FROM_EMAIL,
+           #    [user.email],
+           #    fail_silently=False,
+           #)
