@@ -7,6 +7,9 @@ from django.db.models import Q
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 from accounts.models import CustomUser
 from kempeUndCo_backend.settings import EMAIL_HOST_USER
@@ -73,11 +76,27 @@ def notify_new_discussionEntry(sender, instance, created, **kwargs):
             token = default_token_generator.make_token(user)
             unsubscribe_url = f"{settings.BACKEND_URL}/unsubscribe/{uid}/{token}/discussion/"
 
-            send_mail(
-                'Neuer Diskussionsbeitrag erstellt',
-                f'Hallo {user.username}! Es wurde ein neuer Diskussionsbeitrag zu Person "{instance.discussion.person.name}" auf der Webseite KempeUndCo erstellt. '
-                f'Wenn du keine Benachrichtigungen zur Webseitendiskussion mehr erhalten möchtest, klicke hier: {unsubscribe_url}',
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
+            html_content = render_to_string('emails/new_discussion_alert.html', {
+                'person_name': instance.discussion.person.name,
+                'unsubscribe_url': unsubscribe_url,
+                'user.first_name': user.first_name
+            })
+            text_content = strip_tags(html_content)
+            print('email')
+            email = EmailMultiAlternatives(
+                subject='Neuer Diskussionsbeitrag zur Stammfolge',
+                body=text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[user.email],
             )
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+
+           #send_mail(
+           #    'Neuer Diskussionsbeitrag erstellt',
+           #    f'Hallo {user.username}! Es wurde ein neuer Diskussionsbeitrag zu Person "{instance.discussion.person.name}" auf der Webseite KempeUndCo erstellt. '
+           #    f'Wenn du keine Benachrichtigungen zur Webseitendiskussion mehr erhalten möchtest, klicke hier: {unsubscribe_url}',
+           #    settings.DEFAULT_FROM_EMAIL,
+           #    [user.email],
+           #    fail_silently=False,
+           #)
