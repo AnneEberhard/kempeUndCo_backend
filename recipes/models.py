@@ -3,7 +3,7 @@ from django.db import models
 from django.conf import settings
 from kempeUndCo_backend.constants import FAMILY_CHOICES
 from utils.html_cleaner import clean_html
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import io
 from django.core.files.base import ContentFile
 
@@ -106,19 +106,25 @@ class Recipe(models.Model):
 
         super().save(update_fields=['image_1_thumbnail', 'image_2_thumbnail', 'image_3_thumbnail', 'image_4_thumbnail'])
 
-    def create_thumbnail(self, image_field, thumbnail_field_name):
-        with Image.open(image_field) as img:
-            img = img.convert('RGB')
-            img.thumbnail((200, 200))
-            thumb_io = io.BytesIO()
-            img.save(thumb_io, format='JPEG', quality=70)
-
-            original_path = image_field.name
-            base_name = os.path.basename(original_path)
-            base_name, ext = os.path.splitext(base_name)
-            thumb_name = f"{base_name}_thumbnail.jpg"
-            thumb_file = ContentFile(thumb_io.getvalue(), name=thumb_name)
-            setattr(self, thumbnail_field_name, thumb_file)
+    def create_thumbnail(self, image_field, thumbnail_field_name, index):
+        """Erstellt ein Thumbnail für das gegebene Bildfeld."""
+        try:
+            with Image.open(image_field) as img:
+                img = img.convert('RGB')
+                img.thumbnail((200, 200))
+                thumb_io = io.BytesIO()
+                img.save(thumb_io, format='JPEG', quality=70)
+    
+                original_path = image_field.name
+                base_name = os.path.basename(original_path)
+                base_name, ext = os.path.splitext(base_name)
+                thumb_name = f"{base_name}_thumbnail.jpg"
+                thumb_file = ContentFile(thumb_io.getvalue(), name=thumb_name)
+                setattr(self, thumbnail_field_name, thumb_file)
+    
+        except UnidentifiedImageError:
+            # Datei ist kein Bild (z. B. PDF) → kein Thumbnail
+            setattr(self, thumbnail_field_name, None)
 
     def __str__(self):
         """
