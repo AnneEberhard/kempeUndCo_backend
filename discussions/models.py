@@ -4,7 +4,7 @@ from django.db import models
 from django.conf import settings
 from ancestors.models import Person
 from utils.html_cleaner import clean_html
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import io
 from django.core.files.base import ContentFile
 
@@ -103,20 +103,25 @@ class DiscussionEntry(models.Model):
         self.discussion.updated_at = self.updated_at
         self.discussion.save(update_fields=['updated_at'])
 
-    def create_thumbnail(self, image_field, thumbnail_field_name):
+    def create_thumbnail(self, image_field, thumbnail_field_name, index):
         """Erstellt ein Thumbnail für das gegebene Bildfeld."""
-        with Image.open(image_field) as img:
-            img = img.convert('RGB')
-            img.thumbnail((200, 200))
-            thumb_io = io.BytesIO()
-            img.save(thumb_io, format='JPEG', quality=70)
-
-            original_path = image_field.name
-            base_name = os.path.basename(original_path)
-            base_name, ext = os.path.splitext(base_name)
-            thumb_name = f"{base_name}_thumbnail.jpg"
-            thumb_file = ContentFile(thumb_io.getvalue(), name=thumb_name)
-            setattr(self, thumbnail_field_name, thumb_file)
+        try:
+            with Image.open(image_field) as img:
+                img = img.convert('RGB')
+                img.thumbnail((200, 200))
+                thumb_io = io.BytesIO()
+                img.save(thumb_io, format='JPEG', quality=70)
+    
+                original_path = image_field.name
+                base_name = os.path.basename(original_path)
+                base_name, ext = os.path.splitext(base_name)
+                thumb_name = f"{base_name}_thumbnail.jpg"
+                thumb_file = ContentFile(thumb_io.getvalue(), name=thumb_name)
+                setattr(self, thumbnail_field_name, thumb_file)
+    
+        except UnidentifiedImageError:
+            # Datei ist kein Bild (z. B. PDF) → kein Thumbnail
+            setattr(self, thumbnail_field_name, None)
 
     def __str__(self):
         """
