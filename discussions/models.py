@@ -107,14 +107,12 @@ class DiscussionEntry(models.Model):
 
                     setattr(self, thumbnail_field, None)
 
-        if self.image_1 and not self.image_1_thumbnail:
-            self.create_thumbnail(self.image_1, 'image_1_thumbnail')
-        if self.image_2 and not self.image_2_thumbnail:
-            self.create_thumbnail(self.image_2, 'image_2_thumbnail')
-        if self.image_3 and not self.image_3_thumbnail:
-            self.create_thumbnail(self.image_3, 'image_3_thumbnail')
-        if self.image_4 and not self.image_4_thumbnail:
-            self.create_thumbnail(self.image_4, 'image_4_thumbnail')
+        for i in range(1, 5):
+            image_field = getattr(self, f'image_{i}')
+            thumbnail_field_name = f'image_{i}_thumbnail'
+# 
+            if image_field and not getattr(self, thumbnail_field_name):
+                self.create_thumbnail(image_field, thumbnail_field_name, i)
 
         super().save(*args, **kwargs)
 
