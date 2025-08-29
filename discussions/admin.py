@@ -4,6 +4,7 @@ from ancestors.models import Person
 from .models import Discussion, DiscussionEntry
 from django.db.models import Q
 from django.contrib.admin import SimpleListFilter
+from import_export.admin import ImportExportModelAdmin
 
 
 class PersonFamilyFilter(SimpleListFilter):
@@ -25,7 +26,7 @@ class DiscussionEntryInline(admin.TabularInline):
     extra = 1
 
 
-class DiscussionPageAdmin(admin.ModelAdmin):
+class DiscussionPageAdmin(ImportExportModelAdmin):
     inlines = [DiscussionEntryInline]
 
     list_display = ('id', 'discussion_for', 'created_at', 'updated_at')
@@ -47,7 +48,7 @@ class DiscussionPageAdmin(admin.ModelAdmin):
         return request.user.is_superuser
 
 
-class DiscussionEntryAdmin(admin.ModelAdmin):
+class DiscussionEntryAdmin(ImportExportModelAdmin):
     list_display = ('id', 'discussion_for', 'author', 'created_at', 'updated_at')
 
     def discussion_for(self, obj):

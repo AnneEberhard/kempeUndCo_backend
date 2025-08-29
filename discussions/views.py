@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from ancestors.models import Person
 from .models import Discussion, DiscussionEntry
 from .serializers import DiscussionSerializer, DiscussionEntrySerializer
+import os
 
 
 class DiscussionListView(generics.ListAPIView):
@@ -138,6 +139,33 @@ class DiscussionEntryDetailView(views.APIView):
         if entry:
             if entry.author != request.user:
                 return Response({'error': 'You are not the author of this entry'}, status=status.HTTP_403_FORBIDDEN)
+
+            for field in ['image_1', 'image_2', 'image_3', 'image_4']:
+                if field in request.data and request.data[field] == '':
+                    image_field = getattr(entry, field, None)
+                    if image_field:
+                        if os.path.isfile(image_field.path):
+                            os.remove(image_field.path)
+                            setattr(entry, field, None)
+
+                    thumbnail_field = f'{field}_thumbnail'
+                    thumbnail = getattr(entry, thumbnail_field, None)
+                    if thumbnail and os.path.isfile(thumbnail.path):
+                        os.remove(thumbnail.path)
+                        setattr(entry, thumbnail_field, None)
+
+            for field in ['pdf_1', 'pdf_2', 'pdf_3', 'pdf_4']:
+                if field in request.data and request.data[field] == '':
+                    pdf_field = getattr(entry, field, None)
+                    if pdf_field and os.path.isfile(pdf_field.path):
+                        os.remove(pdf_field.path)
+                        setattr(entry, field, None)
+
+                    # optional auch den Namen löschen
+                    name_field = f'{field}_name'
+                    if hasattr(entry, name_field):
+                        setattr(entry, name_field, '')
+
             serializer = DiscussionEntrySerializer(entry, data=request.data, partial=True, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
