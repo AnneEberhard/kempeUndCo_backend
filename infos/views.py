@@ -126,6 +126,18 @@ class InfoDetailView(APIView):
                     os.remove(thumbnail.path)
                     setattr(info, thumbnail_field, None)
 
+        for field in ['pdf_1', 'pdf_2', 'pdf_3', 'pdf_4']:
+            if field in request.data and request.data[field] == '':
+                pdf_field = getattr(info, field, None)
+                if pdf_field and os.path.isfile(pdf_field.path):
+                    os.remove(pdf_field.path)
+                    setattr(info, field, None)
+
+                # optional auch den Namen löschen
+                name_field = f'{field}_name'
+                if hasattr(info, name_field):
+                    setattr(info, name_field, '')
+
         serializer = InfoSerializer(info, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()

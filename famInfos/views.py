@@ -110,7 +110,6 @@ class FamInfoDetailView(APIView):
             Response: The API response containing the updated famInfo instance or validation errors, or a 404 Not Found status if the famInfo instance does not exist.
         """
         famInfo = get_object_or_404(FamInfo, pk=pk)
-        # deleted_images = json.loads(request.data.get('deletedImages', '[]'))
 
         for field in ['image_1', 'image_2', 'image_3', 'image_4']:
             if field in request.data and request.data[field] == '':
@@ -125,6 +124,18 @@ class FamInfoDetailView(APIView):
                 if thumbnail and os.path.isfile(thumbnail.path):
                     os.remove(thumbnail.path)
                     setattr(famInfo, thumbnail_field, None)
+
+        for field in ['pdf_1', 'pdf_2', 'pdf_3', 'pdf_4']:
+            if field in request.data and request.data[field] == '':
+                pdf_field = getattr(famInfo, field, None)
+                if pdf_field and os.path.isfile(pdf_field.path):
+                    os.remove(pdf_field.path)
+                    setattr(famInfo, field, None)
+
+                # optional auch den Namen löschen
+                name_field = f'{field}_name'
+                if hasattr(famInfo, name_field):
+                    setattr(famInfo, name_field, '')
 
         serializer = FamInfoSerializer(famInfo, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():

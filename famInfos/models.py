@@ -7,6 +7,16 @@ from PIL import Image, UnidentifiedImageError
 import io
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+import os
+import uuid
+
+
+def pdf_upload_to(instance, filename):
+    ext = filename.split('.')[-1]
+    # Eindeutigen Dateinamen generieren, z.B. mit UUID
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    # Optionaler Unterordner nach Beitrag-ID o.ä.
+    return os.path.join('famInfos', filename)
 
 
 class FamInfo(models.Model):
@@ -32,6 +42,14 @@ class FamInfo(models.Model):
     family_1 = models.CharField(choices=FAMILY_CHOICES, max_length=100, blank=False, verbose_name='Stammbaum 1')
     family_2 = models.CharField(choices=FAMILY_CHOICES, max_length=50, blank=True, null=True, verbose_name='Stammbaum 2')
 
+    pdf_1 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True)
+    pdf_1_name = models.CharField(max_length=255, null=True, blank=True) 
+    pdf_2 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True)
+    pdf_2_name = models.CharField(max_length=255, null=True, blank=True) 
+    pdf_3 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True)
+    pdf_3_name = models.CharField(max_length=255, null=True, blank=True) 
+    pdf_4 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True)
+    pdf_4_name = models.CharField(max_length=255, null=True, blank=True) 
 
     def save(self, *args, **kwargs):
         """

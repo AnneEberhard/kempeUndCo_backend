@@ -47,6 +47,20 @@ class RecipeSerializer(serializers.ModelSerializer):
     image_3_thumbnail_url = serializers.SerializerMethodField()
     image_4_thumbnail_url = serializers.SerializerMethodField()
 
+    pdf_1 = serializers.FileField(required=False)
+    pdf_2 = serializers.FileField(required=False)
+    pdf_3 = serializers.FileField(required=False)
+    pdf_4 = serializers.FileField(required=False)
+
+    pdf_1_url = serializers.SerializerMethodField()
+    pdf_2_url = serializers.SerializerMethodField()
+    pdf_3_url = serializers.SerializerMethodField()
+    pdf_4_url = serializers.SerializerMethodField()
+    pdf_1_name = serializers.CharField(required=False, allow_blank=True)
+    pdf_2_name = serializers.CharField(required=False, allow_blank=True)
+    pdf_3_name = serializers.CharField(required=False, allow_blank=True)
+    pdf_4_name = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = Recipe
         fields = [
@@ -54,6 +68,9 @@ class RecipeSerializer(serializers.ModelSerializer):
             'image_1', 'image_2', 'image_3', 'image_4',
             'image_1_url', 'image_2_url', 'image_3_url', 'image_4_url', 'family_1', 'family_2',
             'image_1_thumbnail_url', 'image_2_thumbnail_url', 'image_3_thumbnail_url', 'image_4_thumbnail_url',
+            'pdf_1', 'pdf_2', 'pdf_3', 'pdf_4',
+            'pdf_1_url', 'pdf_2_url', 'pdf_3_url', 'pdf_4_url',
+            'pdf_1_name', 'pdf_2_name', 'pdf_3_name', 'pdf_4_name',        
         ]
         read_only_fields = ['author', 'created_at', 'updated_at']
 
@@ -80,6 +97,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_image_4_thumbnail_url(self, obj):
         return self.build_absolute_uri(obj.image_4_thumbnail.url) if obj.image_4_thumbnail else None
+
+    def get_pdf_1_url(self, obj):
+        return self.build_absolute_uri(obj.pdf_1.url) if obj.pdf_1 else None
+    def get_pdf_2_url(self, obj):
+        return self.build_absolute_uri(obj.pdf_2.url) if obj.pdf_2 else None
+    def get_pdf_3_url(self, obj):
+        return self.build_absolute_uri(obj.pdf_3.url) if obj.pdf_3 else None
+    def get_pdf_4_url(self, obj):
+        return self.build_absolute_uri(obj.pdf_4.url) if obj.pdf_4 else None
 
     def build_absolute_uri(self, relative_url):
         request = self.context.get('request')

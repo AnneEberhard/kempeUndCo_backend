@@ -16,19 +16,40 @@ from recipes.models import Recipe
 
 
 @receiver(post_delete, sender=Recipe)
-def delete_images_on_recipe_delete(sender, instance, **kwargs):
+def delete_files_on_recipe_delete(sender, instance, **kwargs):
     """
-    Deletes associated image files and thumbnails when a Recipe instance is deleted.
+    Deletes associated image and PDF files when a recipe instance is deleted.
     """
+    # Bilder + Thumbnails
     for field in ['image_1', 'image_2', 'image_3', 'image_4']:
         image = getattr(instance, field)
         if image and os.path.isfile(image.path):
             os.remove(image.path)
 
         thumbnail_field = f'{field}_thumbnail'
-        thumbnail = getattr(instance, thumbnail_field)
+        thumbnail = getattr(instance, thumbnail_field, None)
         if thumbnail and os.path.isfile(thumbnail.path):
             os.remove(thumbnail.path)
+
+    # PDFs
+    for field in ['pdf_1', 'pdf_2', 'pdf_3', 'pdf_4']:
+        pdf_file = getattr(instance, field)
+        if pdf_file and os.path.isfile(pdf_file.path):
+            os.remove(pdf_file.path)
+
+#def delete_images_on_recipe_delete(sender, instance, **kwargs):
+#    """
+#    Deletes associated image files and thumbnails when a Recipe instance is deleted.
+#    """
+#    for field in ['image_1', 'image_2', 'image_3', 'image_4']:
+#        image = getattr(instance, field)
+#        if image and os.path.isfile(image.path):
+#            os.remove(image.path)
+#
+#        thumbnail_field = f'{field}_thumbnail'
+#        thumbnail = getattr(instance, thumbnail_field)
+#        if thumbnail and os.path.isfile(thumbnail.path):
+#            os.remove(thumbnail.path)
 
 
 # @receiver(post_save, sender=Recipe)
