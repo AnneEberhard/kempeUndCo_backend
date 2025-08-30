@@ -16,6 +16,9 @@ from .models import CustomUser
 from .serializers import ChangeAlertPreferencesSerializer, ChangeAuthorNameSerializer, ChangePasswordSerializer, PasswordResetRequestSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, SetNewPasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class LoginView(TokenObtainPairView):
@@ -90,8 +93,12 @@ class RegistrationView(generics.CreateAPIView):
                 user_data['family_1'] = valid_families[0] if len(valid_families) > 0 else None
                 user_data['family_2'] = valid_families[1] if len(valid_families) > 1 else None
 
-                user = serializer.save()
-
+                try:
+                    user = serializer.save()
+                except Exception as e:
+                    logger.error(f'Fehler beim Speichern des Users: {e}', exc_info=True)
+                    raise
+                
                 # Senden einer Aktivierungs-E-Mail an den Bürgen
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
                 token = default_token_generator.make_token(user)
@@ -105,7 +112,11 @@ class RegistrationView(generics.CreateAPIView):
 
                 email = EmailMultiAlternatives(subject, plain_message, from_email, to=to_email, reply_to=[settings.REPLY_TO_EMAIL])
                 email.attach_alternative(html_message, "text/html")
-                email.send()
+                try:
+                    email.send()
+                except Exception as e:
+                    logger.error(f"Senden der E-Mail fehlgeschlagen: {e}", exc_info=True)
+                    raise serializers.ValidationError({"detail": "Fehler beim Versand der E-Mail. Bitte versuche es später erneut."})
 
             except CustomUser.DoesNotExist:
                 # Senden einer Benachrichtigungs-E-Mail an den neuen Benutzer, dass der Bürge nicht existiert
