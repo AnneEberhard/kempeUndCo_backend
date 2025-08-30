@@ -78,7 +78,7 @@ class RegistrationView(generics.CreateAPIView):
         if user_data.get('guarantor'):
             guarantor_email = user_data.get('guarantor_email')
             try:
-                guarantor_user = CustomUser.objects.get(email=guarantor_email)
+                guarantor_user = CustomUser.objects.get(email__iexact=guarantor_email)
 
                 # Erlaubte Familien des Bürgen ermitteln
                 allowed_families = {guarantor_user.family_1, guarantor_user.family_2}
@@ -220,7 +220,7 @@ class ActivationView(APIView):
             if user.guarantor:
                 guarantor_email = user.guarantor_email
                 try:
-                    guarantor_user = CustomUser.objects.get(email=guarantor_email)
+                    guarantor_user = CustomUser.objects.get(email__iexact=guarantor_email)
 
                     subject = 'Ein neuer Benutzer wurde aktiviert'
                     html_message = render_to_string('guarantor_activation_email.html', {'user': user})
@@ -260,7 +260,7 @@ class PasswordResetRequestView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
         try:
-            user = CustomUser.objects.get(email=email)
+            user = CustomUser.objects.get(email__iexact=email)
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             reset_link = f"{settings.FRONTEND_URL}/reset-password/{uidb64}/{token}/"

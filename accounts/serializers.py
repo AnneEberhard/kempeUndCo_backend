@@ -39,7 +39,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         logger.info(f"Login attempt with data: {attrs}")
         try:
-            user = CustomUser.objects.get(email=attrs['email'])
+            user = CustomUser.objects.get(email__iexact=attrs['email'])
             logger.info(f"User found: {user.email}, is_active: {user.is_active}")
         except CustomUser.DoesNotExist:
             logger.error(f"User with email {attrs['email']} does not exist")
