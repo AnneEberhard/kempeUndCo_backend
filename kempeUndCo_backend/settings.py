@@ -30,9 +30,11 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'https://kempeundco.pythonanywhere.com/',
     'kempeundco.pythonanywhere.com',
+    'kempeundco.de',
+    'www.kempeundco.de',
 ]
+
 
 CORS_ALLOW_HEADERS = ["content-type", "authorization", "x-csrftoken"]
 
@@ -41,7 +43,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:4200',
     'https://kempeundco.de',
-    'http://kempeundco.de'
+    'http://kempeundco.de',
+    'https://www.kempeundco.de'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -49,7 +52,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:4200',
     'https://kempeundco.de',
-    'http://kempeundco.de'
+    'https://www.kempeundco.de'
 ]
 
 SESSION_COOKIE_SAMESITE = 'None'
