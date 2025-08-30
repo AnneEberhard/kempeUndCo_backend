@@ -84,7 +84,7 @@ class RegistrationView(generics.CreateAPIView):
                 selected_families = user_data.get('selected_families', [])
                 valid_families = [fam for fam in selected_families if fam in allowed_families]
                 if not valid_families:
-                    raise serializers.ValidationError("Der Bürge ist für die ausgewählten Familien nicht berechtigt.")
+                    raise serializers.ValidationError({"detail":"Der Bürge ist für die ausgewählten Familien nicht berechtigt."})
 
                 # Anpassen der Benutzer-Familienfelder basierend auf validierten Familien
                 user_data['family_1'] = valid_families[0] if len(valid_families) > 0 else None
@@ -109,17 +109,17 @@ class RegistrationView(generics.CreateAPIView):
 
             except CustomUser.DoesNotExist:
                 # Senden einer Benachrichtigungs-E-Mail an den neuen Benutzer, dass der Bürge nicht existiert
-                subject = 'Ihr Bürge existiert nicht'
-                html_message = render_to_string('guarantor_not_exist_email.html', {'user': user_data})
-                plain_message = strip_tags(html_message)
-                from_email = settings.NO_REPLY_EMAIL
-                to_email = [user_data['email']]
-
-                email = EmailMultiAlternatives(subject, plain_message, from_email, to=to_email, reply_to=[settings.REPLY_TO_EMAIL])
-                email.attach_alternative(html_message, "text/html")
-                email.send()
-
-                raise serializers.ValidationError("Der angegebene Bürge existiert nicht.")
+                # subject = 'Ihr Bürge existiert nicht'
+                # html_message = render_to_string('guarantor_not_exist_email.html', {'user': user_data})
+                # plain_message = strip_tags(html_message)
+                # from_email = settings.NO_REPLY_EMAIL
+                # to_email = [user_data['email']]
+# 
+                # email = EmailMultiAlternatives(subject, plain_message, from_email, to=to_email, reply_to=[settings.REPLY_TO_EMAIL])
+                # email.attach_alternative(html_message, "text/html")
+                # email.send()
+# 
+                raise serializers.ValidationError({"detail": "Der angegebene Bürge existiert nicht."})
         else:
             # Benutzer erstellen
             user = serializer.save()
