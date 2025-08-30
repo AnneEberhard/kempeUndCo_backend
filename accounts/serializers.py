@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import CustomUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+import logging
+logger = logging.getLogger(__name__)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -35,12 +37,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         - serializers.ValidationError: If authentication fails or account is inactive
         """
 
+        logger.info(f"Login attempt with data: {attrs}")
         try:
             user = CustomUser.objects.get(email=attrs['email'])
+            logger.info(f"User found: {user.email}, is_active: {user.is_active}")
         except CustomUser.DoesNotExist:
+            logger.error(f"User with email {attrs['email']} does not exist")
             raise serializers.ValidationError('Invalid credentials')
 
         if not user.is_active:
+            logger.warning(f"Inactive account login attempt: {user.email}")
             raise serializers.ValidationError('Inactive account')
 
         authenticate_kwargs = {
@@ -50,9 +56,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         user = authenticate(**authenticate_kwargs)
 
         if user is None:
+            logger.error(f"Authentication failed for email {attrs['email']}")
             raise serializers.ValidationError('Invalid credentials')
 
         data = super().validate(attrs)
+        logger.info(f"Login successful for user {user.email}")
         data['user'] = {
             'id': self.user.id,
             'email': self.user.email,
