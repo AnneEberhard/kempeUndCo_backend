@@ -24,7 +24,7 @@ class PersonFamilyFilter(SimpleListFilter):
 class DiscussionEntryInline(admin.TabularInline):
     model = DiscussionEntry
     extra = 1
-
+ 
 
 class DiscussionPageAdmin(ImportExportModelAdmin):
     inlines = [DiscussionEntryInline]
