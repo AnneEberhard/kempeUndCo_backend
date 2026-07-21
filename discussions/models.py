@@ -92,7 +92,7 @@ class DiscussionEntry(models.Model):
         """
         self.content = clean_html(self.content)
 
-        if self.pk:
+        if self.pk and DiscussionEntry.objects.filter(pk=self.pk).exists():
             old_entry = DiscussionEntry.objects.get(pk=self.pk)
             for i in range(1, 5):
                 old_image = getattr(old_entry, f'image_{i}')

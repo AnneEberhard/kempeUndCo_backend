@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from ancestors.models import Person
+from discussions.resources import DiscussionEntryResource, DiscussionResource
 from .models import Discussion, DiscussionEntry
 from django.db.models import Q
 from django.contrib.admin import SimpleListFilter
@@ -24,16 +25,22 @@ class PersonFamilyFilter(SimpleListFilter):
 class DiscussionEntryInline(admin.TabularInline):
     model = DiscussionEntry
     extra = 1
- 
+
 
 class DiscussionPageAdmin(ImportExportModelAdmin):
+    inlines = [DiscussionEntryInline]
+    resource_class = DiscussionResource
     inlines = [DiscussionEntryInline]
 
     list_display = ('id', 'discussion_for', 'created_at', 'updated_at')
     list_filter = (PersonFamilyFilter,)
 
+    class Meta:
+        model = Discussion
+        import_id_fields = ('person',)
+
     def discussion_for(self, obj):
-        return f"{obj.person.id} - {obj.person.name}"
+        return f"{obj.person.name}"
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -49,6 +56,8 @@ class DiscussionPageAdmin(ImportExportModelAdmin):
 
 
 class DiscussionEntryAdmin(ImportExportModelAdmin):
+    resource_class = DiscussionEntryResource
+
     list_display = ('id', 'discussion_for', 'author', 'created_at', 'updated_at')
 
     def discussion_for(self, obj):
