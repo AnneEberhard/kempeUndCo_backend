@@ -104,7 +104,7 @@ class Recipe(models.Model):
         #         compressed_image = self.compress_image(image_field.file)
         #         setattr(self, f'image_{i}', compressed_image)
 
-        if self.pk:
+        if self.pk and Recipe.objects.filter(pk=self.pk).exists():
             old_recipe = Recipe.objects.get(pk=self.pk)
             for i in range(1, 5):
                 old_image = getattr(old_recipe, f'image_{i}')
