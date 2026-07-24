@@ -65,7 +65,7 @@ class FamInfo(models.Model):
         """
         self.content = clean_html(self.content)
 
-        if self.pk:
+        if self.pk and FamInfo.objects.filter(pk=self.pk).exists():
             old_famInfo = FamInfo.objects.get(pk=self.pk)
             for i in range(1, 5):
                 old_image = getattr(old_famInfo, f'image_{i}')
