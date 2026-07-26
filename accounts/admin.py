@@ -24,7 +24,7 @@ class CustomUserAdmin(ImportExportModelAdmin, UserAdmin):
     model = CustomUser
     resource_class = CustomUserResource
     
-    list_display = ('id', 'username', 'email', 'get_allowed_families', )
+    list_display = ('id', 'username', 'author_name', 'email', 'get_allowed_families', )
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('author_name', 'guarantor', 'guarantor_email', 'family_1', 'family_2', 'notes',
                            'alert_faminfo', 'alert_info', 'alert_recipe', 'alert_discussion')}),
