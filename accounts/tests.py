@@ -135,7 +135,10 @@ class RegistrationViewTests(TestCase):
         response = self.client.post(self.registration_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         error_messages = [error for error in response.data]
-        self.assertIn('Der angegebene Bürge existiert nicht.', error_messages)
+        self.assertEqual(
+            str(response.data['detail']),
+            'Der angegebene Bürge existiert nicht.'
+        )
 
     def test_registration_missing_required_fields(self):
         """Test that registration with missing required fields returns an error."""

@@ -21,11 +21,17 @@ class DiscussionListViewTests(TestCase):
         self.user.is_active = True
         self.user.save()
         self.client.force_authenticate(user=self.user)
-        self.url = reverse('get_all_discussions')
+
 
         # Create Persons and Discussions
         self.person1 = Person.objects.create(name='John Smith', family_1='smith')
         self.discussion1 = Discussion.objects.create(person=self.person1)
+        self.entry1 = DiscussionEntry.objects.create(
+            discussion=self.discussion1,
+            author=self.user,
+            content="Testbeitrag"
+        )
+        self.url = reverse('get_all_discussions')
 
     def test_list_discussions(self):
         """Test that the user can see discussions related to their allowed family trees."""
