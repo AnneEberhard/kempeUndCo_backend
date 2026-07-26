@@ -3,6 +3,7 @@ from import_export.admin import ImportExportModelAdmin
 from comments.models import Comment
 from django.contrib.admin import SimpleListFilter
 from django.db.models import Q
+from comments.resources import CommentResource
 from infos.models import Info
 from recipes.models import Recipe
 
@@ -54,6 +55,7 @@ class CommentsAdmin(ImportExportModelAdmin):
     Displays comments with additional filters for `Info` and `Recipe` families.
     Filters the queryset based on the logged-in user's allowed families unless the user is a superuser.
     """
+    resource_class = CommentResource
     model = Comment
     list_display = ('id', 'author', 'info', 'recipe', 'famInfo')
     list_filter = (InfoFamilyFilter, RecipeFamilyFilter)

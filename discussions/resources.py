@@ -1,13 +1,13 @@
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget, Widget
 from django.contrib.auth import get_user_model
-from import_export.instance_loaders import BaseInstanceLoader
+from import_resources import TimestampRestoreResource
 
 from .models import Discussion, Person, DiscussionEntry
 
 User = get_user_model()
 
-class DiscussionResource(resources.ModelResource):
+class DiscussionResource(TimestampRestoreResource):
 
     person = fields.Field(
         column_name='person',
@@ -32,7 +32,7 @@ class DiscussionWidget(Widget):
         return ""
 
 
-class DiscussionEntryResource(resources.ModelResource):
+class DiscussionEntryResource(TimestampRestoreResource):
 
     discussion = fields.Field(
         column_name="discussion_refn",
@@ -53,3 +53,4 @@ class DiscussionEntryResource(resources.ModelResource):
     def get_import_id_fields(self):
         print("IMPORT IDS:", super().get_import_id_fields())
         return super().get_import_id_fields()
+    

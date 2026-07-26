@@ -1,6 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from infos.models import Info
+from infos.resources import InfoResource
 
 
 class InfoAdmin(ImportExportModelAdmin):
@@ -13,6 +14,7 @@ class InfoAdmin(ImportExportModelAdmin):
     - Excluding the `image_*_thumbnail` fields from the admin form, as these are likely auto-generated and not meant to be edited manually.
     - Restricting the queryset based on the user's allowed families unless the user is a superuser.
     """
+    resource_class = InfoResource
     model = Info
     list_display = ('id', 'title', 'author')
     list_filter = ('family_1', 'family_2')
