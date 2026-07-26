@@ -6,5 +6,6 @@ class CustomUserResource(resources.ModelResource):
     class Meta:
         model = CustomUser
         import_id_fields = ('email',)
-        fields = ('username', 'email','author_name',  'family_1', 'family_2', 'guarantor', 'guarantor_email', 'notes')
-        export_order = ('id', 'username', 'email', 'author_name', 'family_1', 'family_2', 'guarantor', 'guarantor_email', 'notes')
+        fields = ('username', 'email','author_name',  'family_1', 'family_2', 'guarantor', 'guarantor_email', 'notes', 'alert_faminfo', 'alert_info', 'alert_recipe', 'alert_discussion')
+        export_order = ('id', 'username', 'email', 'author_name', 'family_1', 'family_2', 'guarantor', 'guarantor_email', 'notes', 'alert_faminfo', 'alert_info', 'alert_recipe', 'alert_discussion')
+
