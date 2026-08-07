@@ -78,6 +78,7 @@ def notify_new_recipe(sender, instance, created, **kwargs):
                 'user.first_name': user.first_name
             })
             text_content = strip_tags(html_content)
+            print('email')
             email = EmailMultiAlternatives(
                 subject='Neues Rezept erstellt',
                 body=text_content,
@@ -85,7 +86,7 @@ def notify_new_recipe(sender, instance, created, **kwargs):
                 to=[user.email],
             )
             email.attach_alternative(html_content, "text/html")
-            #email.send()
+            email.send()
 
 
           # send_mail(
