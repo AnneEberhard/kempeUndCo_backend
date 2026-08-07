@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Recipe
+from utils.file_validators import validate_pdf
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -47,10 +48,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     image_3_thumbnail_url = serializers.SerializerMethodField()
     image_4_thumbnail_url = serializers.SerializerMethodField()
 
-    pdf_1 = serializers.FileField(required=False)
-    pdf_2 = serializers.FileField(required=False)
-    pdf_3 = serializers.FileField(required=False)
-    pdf_4 = serializers.FileField(required=False)
+    pdf_1 = serializers.FileField(required=False, validators=[validate_pdf])
+    pdf_2 = serializers.FileField(required=False, validators=[validate_pdf])
+    pdf_3 = serializers.FileField(required=False, validators=[validate_pdf])
+    pdf_4 = serializers.FileField(required=False, validators=[validate_pdf])
 
     pdf_1_url = serializers.SerializerMethodField()
     pdf_2_url = serializers.SerializerMethodField()

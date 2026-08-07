@@ -4,6 +4,7 @@ from django.db import models
 from django.conf import settings
 from ancestors.models import Person
 from utils.html_cleaner import clean_html
+from utils.file_validators import validate_pdf
 from PIL import Image, UnidentifiedImageError
 from django.core.files.base import ContentFile
 import uuid
@@ -12,9 +13,9 @@ import uuid
 def pdf_upload_to(instance, filename):
     ext = filename.split('.')[-1]
     # Eindeutigen Dateinamen generieren, z.B. mit UUID
-    filename = f"{uuid.uuid4().hex}.{ext}"
+    filename = f"{uuid.uuid4().hex}.pdf"
     # Optionaler Unterordner nach Beitrag-ID o.ä.
-    return os.path.join('discussions', filename)
+    return os.path.join('famInfos', filename)
 
 
 
@@ -69,13 +70,13 @@ class DiscussionEntry(models.Model):
     image_4 = models.FileField(upload_to='discussions/', null=True, blank=True)
     image_4_thumbnail = models.ImageField(upload_to='discussions/thumbnails/', null=True, blank=True)
 
-    pdf_1 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True)
+    pdf_1 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True, validators=[validate_pdf])
     pdf_1_name = models.CharField(max_length=255, null=True, blank=True) 
-    pdf_2 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True)
+    pdf_2 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True, validators=[validate_pdf])
     pdf_2_name = models.CharField(max_length=255, null=True, blank=True) 
-    pdf_3 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True)
+    pdf_3 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True, validators=[validate_pdf])
     pdf_3_name = models.CharField(max_length=255, null=True, blank=True) 
-    pdf_4 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True)
+    pdf_4 = models.FileField(upload_to=pdf_upload_to, null=True, blank=True, validators=[validate_pdf])
     pdf_4_name = models.CharField(max_length=255, null=True, blank=True) 
 
     def save(self, *args, **kwargs):
