@@ -1,3 +1,5 @@
+import uuid
+
 from django.conf import settings
 from django.db import models
 from datetime import datetime
@@ -336,3 +338,28 @@ class Relation(models.Model):
     marr_date_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsdatum 4')
     marr_plac_4 = models.CharField(max_length=255, null=True, blank=True, verbose_name='Heiratsort 4')
     fam_stat_4 = models.CharField(max_length=255, choices=FAMILY_STATUS_CHOICES, null=True, blank=True, verbose_name='Familienstand 4')
+
+
+class PersonChangeLog(models.Model):
+    change_id = models.UUIDField(default=uuid.uuid4, editable=False)
+
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        related_name='change_logs',
+    )
+
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='person_change_logs',
+    )
+
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    field_name = models.CharField(max_length=100)
+    old_value = models.TextField(null=True, blank=True)
+    new_value = models.TextField(null=True, blank=True)
+    

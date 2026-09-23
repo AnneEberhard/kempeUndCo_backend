@@ -1,6 +1,6 @@
 from accounts import models
 from .resources import PersonResource, RelationResource
-from .models import Person, Relation
+from .models import Person, PersonChangeLog, Relation
 from import_export.admin import ImportExportModelAdmin
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
@@ -178,5 +178,40 @@ class RelationAdmin(ImportExportModelAdmin):
         return request.user.is_superuser
 
 
+class PersonChangeLogAdmin(ImportExportModelAdmin):
+    list_display = (
+        'person',
+        'changed_at',
+        'changed_by',
+        'field_name',
+        'old_value',
+        'new_value',
+        'change_id'
+    )
+
+    list_filter = (
+        'changed_by',
+        'field_name',
+        'changed_at',
+    )
+
+    search_fields = (
+        'person__refn',
+        'person__name',
+        'field_name',
+        'old_value',
+        'new_value',
+    )
+
+    readonly_fields = (
+        'person',
+        'changed_by',
+        'changed_at',
+        'field_name',
+        'old_value',
+        'new_value',
+    )
+
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Relation, RelationAdmin)
+admin.site.register(PersonChangeLog, PersonChangeLogAdmin)

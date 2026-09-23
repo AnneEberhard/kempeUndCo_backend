@@ -100,6 +100,7 @@ class PersonSerializer(serializers.ModelSerializer):
         if instance.confidential == 'yes':
             return {
                 'id': instance.id,
+                'refn': instance.refn,
                 'name': 'vertraulich',
                 'surn': '',
                 'givn': '',
@@ -238,6 +239,138 @@ class RelationSerializer(serializers.ModelSerializer):
     Fields:
     - All fields of the Relation model.
     """
+    class Meta:
+        model = Relation
+        fields = '__all__'
+
+
+class AdminPersonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Person
+        fields = [
+            'id',
+            'refn',
+            'name',
+
+            'fath_name',
+            'fath_refn',
+            'moth_name',
+            'moth_refn',
+            'uid',
+
+            'surn',
+            'givn',
+            'sex',
+            'occu',
+
+            'chan_date',
+            'chan_date_time',
+
+            'birt_date',
+            'birth_date_formatted',
+            'birt_plac',
+
+            'deat_date',
+            'death_date_formatted',
+            'deat_plac',
+
+            'note',
+
+            'chr_date',
+            'chr_plac',
+            'buri_date',
+            'buri_plac',
+
+            'name_rufname',
+            'name_npfx',
+            'sour',
+            'name_nick',
+            'name_marnm',
+            'chr_addr',
+            'reli',
+
+            'marr_spou_name_1',
+            'marr_spou_refn_1',
+            'fam_husb_1',
+            'fam_wife_1',
+            'marr_date_1',
+            'marr_plac_1',
+            'fam_chil_1',
+            'fam_marr_1',
+            'fam_stat_1',
+
+            'marr_spou_name_2',
+            'marr_spou_refn_2',
+            'fam_husb_2',
+            'fam_wife_2',
+            'marr_date_2',
+            'marr_plac_2',
+            'fam_chil_2',
+            'fam_marr_2',
+            'fam_stat_2',
+
+            'marr_spou_name_3',
+            'marr_spou_refn_3',
+            'fam_husb_3',
+            'fam_wife_3',
+            'marr_date_3',
+            'marr_plac_3',
+            'fam_chil_3',
+            'fam_marr_3',
+            'fam_stat_3',
+
+            'marr_spou_name_4',
+            'marr_spou_refn_4',
+            'fam_husb_4',
+            'fam_wife_4',
+            'marr_date_4',
+            'marr_plac_4',
+            'fam_chil_4',
+            'fam_marr_4',
+            'fam_stat_4',
+
+            'obje_file_1',
+            'obje_titl_1',
+            'obje_file_2',
+            'obje_titl_2',
+            'obje_file_3',
+            'obje_titl_3',
+            'obje_file_4',
+            'obje_titl_4',
+            'obje_file_5',
+            'obje_titl_5',
+            'obje_file_6',
+            'obje_titl_6',
+
+            'confidential',
+            'family_1',
+            'family_2',
+
+            'creation_date',
+            'last_modified_date',
+            'created_by',
+            'last_modified_by',
+
+            'family_1',
+            'family_2',
+        ]
+
+        read_only_fields = [
+            'id',
+            'refn',
+            'name',
+            'birth_date_formatted',
+            'death_date_formatted',
+
+            'creation_date',
+            'last_modified_date',
+            'created_by',
+            'last_modified_by',
+        ]
+
+
+class AdminRelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Relation
         fields = '__all__'

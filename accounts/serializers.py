@@ -69,6 +69,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'first_name': self.user.first_name,
             'family_1': self.user.family_1,
             'family_2': self.user.family_2,
+            'is_staff': self.user.is_staff,
             'alert_faminfo': self.user.alert_faminfo,
             'alert_info': self.user.alert_info,
             'alert_recipe': self.user.alert_recipe,
