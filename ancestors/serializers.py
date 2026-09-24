@@ -351,9 +351,6 @@ class AdminPersonSerializer(serializers.ModelSerializer):
             'last_modified_date',
             'created_by',
             'last_modified_by',
-
-            'family_1',
-            'family_2',
         ]
 
         read_only_fields = [
@@ -371,6 +368,35 @@ class AdminPersonSerializer(serializers.ModelSerializer):
 
 
 class AdminRelationSerializer(serializers.ModelSerializer):
+    fath_refn = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        allow_null=True,
+        required=False,
+    )
+    moth_refn = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        allow_null=True,
+        required=False,
+    )
+
+    fath_name = serializers.CharField(
+        source='fath_refn.name',
+        read_only=True,
+        allow_null=True,
+    )
+    moth_name = serializers.CharField(
+        source='moth_refn.name',
+        read_only=True,
+        allow_null=True,
+    )
+
     class Meta:
         model = Relation
-        fields = '__all__'
+        fields = [
+            'fath_refn',
+            'fath_name',
+            'moth_refn',
+            'moth_name',
+        ]

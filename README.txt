@@ -1,3 +1,7 @@
+CAVE: person.familienfelder fehleranfällig. 
+Für Verwandtschaft immer auf Relation beziehen, nicht auf die historisch gewachsenen Felder in Person!
+
+
 Compress existing images: run script_python compress_images.py
     it will overwrite the images with a smaller version for better performance
     CAVE: no redis installed, no compression wil upload feasible due to thumbnails

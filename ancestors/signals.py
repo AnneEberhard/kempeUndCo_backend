@@ -55,34 +55,64 @@ def rename_files_on_save(sender, instance, created, **kwargs):
 
 @receiver(pre_save, sender=Person)
 def delete_old_files_on_update(sender, instance, **kwargs):
-    """
-    Before saving an updated Person instance, this function deletes old files.
-
-    This function checks if the Person instance already exists in the database (by checking the primary key).
-    If the instance exists and the file fields (obje_file_1 to obje_file_6) are being updated, the old files
-    associated with these fields are deleted from the file system.
-
-    Parameters:
-    - sender: The model class (Person) that sent the signal.
-    - instance: The instance of the Person being updated.
-    - kwargs: Additional keyword arguments.
-    """
     if not instance.pk:
-        return False  # No action needed for new instances
+        return
 
     try:
         old_instance = sender.objects.get(pk=instance.pk)
     except sender.DoesNotExist:
-        return False  # Old instance does not exist, no action needed
+        return
 
     for i in range(1, 7):
         field_name = f'obje_file_{i}'
+
         old_file = getattr(old_instance, field_name)
         new_file = getattr(instance, field_name)
 
-        if old_file and old_file != new_file:
-            if os.path.exists(old_file.path):
-                os.remove(old_file.path)
+        old_name = old_file.name if old_file and old_file.name else None
+        new_name = new_file.name if new_file and new_file.name else None
+
+        if old_name and old_name != new_name:
+            old_path = os.path.join(
+                settings.MEDIA_ROOT,
+                old_name
+            )
+
+            if os.path.exists(old_path):
+                os.remove(old_path)
+
+
+##@receiver(pre_save, sender=Person)
+#def delete_old_files_on_update2(sender, instance, **kwargs):
+#    """
+#    Before saving an updated Person instance, this function deletes old files.
+#
+#    This function checks if the Person instance already exists in the database (by checking the primary key).
+#    If the instance exists and the file fields (obje_file_1 to obje_file_6) are being updated, the old files
+#    associated with these fields are deleted from the file system.
+#
+#    Parameters:
+#    - sender: The model class (Person) that sent the signal.
+#    - instance: The instance of the Person being updated.
+#    - kwargs: Additional keyword arguments.
+#    """
+#    if not instance.pk:
+#        return False  # No action needed for new instances
+#
+#    try:
+#        old_instance = sender.objects.get(pk=instance.pk)
+#    except sender.DoesNotExist:
+#        return False  # Old instance does not exist, no action needed
+#
+#    for i in range(1, 7):
+#        field_name = f'obje_file_{i}'
+#        old_file = getattr(old_instance, field_name)
+#        new_file = getattr(instance, field_name)
+#
+#        if old_file and old_file != new_file:
+#            #old_file.delete(save=False)
+#            if os.path.exists(old_file.path):
+#                os.remove(old_file.path)
 
 
 @receiver(post_delete, sender=Person)
@@ -110,7 +140,6 @@ def delete_files_on_delete(sender, instance, **kwargs):
 @receiver(post_save, sender=Relation)
 def update_own_person_fields(sender, instance, **kwargs):
     if instance.fath_refn:
-        print(instance.fath_refn.refn)
         instance.person.fath_refn = instance.fath_refn.refn
     if instance.moth_refn:
         instance.person.moth_refn = instance.moth_refn.refn
@@ -130,15 +159,27 @@ def update_own_person_fields(sender, instance, **kwargs):
         instance.person.marr_spou_refn_4 = instance.marr_spou_refn_4.refn
         instance.person.marr_date_4 = instance.marr_date_4
         instance.person.marr_plac_4 = instance.marr_plac_4
-    if instance.children_1.exists():
-        instance.person.fam_chil_1 = ','.join(child.refn for child in instance.children_1.all())
-    if instance.children_2.exists():
-        instance.person.fam_chil_2 = ','.join(child.refn for child in instance.children_1.all())
-    if instance.children_3.exists():
-        instance.person.fam_chil_3 = ','.join(child.refn for child in instance.children_1.all())
-    if instance.children_4.exists():
-        instance.person.fam_chil_4 = ','.join(child.refn for child in instance.children_1.all())
 
+    instance.person.fam_chil_1 = ','.join(
+            child.refn for child in instance.children_1.all()
+        )
+
+    instance.person.fam_chil_2 = ','.join(
+        child.refn for child in instance.children_2.all()
+    )
+
+    instance.person.fam_chil_3 = ','.join(
+        child.refn for child in instance.children_3.all()
+    )
+
+    instance.person.fam_chil_4 = ','.join(
+        child.refn for child in instance.children_4.all()
+    )
+    if instance.person.refn == '@I2271@':
+        print(
+        '>>> SAVE VATER1 AUS update_own_person_fields',
+        repr(instance.person.fam_chil_1)
+        )
     instance.person.save()
 
 
@@ -264,7 +305,11 @@ def update_or_create_spouse_relation(sender, instance, created, **kwargs):
 
 @receiver(m2m_changed, sender=Relation.children_1.through)
 def update_or_create_child_relation(sender, instance, action, reverse, model, pk_set, **kwargs):
+    if getattr(instance, '_updating', False):
+        return
     if action in ["post_add", "post_remove", "post_clear"]:
+        if not pk_set:
+            return
         for child_id in pk_set:
             child = Person.objects.get(pk=child_id)
             relation, created = Relation.objects.get_or_create(person=child)
@@ -290,6 +335,7 @@ def update_or_create_child_relation(sender, instance, action, reverse, model, pk
 @receiver(post_save, sender=Relation)
 def update_parent_relations(sender, instance, **kwargs):
     # Verhindere Endlosschleifen
+
     if getattr(instance, '_updating', False):
         return
 

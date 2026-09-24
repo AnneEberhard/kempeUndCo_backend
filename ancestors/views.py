@@ -1,11 +1,13 @@
 from django.db import transaction
 from rest_framework import generics
 from .models import Person, Relation
-from .serializers import AdminPersonSerializer, PersonListSerializer, PersonSerializer, RelationSerializer
+from .serializers import AdminPersonSerializer, AdminRelationSerializer, PersonListSerializer, PersonSerializer, RelationSerializer
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.decorators import permission_classes
 from django.db.models import Q
 from utils.change_log import log_person_changes
+from django.shortcuts import get_object_or_404
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
 @permission_classes([IsAuthenticated])
@@ -155,6 +157,7 @@ class AdminPersonDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = AdminPersonSerializer
     lookup_field = 'refn'
     permission_classes = [IsTreeAdmin]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         user = self.request.user
@@ -212,8 +215,30 @@ class AdminPersonDetailView(generics.RetrieveUpdateAPIView):
         }
 
         serializer.save(user=self.request.user)
+        person = serializer.instance
 
+        for index in range(1, 7):
+            delete_field = f'delete_obje_file_{index}'
 
+            if self.request.data.get(delete_field) == 'true':
+                image_field = f'obje_file_{index}'
+                setattr(person, image_field, None)
+
+        for i in range(1, 7):
+            field = getattr(person, f'obje_file_{i}')
+            print(
+                'VOR SAVE:',
+                i,
+                field.name if field and field.name else None
+            )
+        person.save(user=self.request.user)
+        for i in range(1, 7):
+            field = getattr(person, f'obje_file_{i}')
+            print(
+                'NACH SAVE:',
+                i,
+                field.name if field and field.name else None
+            )
         log_person_changes(
             person=person,
             old_values=old_values, new_values=serializer.validated_data,
@@ -247,3 +272,98 @@ class AdminPersonListView(generics.ListAPIView):
             )
 
         return queryset.order_by('name')
+
+
+class AdminRelationDetailView(generics.RetrieveUpdateAPIView):
+    serializer_class = AdminRelationSerializer
+    #permission_classes = [IsTreeAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_superuser:
+            return Relation.objects.all()
+
+        #allowed_families = user.allowed_families
+        allowed_families = ['kempe', 'huenten']
+
+        return (
+            Relation.objects.filter(
+                Q(person__family_1__in=allowed_families)
+                | Q(person__family_2__in=allowed_families)
+            )
+            .distinct()
+        )
+
+    def get_object(self):
+        refn = self.kwargs['refn']
+
+        return get_object_or_404(
+            self.get_queryset(),
+            person__refn=refn,
+        )
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        relation = self.get_object()
+
+        old_father = relation.fath_refn
+        old_mother = relation.moth_refn
+
+        new_father = serializer.validated_data.get(
+            'fath_refn',
+            old_father,
+        )
+        new_mother = serializer.validated_data.get(
+            'moth_refn',
+            old_mother,
+        )
+
+        child = relation.person
+
+        # Alte Vaterbeziehung entfernen
+        if old_father != new_father:
+            self._remove_child_from_parent(
+                child=child,
+                parent=old_father
+            )
+
+        # Alte Mutterbeziehung entfernen
+        if old_mother != new_mother:
+            self._remove_child_from_parent(
+                child=child,
+                parent=old_mother
+            )
+
+        # Jetzt den neuen Zustand speichern.
+        # Die bestehenden Signals kümmern sich um das Hinzufügen
+        # der neuen Beziehungen.
+        serializer.save()
+
+    def _remove_child_from_parent(self, child, parent):
+        if not parent:
+            return
+
+        parent_relation = Relation.objects.filter(
+            person=parent
+        ).first()
+
+        if not parent_relation:
+            return
+
+        for i in range(1, 5):
+            children_field = getattr(
+                parent_relation,
+                f'children_{i}',
+            )
+
+            if children_field.filter(pk=child.pk).exists():
+                parent_relation._updating = True
+
+                try:
+                    children_field.remove(child)
+                    parent_relation.save()
+                finally:
+                    parent_relation._updating = False
+
+                break
