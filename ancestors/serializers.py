@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Person, Relation
+from .services import add_child_to_relationship, add_spouse, remove_child_from_relationship, remove_parent_from_child, remove_spouse, sync_child_from_parent, sync_person_legacy_fields, sync_spouse_data
 
 
 class PersonSerializer(serializers.ModelSerializer):
@@ -391,6 +392,61 @@ class AdminRelationSerializer(serializers.ModelSerializer):
         read_only=True,
         allow_null=True,
     )
+    marr_spou_refn_1 = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        allow_null=True,
+        required=False,
+    )
+
+    marr_spou_refn_2 = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        allow_null=True,
+        required=False,
+    )
+
+    marr_spou_refn_3 = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        allow_null=True,
+        required=False,
+    )
+
+    marr_spou_refn_4 = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        allow_null=True,
+        required=False,
+    )
+
+    children_1 = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        many=True,
+        required=False,
+    )
+
+    children_2 = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        many=True,
+        required=False,
+    )
+
+    children_3 = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        many=True,
+        required=False,
+    )
+
+    children_4 = serializers.SlugRelatedField(
+        slug_field='refn',
+        queryset=Person.objects.all(),
+        many=True,
+        required=False,
+    )
 
     class Meta:
         model = Relation
@@ -399,4 +455,202 @@ class AdminRelationSerializer(serializers.ModelSerializer):
             'fath_name',
             'moth_refn',
             'moth_name',
+
+            'marr_spou_refn_1',
+            'marr_date_1',
+            'marr_plac_1',
+            'fam_stat_1',
+            'children_1',
+
+            'marr_spou_refn_2',
+            'marr_date_2',
+            'marr_plac_2',
+            'fam_stat_2',
+            'children_2',
+
+            'marr_spou_refn_3',
+            'marr_date_3',
+            'marr_plac_3',
+            'fam_stat_3',
+            'children_3',
+
+            'marr_spou_refn_4',
+            'marr_date_4',
+            'marr_plac_4',
+            'fam_stat_4',
+            'children_4',
         ]
+
+    def update(self, instance, validated_data):
+    
+        old_father = instance.fath_refn
+        old_mother = instance.moth_refn
+        old_spouses = {
+            index: getattr(
+                instance,
+                f"marr_spou_refn_{index}"
+            )
+            for index in range(1, 5)
+        }
+
+        old_children = {
+            index: set(
+                getattr(
+                    instance,
+                    f"children_{index}"
+                ).values_list("pk", flat=True)
+            )
+            for index in range(1, 5)
+        }
+    
+        instance = super().update(
+            instance,
+            validated_data
+        )
+    
+        new_father = instance.fath_refn
+        new_mother = instance.moth_refn
+        new_spouses = {
+            index: getattr(
+                instance,
+                f"marr_spou_refn_{index}"
+            )
+            for index in range(1, 5)
+        }
+        new_children = {
+            index: set(
+                getattr(
+                    instance,
+                    f"children_{index}"
+                ).values_list("pk", flat=True)
+            )
+            for index in range(1, 5)
+        }
+    
+        if old_father and old_father != new_father:
+            remove_child_from_relationship(
+                parent=old_father,
+                other_parent=new_mother,
+                child=instance.person,
+            )
+
+            if old_mother:
+                remove_child_from_relationship(
+                    parent=old_mother,
+                    other_parent=old_father,
+                    child=instance.person,
+                )
+    
+        if new_father and old_father != new_father:
+            add_child_to_relationship(
+                parent=new_father,
+                other_parent=new_mother,
+                child=instance.person,
+            )
+
+            if new_mother:
+                add_child_to_relationship(
+                    parent=new_mother,
+                    other_parent=new_father,
+                    child=instance.person,
+                )
+
+        if old_mother and old_mother != new_mother:
+            remove_child_from_relationship(
+                parent=old_mother,
+                other_parent=new_father,
+                child=instance.person,
+            )
+
+        if new_mother and old_mother != new_mother:
+            add_child_to_relationship(
+                parent=new_mother,
+                other_parent=new_father,
+                child=instance.person,
+            )
+
+        for index in range(1, 5):
+
+            removed_children = (
+                old_children[index] - new_children[index]
+            )
+
+            added_children = (
+                new_children[index] - old_children[index]
+            )
+
+            # Kinder wurden aus children_X entfernt
+            for child_pk in removed_children:
+                removed_child = Person.objects.get(
+                    pk=child_pk
+                )
+                print("removed_child: ", removed_child.refn)
+                remove_parent_from_child(parent=instance.person, child=removed_child)
+
+            # Kinder wurden direkt in children_X eingetragen
+            for child_pk in added_children:
+                added_child = Person.objects.get(
+                    pk=child_pk
+                )
+                print("added_child: ", added_child.refn)
+
+                sync_child_from_parent(
+                    parent=instance.person,
+                    child=added_child,
+                )
+            
+        for index in range(1, 5):
+            old_spouse = old_spouses[index]
+            new_spouse = new_spouses[index]
+
+            # Alten Ehepartner beim anderen entfernen
+            if old_spouse and old_spouse != new_spouse:
+                remove_spouse(
+                    person=old_spouse,
+                    spouse=instance.person,
+                )
+
+            # Neuen Ehepartner beim anderen eintragen
+            if new_spouse:
+                sync_spouse_data(
+                                    person=instance.person,
+                                    spouse=new_spouse,
+                                    marr_date=getattr(
+                                        instance,
+                                        f"marr_date_{index}"
+                                    ),
+                                    marr_plac=getattr(
+                                        instance,
+                                        f"marr_plac_{index}"
+                                    ),
+                                    fam_stat=getattr(
+                                        instance,
+                                        f"fam_stat_{index}"
+                                    ),
+                                )
+                if old_spouse != new_spouse:
+                    add_spouse(
+                        person=new_spouse,
+                        spouse=instance.person,
+                        preferred_slot=index,
+                    )
+                    sync_person_legacy_fields(old_spouse)
+                    sync_person_legacy_fields(new_spouse)
+
+                    print("old spouse: ", old_spouse)
+                    print("new spouse: ", new_spouse)
+                
+        sync_person_legacy_fields(instance.person)
+        if old_father:
+            sync_person_legacy_fields(old_father)
+
+        if new_father:
+            sync_person_legacy_fields(new_father)
+
+        if old_mother:
+            sync_person_legacy_fields(old_mother)
+
+        if new_mother:
+            sync_person_legacy_fields(new_mother)
+
+        return instance

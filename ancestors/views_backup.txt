@@ -1,0 +1,177 @@
+
+#    @transaction.atomic
+#    def perform_update(self, serializer):
+#        relation = self.get_object()
+#
+#        old_father = relation.fath_refn
+#        old_mother = relation.moth_refn
+#
+#        new_father = serializer.validated_data.get(
+#            'fath_refn',
+#            old_father,
+#        )
+#        new_mother = serializer.validated_data.get(
+#            'moth_refn',
+#            old_mother,
+#        )
+#
+#        child = relation.person
+#
+#        # Alte Vaterbeziehung entfernen
+#        if old_father != new_father:
+#            self._remove_child_from_parent(
+#                child=child,
+#                parent=old_father
+#            )
+#
+#        # Alte Mutterbeziehung entfernen
+#        if old_mother != new_mother:
+#            self._remove_child_from_parent(
+#                child=child,
+#                parent=old_mother
+#            )
+#
+#        # Alte Ehe-/Spouse-Beziehung nur dann entfernen,
+#        # wenn Vater und Mutter kein gemeinsames Kind mehr haben.
+#        if old_father != new_father and old_mother:
+#            if not self._parents_have_common_children(
+#                father=old_father,
+#                mother=old_mother,
+#            ):
+#                self._remove_spouse_relation(
+#                    person_a=old_father,
+#                    person_b=old_mother,
+#                )
+#        serializer.save()
+#
+#    def _remove_child_from_parent(self, child, parent):
+#        if not parent:
+#            return
+#
+#        parent_relation = Relation.objects.filter(
+#            person=parent
+#        ).first()
+#
+#        if not parent_relation:
+#            return
+#
+#        for i in range(1, 5):
+#            children_field = getattr(
+#                parent_relation,
+#                f'children_{i}',
+#            )
+#
+#            if children_field.filter(pk=child.pk).exists():
+#                parent_relation._updating = True
+#
+#                try:
+#                    children_field.remove(child)
+#                    parent_relation.save()
+#                finally:
+#                    parent_relation._updating = False
+#
+#                break
+#
+#
+#    def _parents_have_common_children(self, father, mother):
+#       if not father or not mother:
+#           return False
+#
+#       father_relation = Relation.objects.filter(
+#           person=father
+#       ).first()
+#
+#       mother_relation = Relation.objects.filter(
+#           person=mother
+#       ).first()
+#
+#       if not father_relation or not mother_relation:
+#           return False
+#
+#       for i in range(1, 5):
+#           father_children = set(
+#               getattr(
+#                   father_relation,
+#                   f'children_{i}'
+#               ).values_list('pk', flat=True)
+#           )
+#
+#           if not father_children:
+#               continue
+#
+#           for j in range(1, 5):
+#               mother_children = set(
+#                   getattr(
+#                       mother_relation,
+#                       f'children_{j}'
+#                   ).values_list('pk', flat=True)
+#               )
+#
+#               if father_children & mother_children:
+#                   return True
+#
+#       return False
+#
+#
+#    def _remove_spouse_relation(self, person_a, person_b):
+#        if not person_a or not person_b:
+#            return
+#
+#        relation_a = Relation.objects.filter(
+#            person=person_a
+#        ).first()
+#
+#        relation_b = Relation.objects.filter(
+#            person=person_b
+#        ).first()
+#
+#        if relation_a:
+#            relation_a._updating = True
+#
+#            try:
+#                for i in range(1, 5):
+#                    field = f'marr_spou_refn_{i}'
+#
+#                    if getattr(relation_a, field) == person_b:
+#                        setattr(relation_a, field, None)
+#                        setattr(
+#                            relation_a,
+#                            f'marr_date_{i}',
+#                            None,
+#                        )
+#                        setattr(
+#                            relation_a,
+#                            f'marr_plac_{i}',
+#                            None,
+#                        )
+#                        break
+#
+#                relation_a.save()
+#            finally:
+#                relation_a._updating = False
+#
+#        if relation_b:
+#            relation_b._updating = True
+#
+#            try:
+#                for i in range(1, 5):
+#                    field = f'marr_spou_refn_{i}'
+#
+#                    if getattr(relation_b, field) == person_a:
+#                        setattr(relation_b, field, None)
+#                        setattr(
+#                            relation_b,
+#                            f'marr_date_{i}',
+#                            None,
+#                        )
+#                        setattr(
+#                            relation_b,
+#                            f'marr_plac_{i}',
+#                            None,
+#                        )
+#                        break
+#
+#                relation_b.save()
+#            finally:
+#                relation_b._updating = False
+#

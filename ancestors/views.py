@@ -8,6 +8,7 @@ from django.db.models import Q
 from utils.change_log import log_person_changes
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.response import Response
 
 
 @permission_classes([IsAuthenticated])
@@ -298,72 +299,33 @@ class AdminRelationDetailView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         refn = self.kwargs['refn']
 
-        return get_object_or_404(
-            self.get_queryset(),
-            person__refn=refn,
-        )
+        "No Relation matches the given query."
 
     @transaction.atomic
-    def perform_update(self, serializer):
-        relation = self.get_object()
+    def update(self, request, *args, **kwargs):
+        refn = self.kwargs['refn']
 
-        old_father = relation.fath_refn
-        old_mother = relation.moth_refn
-
-        new_father = serializer.validated_data.get(
-            'fath_refn',
-            old_father,
-        )
-        new_mother = serializer.validated_data.get(
-            'moth_refn',
-            old_mother,
-        )
-
-        child = relation.person
-
-        # Alte Vaterbeziehung entfernen
-        if old_father != new_father:
-            self._remove_child_from_parent(
-                child=child,
-                parent=old_father
-            )
-
-        # Alte Mutterbeziehung entfernen
-        if old_mother != new_mother:
-            self._remove_child_from_parent(
-                child=child,
-                parent=old_mother
-            )
-
-        # Jetzt den neuen Zustand speichern.
-        # Die bestehenden Signals kümmern sich um das Hinzufügen
-        # der neuen Beziehungen.
-        serializer.save()
-
-    def _remove_child_from_parent(self, child, parent):
-        if not parent:
-            return
-
-        parent_relation = Relation.objects.filter(
-            person=parent
+        relation = self.get_queryset().filter(
+            person__refn=refn
         ).first()
 
-        if not parent_relation:
-            return
-
-        for i in range(1, 5):
-            children_field = getattr(
-                parent_relation,
-                f'children_{i}',
+        if relation is None:
+            person = get_object_or_404(
+                Person,
+                refn=refn,
             )
 
-            if children_field.filter(pk=child.pk).exists():
-                parent_relation._updating = True
+            relation = Relation.objects.create(
+                person=person
+            )
 
-                try:
-                    children_field.remove(child)
-                    parent_relation.save()
-                finally:
-                    parent_relation._updating = False
+        serializer = self.get_serializer(
+            relation,
+            data=request.data,
+            partial=True,
+        )
 
-                break
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)

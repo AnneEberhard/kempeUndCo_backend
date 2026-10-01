@@ -4,6 +4,8 @@ from .models import Person, PersonChangeLog, Relation
 from import_export.admin import ImportExportModelAdmin
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
+from .services import add_child_to_relationship, add_spouse, remove_child_from_relationship, remove_parent_from_child, remove_spouse, sync_child_from_parent, sync_person_legacy_fields, sync_spouse_data
+
 
 
 class PersonAdmin(ImportExportModelAdmin):
@@ -176,6 +178,206 @@ class RelationAdmin(ImportExportModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
+
+    def save_model(self, request, obj, form, change):
+        old_father = None
+        old_mother = None
+        old_spouses = {}
+
+        if change:
+            old_obj = Relation.objects.get(pk=obj.pk)
+            old_father = old_obj.fath_refn
+            old_mother = old_obj.moth_refn
+            old_spouses = {
+                index: getattr(old_obj, f"marr_spou_refn_{index}")
+                for index in range(1, 5)
+            }
+
+        super().save_model(request, obj, form, change)
+
+        new_father = obj.fath_refn
+        new_mother = obj.moth_refn
+        new_spouses = {
+            index: getattr(obj, f"marr_spou_refn_{index}")
+            for index in range(1, 5)
+        }
+
+        if old_father != new_father:
+
+            if old_father:
+                remove_child_from_relationship(
+                    parent=old_father,
+                    other_parent=old_mother,
+                    child=obj.person,
+                )
+
+                if old_mother:
+                    remove_child_from_relationship(
+                        parent=old_mother,
+                        other_parent=old_father,
+                        child=obj.person,
+                    )
+
+            if new_father:
+                add_child_to_relationship(
+                    parent=new_father,
+                    other_parent=new_mother,
+                    child=obj.person,
+                )
+
+                if new_mother:
+                    add_child_to_relationship(
+                        parent=new_mother,
+                        other_parent=new_father,
+                        child=obj.person,
+                    )
+
+        if old_mother != new_mother:
+
+            if old_mother:
+                remove_child_from_relationship(
+                    parent=old_mother,
+                    other_parent=old_father,
+                    child=obj.person,
+                )
+
+                if old_father:
+                    remove_child_from_relationship(
+                        parent=old_father,
+                        other_parent=old_mother,
+                        child=obj.person,
+                    )
+
+            if new_mother:
+                add_child_to_relationship(
+                    parent=new_mother,
+                    other_parent=new_father,
+                    child=obj.person,
+                )
+
+                if new_father:
+                    add_child_to_relationship(
+                        parent=new_father,
+                        other_parent=new_mother,
+                        child=obj.person,
+                    )
+
+        for index in range(1, 5):
+            old_spouse = old_spouses.get(index)
+            new_spouse = new_spouses[index]
+
+            if old_spouse and old_spouse != new_spouse:
+                remove_spouse(
+                    person=old_spouse,
+                    spouse=obj.person,
+                )
+
+                sync_person_legacy_fields(old_spouse)
+
+            if new_spouse:
+                sync_spouse_data(
+                    person=obj.person,
+                    spouse=new_spouse,
+                    marr_date=getattr(
+                        obj,
+                        f"marr_date_{index}"
+                    ),
+                    marr_plac=getattr(
+                        obj,
+                        f"marr_plac_{index}"
+                    ),
+                    fam_stat=getattr(
+                        obj,
+                        f"fam_stat_{index}"
+                    ),
+                )
+
+            if new_spouse and old_spouse != new_spouse:
+                add_spouse(
+                    person=new_spouse,
+                    spouse=obj.person,
+                    preferred_slot=index,
+                )
+
+                sync_person_legacy_fields(new_spouse)
+
+        sync_person_legacy_fields(obj.person)
+
+        if old_father:
+            sync_person_legacy_fields(old_father)
+
+        if new_father:
+            sync_person_legacy_fields(new_father)
+
+        if old_mother:
+            sync_person_legacy_fields(old_mother)
+
+        if new_mother:
+            sync_person_legacy_fields(new_mother)
+
+    def save_form(self, request, form, change):
+        if change:
+            old_obj = Relation.objects.get(pk=form.instance.pk)
+
+            form._old_children = {
+                index: set(
+                    getattr(old_obj, f"children_{index}")
+                    .values_list("pk", flat=True)
+                )
+                for index in range(1, 5)
+            }
+        else:
+            form._old_children = {
+                index: set()
+                for index in range(1, 5)
+            }
+
+        return super().save_form(request, form, change)
+
+    def save_related(self, request, form, formsets, change):
+        old_children = form._old_children
+
+        super().save_related(request, form, formsets, change)
+
+        obj = form.instance
+
+        new_children = {
+            index: set(
+                getattr(obj, f"children_{index}")
+                .values_list("pk", flat=True)
+            )
+            for index in range(1, 5)
+        }
+
+        for index in range(1, 5):
+            removed_children = (
+                old_children[index] - new_children[index]
+            )
+            added_children = (
+                new_children[index] - old_children[index]
+            )
+
+            for child_pk in removed_children:
+                child = Person.objects.get(pk=child_pk)
+    
+                remove_parent_from_child(
+                    parent=obj.person,
+                    child=child,
+                )
+    
+                sync_person_legacy_fields(child)
+    
+            for child_pk in added_children:
+                child = Person.objects.get(pk=child_pk)
+    
+                sync_child_from_parent(
+                    parent=obj.person,
+                    child=child,
+                )
+
+                sync_person_legacy_fields(child)
+
+        sync_person_legacy_fields(obj.person)
 
 
 class PersonChangeLogAdmin(ImportExportModelAdmin):
