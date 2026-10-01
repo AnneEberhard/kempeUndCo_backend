@@ -301,6 +301,13 @@ class AdminRelationDetailView(generics.RetrieveUpdateAPIView):
 
         "No Relation matches the given query."
 
+        relation = get_object_or_404(
+        self.get_queryset(),
+        person__refn=refn,
+    )
+
+        return relation
+
     @transaction.atomic
     def update(self, request, *args, **kwargs):
         refn = self.kwargs['refn']
