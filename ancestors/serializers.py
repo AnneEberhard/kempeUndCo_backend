@@ -367,6 +367,14 @@ class AdminPersonSerializer(serializers.ModelSerializer):
             'last_modified_by',
         ]
 
+    def create(self, validated_data):
+        user = validated_data.pop('user', None)
+
+        person = Person(**validated_data)
+        person.save(user=user)
+
+        return person
+
 
 class AdminRelationSerializer(serializers.ModelSerializer):
     fath_refn = serializers.SlugRelatedField(

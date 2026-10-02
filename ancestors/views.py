@@ -8,6 +8,7 @@ from django.db.models import Q
 from utils.change_log import log_person_changes
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework import status
 from rest_framework.response import Response
 
 
@@ -277,7 +278,7 @@ class AdminPersonListView(generics.ListAPIView):
 
 class AdminRelationDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = AdminRelationSerializer
-    #permission_classes = [IsTreeAdmin]
+    permission_classes = [IsTreeAdmin]
 
     def get_queryset(self):
         user = self.request.user
@@ -285,8 +286,7 @@ class AdminRelationDetailView(generics.RetrieveUpdateAPIView):
         if user.is_superuser:
             return Relation.objects.all()
 
-        #allowed_families = user.allowed_families
-        allowed_families = ['kempe', 'huenten']
+        allowed_families = user.allowed_families
 
         return (
             Relation.objects.filter(
@@ -336,3 +336,27 @@ class AdminRelationDetailView(generics.RetrieveUpdateAPIView):
         self.perform_update(serializer)
 
         return Response(serializer.data)
+
+
+class AdminPersonCreateView(generics.CreateAPIView):
+    serializer_class = AdminPersonSerializer
+
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        person = serializer.save(user=request.user)
+
+        relation = Relation.objects.create(
+            person=person
+        )
+
+        return Response(
+            {
+                'person': AdminPersonSerializer(person).data,
+                'relation': AdminRelationSerializer(relation).data,
+            },
+            status=status.HTTP_201_CREATED
+        )
+    
