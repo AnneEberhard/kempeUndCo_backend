@@ -5,7 +5,7 @@ from .serializers import AdminPersonSerializer, AdminRelationSerializer, PersonL
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.decorators import permission_classes
 from django.db.models import Q
-from utils.change_log import log_person_changes
+from utils.change_log import log_person_changes, log_relation_changes, get_relation_field_value
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
@@ -183,13 +183,10 @@ class AdminPersonDetailView(generics.RetrieveUpdateAPIView):
             'fath_refn',
             'moth_name',
             'moth_refn',
-            'uid',
             'surn',
             'givn',
             'sex',
             'occu',
-            'chan_date',
-            'chan_date_time',
             'birt_date',
             'birt_plac',
             'deat_date',
@@ -209,6 +206,12 @@ class AdminPersonDetailView(generics.RetrieveUpdateAPIView):
             'confidential',
             'family_1',
             'family_2',
+            'obje_file_1',
+            'obje_file_2',
+            'obje_file_3',
+            'obje_file_4',
+            'obje_file_5',
+            'obje_file_6',
         ]
 
         old_values = {
@@ -312,6 +315,35 @@ class AdminRelationDetailView(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         refn = self.kwargs['refn']
 
+        relation_tracked_fields = [
+            'fath_refn',
+            'moth_refn',
+
+            'marr_spou_refn_1',
+            'marr_date_1',
+            'marr_plac_1',
+            'fam_stat_1',
+            'children_1',
+
+            'marr_spou_refn_2',
+            'marr_date_2',
+            'marr_plac_2',
+            'fam_stat_2',
+            'children_2',
+
+            'marr_spou_refn_3',
+            'marr_date_3',
+            'marr_plac_3',
+            'fam_stat_3',
+            'children_3',
+
+            'marr_spou_refn_4',
+            'marr_date_4',
+            'marr_plac_4',
+            'fam_stat_4',
+            'children_4',
+        ]
+
         relation = self.get_queryset().filter(
             person__refn=refn
         ).first()
@@ -326,14 +358,44 @@ class AdminRelationDetailView(generics.RetrieveUpdateAPIView):
                 person=person
             )
 
+        old_values = {
+            field_name: get_relation_field_value(relation, field_name)
+            for field_name in relation_tracked_fields
+        }
+
         serializer = self.get_serializer(
             relation,
             data=request.data,
             partial=True,
         )
 
+        print(
+    'RELATION VOR UPDATE:',
+    relation.pk,
+    relation.person_id,
+    relation.person.refn,
+)
+
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+
+        print(
+    'RELATION NACH UPDATE:',
+    relation.pk,
+    relation.person_id,
+    relation.person.refn,
+)
+        new_values = {
+            field_name: get_relation_field_value(relation, field_name)
+            for field_name in relation_tracked_fields
+            }
+
+        log_relation_changes(
+            relation=relation,
+            old_values=old_values, new_values=new_values,
+            requested_fields=serializer.validated_data,
+            user=self.request.user,
+        )
 
         return Response(serializer.data)
 

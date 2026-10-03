@@ -8,7 +8,6 @@ from kempeUndCo_backend.constants import FAMILY_CHOICES
 from PIL import Image
 import io
 from django.core.files.base import ContentFile
-import logging
 from django.db import transaction, IntegrityError
 
 

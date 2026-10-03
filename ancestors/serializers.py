@@ -389,7 +389,6 @@ class AdminRelationSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
-
     fath_name = serializers.CharField(
         source='fath_refn.name',
         read_only=True,
@@ -406,49 +405,42 @@ class AdminRelationSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
-
     marr_spou_refn_2 = serializers.SlugRelatedField(
         slug_field='refn',
         queryset=Person.objects.all(),
         allow_null=True,
         required=False,
     )
-
     marr_spou_refn_3 = serializers.SlugRelatedField(
         slug_field='refn',
         queryset=Person.objects.all(),
         allow_null=True,
         required=False,
     )
-
     marr_spou_refn_4 = serializers.SlugRelatedField(
         slug_field='refn',
         queryset=Person.objects.all(),
         allow_null=True,
         required=False,
     )
-
     children_1 = serializers.SlugRelatedField(
         slug_field='refn',
         queryset=Person.objects.all(),
         many=True,
         required=False,
     )
-
     children_2 = serializers.SlugRelatedField(
         slug_field='refn',
         queryset=Person.objects.all(),
         many=True,
         required=False,
     )
-
     children_3 = serializers.SlugRelatedField(
         slug_field='refn',
         queryset=Person.objects.all(),
         many=True,
         required=False,
     )
-
     children_4 = serializers.SlugRelatedField(
         slug_field='refn',
         queryset=Person.objects.all(),
@@ -642,7 +634,8 @@ class AdminRelationSerializer(serializers.ModelSerializer):
                         spouse=instance.person,
                         preferred_slot=index,
                     )
-                    sync_person_legacy_fields(old_spouse)
+                    if old_spouse:
+                        sync_person_legacy_fields(old_spouse)
                     sync_person_legacy_fields(new_spouse)
 
                     print("old spouse: ", old_spouse)

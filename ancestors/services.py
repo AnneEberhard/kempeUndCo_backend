@@ -19,12 +19,16 @@ def add_child_to_relationship(parent, other_parent, child):
     # Nur ein Elternteil bekannt
     if other_parent is None:
         for index in range(1, 5):
-            children = getattr(
+            spouse = getattr(
                 relation,
-                f"children_{index}"
+                f"marr_spou_refn_{index}"
             )
 
-            if not children.exists():
+            if spouse is None:
+                children = getattr(
+                    relation,
+                    f"children_{index}"
+                )
                 children.add(child)
                 return
 
@@ -96,7 +100,6 @@ def remove_child_from_relationship(parent, other_parent, child):
             if children.filter(pk=child.pk).exists():
                 children.remove(child)
    
-
 def remove_child_from_parent(parent, child):
     """
     Entfernt child aus allen children_X-Feldern
