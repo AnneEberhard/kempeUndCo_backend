@@ -271,10 +271,21 @@ class AdminPersonListView(generics.ListAPIView):
         search = self.request.query_params.get('search', '').strip()
 
         if search:
-            queryset = queryset.filter(
-                Q(name__icontains=search) |
-                Q(refn__icontains=search)
-            )
+            terms = search.split()
+        
+            for term in terms:
+                queryset = queryset.filter(
+                    Q(givn__icontains=term) |
+                    Q(surn__icontains=term) |
+                    Q(name__icontains=term) |
+                    Q(refn__icontains=term)
+                )
+
+#       if search:
+#           queryset = queryset.filter(
+#               Q(name__icontains=search) |
+#               Q(refn__icontains=search)
+#           )
 
         return queryset.order_by('name')
 
